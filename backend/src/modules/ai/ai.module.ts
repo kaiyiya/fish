@@ -4,15 +4,37 @@ import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { RecognitionService } from './recognition.service';
 import { RecommendationService } from './recommendation.service';
+import { CollaborativeFilteringService } from './algorithms/collaborative-filtering.service';
+import { ContentBasedService } from './algorithms/content-based.service';
+import { PopularityBasedService } from './algorithms/popularity-based.service';
 import { ImageRecognition } from '../../database/entities/image-recognition.entity';
 import { RecommendationLog } from '../../database/entities/recommendation-log.entity';
+import { UserBehavior } from '../../database/entities/user-behavior.entity';
+import { Product } from '../../database/entities/product.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ImageRecognition, RecommendationLog]),
+    TypeOrmModule.forFeature([
+      ImageRecognition,
+      RecommendationLog,
+      UserBehavior,
+      Product,
+    ]),
   ],
   controllers: [AiController],
-  providers: [AiService, RecognitionService, RecommendationService],
-  exports: [AiService, RecognitionService, RecommendationService],
+  providers: [
+    AiService,
+    RecognitionService,
+    RecommendationService,
+    CollaborativeFilteringService,
+    ContentBasedService,
+    PopularityBasedService,
+  ],
+  exports: [
+    AiService,
+    RecognitionService,
+    RecommendationService,
+    CollaborativeFilteringService,
+  ],
 })
 export class AiModule {}

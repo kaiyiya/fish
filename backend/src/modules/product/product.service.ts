@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UserBehavior } from '../../database/entities/user-behavior.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(UserBehavior)
+    private behaviorRepository: Repository<UserBehavior>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -36,5 +39,29 @@ export class ProductService {
 
   async findOne(id: number): Promise<Product> {
     return this.productRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * 记录用户浏览商品行为
+   */
+  async recordView(userId: number, productId: number): Promise<void> {
+    // 检查是否已记录（避免重复记录）
+    const existing = await this.behaviorRepository.findOne({
+      where: {
+        userId,
+        productId,
+        behaviorType: 'view',
+      },
+    });
+
+    if (!existing) {
+      const behavior = this.behaviorRepository.create({
+        userId,
+        productId,
+        behaviorType: 'view',
+        behaviorValue: 1.0,
+      });
+      await this.behaviorRepository.save(behavior);
+    }
   }
 }

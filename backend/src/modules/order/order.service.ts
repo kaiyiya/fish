@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from '../../database/entities/order.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
+import { UserBehavior } from '../../database/entities/user-behavior.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
@@ -12,6 +13,8 @@ export class OrderService {
     private orderRepository: Repository<Order>,
     @InjectRepository(OrderItem)
     private orderItemRepository: Repository<OrderItem>,
+    @InjectRepository(UserBehavior)
+    private behaviorRepository: Repository<UserBehavior>,
   ) {}
 
   async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -39,6 +42,17 @@ export class OrderService {
     );
 
     await this.orderItemRepository.save(orderItems);
+
+    // 记录用户购买行为（用于推荐算法）
+    for (const item of createOrderDto.items) {
+      const behavior = this.behaviorRepository.create({
+        userId,
+        productId: item.productId,
+        behaviorType: 'purchase',
+        behaviorValue: 10.0, // 购买行为权重较高
+      });
+      await this.behaviorRepository.save(behavior);
+    }
 
     return this.findOne(savedOrder.id);
   }

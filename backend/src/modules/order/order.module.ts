@@ -4,9 +4,10 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { Order } from '../../database/entities/order.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
+import { UserBehavior } from '../../database/entities/user-behavior.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem])],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, UserBehavior])],
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService],
