@@ -1,24 +1,18 @@
 import { create } from 'zustand'
 import { storage } from '../utils/storage'
 
-interface UserInfo {
-  id: number
-  username: string
-  phone: string
-  avatar?: string
-}
+// 使用纯 JS + JSDoc，避免 TS 语法在 Babel 中报错
+/**
+ * @typedef {Object} UserInfo
+ * @property {number} id
+ * @property {string} username
+ * @property {string} phone
+ * @property {string} [avatar]
+ */
 
-interface UserState {
-  userInfo: UserInfo | null
-  token: string | null
-  setUserInfo: (userInfo: UserInfo) => void
-  setToken: (token: string) => void
-  logout: () => void
-}
-
-export const useUserStore = create<UserState>((set) => ({
-  userInfo: storage.get<UserInfo>('userInfo'),
-  token: storage.get<string>('token'),
+export const useUserStore = create((set) => ({
+  userInfo: storage.get('userInfo'),
+  token: storage.get('token'),
   setUserInfo: (userInfo) => {
     storage.set('userInfo', userInfo)
     set({ userInfo })

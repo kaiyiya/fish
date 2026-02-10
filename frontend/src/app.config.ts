@@ -23,26 +23,18 @@ export default defineAppConfig({
       {
         pagePath: 'pages/index/index',
         text: '首页',
-        iconPath: 'assets/icons/home.png',
-        selectedIconPath: 'assets/icons/home-active.png',
       },
       {
         pagePath: 'pages/recognize/index',
         text: '识别',
-        iconPath: 'assets/icons/camera.png',
-        selectedIconPath: 'assets/icons/camera-active.png',
       },
       {
         pagePath: 'pages/search/index',
         text: '搜索',
-        iconPath: 'assets/icons/search.png',
-        selectedIconPath: 'assets/icons/search-active.png',
       },
       {
         pagePath: 'pages/profile/index',
         text: '我的',
-        iconPath: 'assets/icons/profile.png',
-        selectedIconPath: 'assets/icons/profile-active.png',
       },
     ],
   },

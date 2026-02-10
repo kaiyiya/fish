@@ -8,7 +8,7 @@ export default class Recognize extends Component {
   state = {
     imageUrl: '',
     recognizing: false,
-    result: null as any,
+    result: null,
   }
 
   chooseImage = () => {
@@ -73,7 +73,7 @@ export default class Recognize extends Component {
         title: '识别成功',
         icon: 'success',
       })
-    } catch (error: any) {
+    } catch (error) {
       console.error('识别失败:', error)
       Taro.showToast({
         title: error.message || '识别失败，请重试',
@@ -85,7 +85,7 @@ export default class Recognize extends Component {
     }
   }
 
-  viewProduct = (productId: number) => {
+  viewProduct = (productId) => {
     Taro.navigateTo({
       url: `/pages/product/detail/index?id=${productId}`,
     })

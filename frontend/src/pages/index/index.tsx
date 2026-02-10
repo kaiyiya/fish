@@ -33,7 +33,7 @@ export default class Index extends Component {
     }
   }
 
-  handleProductClick = (id: number) => {
+  handleProductClick = (id) => {
     Taro.navigateTo({
       url: `/pages/product/detail/index?id=${id}`,
     })
@@ -62,7 +62,7 @@ export default class Index extends Component {
             <View className="section">
               <View className="section-title">为你推荐</View>
               <ScrollView scrollX className="recommend-scroll">
-                {recommendations.map((item: any) => (
+                {recommendations.map((item) => (
                   <View
                     key={item.id}
                     className="recommend-item"
@@ -81,7 +81,7 @@ export default class Index extends Component {
           <View className="section">
             <View className="section-title">热门商品</View>
             <View className="product-list">
-              {products.map((item: any) => (
+              {products.map((item) => (
                 <View
                   key={item.id}
                   className="product-item"
