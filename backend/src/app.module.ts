@@ -8,6 +8,7 @@ import { OrderModule } from './modules/order/order.module';
 import { AiModule } from './modules/ai/ai.module';
 import { SearchModule } from './modules/search/search.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './modules/health/health.controller';
 
@@ -28,6 +29,7 @@ import { HealthController } from './modules/health/health.controller';
         AiModule,
         SearchModule,
         StatisticsModule,
+        UploadModule,
     ],
     controllers: [HealthController],
 })

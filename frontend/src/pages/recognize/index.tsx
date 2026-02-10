@@ -36,16 +36,36 @@ export default class Recognize extends Component {
     this.setState({ recognizing: true })
 
     try {
+      // 获取后端API地址
+      const baseUrl = process.env.TARO_APP_API_URL || 'http://localhost:3000'
+      
       // 先上传图片到服务器
       const uploadRes = await Taro.uploadFile({
-        url: 'http://localhost:3000/upload', // 需要后端提供上传接口
+        url: `${baseUrl}/upload`,
         filePath: imageUrl,
         name: 'file',
+        header: {
+          // 从store获取token
+          Authorization: `Bearer ${Taro.getStorageSync('token') || ''}`,
+        },
       })
 
-      // TODO: 解析上传结果，获取图片URL
-      // 然后调用识别接口
-      const result = await aiApi.recognize(imageUrl) // 临时使用本地路径
+      // 解析上传结果
+      let uploadResult
+      try {
+        uploadResult = JSON.parse(uploadRes.data)
+      } catch (e) {
+        throw new Error('上传响应解析失败')
+      }
+
+      if (!uploadResult.success || !uploadResult.data) {
+        throw new Error(uploadResult.message || '上传失败')
+      }
+
+      const imageUrlFromServer = uploadResult.data.url
+
+      // 调用识别接口
+      const result = await aiApi.recognize(imageUrlFromServer)
       
       this.setState({ result })
       
@@ -53,11 +73,12 @@ export default class Recognize extends Component {
         title: '识别成功',
         icon: 'success',
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('识别失败:', error)
       Taro.showToast({
-        title: '识别失败，请重试',
+        title: error.message || '识别失败，请重试',
         icon: 'none',
+        duration: 2000,
       })
     } finally {
       this.setState({ recognizing: false })
