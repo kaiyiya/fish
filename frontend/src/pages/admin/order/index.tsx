@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Text, Button, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { orderApi } from '../../../services/api'
+import { Button } from '../../../components/ui'
 import './index.scss'
 
 export default class AdminOrder extends Component {
@@ -123,15 +124,15 @@ export default class AdminOrder extends Component {
                   {order.status === 'pending' && (
                     <>
                       <Button
-                        className="status-btn paid"
-                        size="mini"
+                        type="secondary"
+                        size="small"
                         onClick={() => this.handleStatusChange(order.id, 'paid')}
                       >
                         标记已支付
                       </Button>
                       <Button
-                        className="status-btn cancelled"
-                        size="mini"
+                        type="danger"
+                        size="small"
                         onClick={() => this.handleStatusChange(order.id, 'cancelled')}
                       >
                         取消订单
@@ -140,8 +141,8 @@ export default class AdminOrder extends Component {
                   )}
                   {order.status === 'paid' && (
                     <Button
-                      className="status-btn shipped"
-                      size="mini"
+                      type="secondary"
+                      size="small"
                       onClick={() => this.handleStatusChange(order.id, 'shipped')}
                     >
                       标记已发货
@@ -149,8 +150,8 @@ export default class AdminOrder extends Component {
                   )}
                   {order.status === 'shipped' && (
                     <Button
-                      className="status-btn completed"
-                      size="mini"
+                      type="secondary"
+                      size="small"
                       onClick={() => this.handleStatusChange(order.id, 'completed')}
                     >
                       标记已完成

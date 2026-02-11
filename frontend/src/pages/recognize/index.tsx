@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Button, Image, Text } from '@tarojs/components'
+import { View, Image, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { aiApi } from '../../services/api'
+import { Button } from '../../components/ui'
 import './index.scss'
 
 export default class Recognize extends Component {
@@ -153,26 +154,60 @@ export default class Recognize extends Component {
                 </View>
               ) : null}
               
-              {result.productId ? (
-                <Button
-                  className="view-product-btn"
-                  onClick={() => this.viewProduct(result.productId)}
-                >
-                  查看商品
-                </Button>
+              {result.recommendedProducts && result.recommendedProducts.length > 0 ? (
+                <View className="recommended-products">
+                  <Text className="recommended-title">推荐商品</Text>
+                  <ScrollView scrollX className="products-scroll">
+                    {result.recommendedProducts.map((product) => (
+                      <View
+                        key={product.id}
+                        className="product-card"
+                        onClick={() => this.viewProduct(product.id)}
+                      >
+                        {product.imageUrls && product.imageUrls.length > 0 ? (
+                          <Image
+                            src={product.imageUrls[0]}
+                            className="product-image"
+                            mode="aspectFill"
+                          />
+                        ) : (
+                          <View className="product-image-placeholder">
+                            <Text className="placeholder-icon">🐟</Text>
+                          </View>
+                        )}
+                        <Text className="product-name" numberOfLines={2}>
+                          {product.name}
+                        </Text>
+                        <Text className="product-price">¥{product.price}</Text>
+                        {product.stock !== undefined && product.stock > 0 ? (
+                          <Text className="product-stock">库存: {product.stock}</Text>
+                        ) : (
+                          <Text className="product-stock out">缺货</Text>
+                        )}
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
               ) : null}
             </View>
           ) : null}
 
           <View className="actions">
-            <Button className="action-btn" onClick={this.chooseImage}>
+            <Button
+              type="default"
+              size="medium"
+              onClick={this.chooseImage}
+              className="action-btn"
+            >
               选择图片
             </Button>
             <Button
-              className="action-btn primary"
+              type="primary"
+              size="medium"
               onClick={this.uploadAndRecognize}
               loading={recognizing}
               disabled={!imageUrl || recognizing}
+              className="action-btn primary"
             >
               {recognizing ? '识别中...' : '开始识别'}
             </Button>

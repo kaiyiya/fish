@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Text, Image, Button, ScrollView } from '@tarojs/components'
+import { View, Text, Image, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { productApi, orderApi } from '../../../services/api'
+import { Button } from '../../../components/ui'
 import './index.scss'
 
 export default class ProductDetail extends Component {
@@ -161,10 +162,13 @@ export default class ProductDetail extends Component {
 
         <View className="detail-footer">
           <Button
-            className="buy-btn"
+            type="primary"
+            size="large"
+            block
             onClick={this.handleBuyNow}
             disabled={submitting || (product.stock !== undefined && product.stock === 0)}
             loading={submitting}
+            className="buy-btn"
           >
             {submitting
               ? '提交中...'

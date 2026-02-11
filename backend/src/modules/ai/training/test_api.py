@@ -109,6 +109,19 @@ def test_recognition_api():
                     name = alt.get('nameCN') or alt.get('name', '未知')
                     conf = alt.get('confidence', 0) * 100
                     print(f"     - {name}: {conf:.2f}%")
+            
+            # 显示推荐商品
+            if data.get('recommendedProducts'):
+                products = data['recommendedProducts']
+                print(f"   推荐商品 ({len(products)}个):")
+                for i, product in enumerate(products, 1):
+                    name = product.get('name', '未知商品')
+                    price = product.get('price', 0)
+                    stock = product.get('stock', 0)
+                    # 使用format避免编码问题
+                    print(f"     {i}. {name} - {price}元 (库存: {stock})")
+            else:
+                print(f"   推荐商品: 无")
         else:
             print(f"   [ERROR] 识别失败: {recognize_result.get('message')}")
             print(f"   响应: {json.dumps(recognize_result, indent=2, ensure_ascii=False)}")

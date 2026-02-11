@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Text, Input, Button, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { categoryApi } from '../../../services/api'
+import { Button, Input } from '../../../components/ui'
 import './index.scss'
 
 export default class AdminCategory extends Component {
@@ -127,7 +128,12 @@ export default class AdminCategory extends Component {
       <View className="admin-category-page">
         <View className="header">
           <Text className="title">分类管理</Text>
-          <Button className="create-btn" onClick={this.startCreate}>
+          <Button
+            type="default"
+            size="large"
+            onClick={this.startCreate}
+            className="create-btn"
+          >
             新建分类
           </Button>
         </View>
@@ -141,7 +147,6 @@ export default class AdminCategory extends Component {
             <View className="form-item">
               <Text className="label">分类名称 *</Text>
               <Input
-                className="input"
                 value={form.name}
                 onInput={(e) => this.handleChange('name', e.detail.value)}
                 placeholder="例如：海鱼"
@@ -151,7 +156,6 @@ export default class AdminCategory extends Component {
             <View className="form-item">
               <Text className="label">排序（数字越小越靠前）</Text>
               <Input
-                className="input"
                 value={form.sortOrder}
                 onInput={(e) => this.handleChange('sortOrder', e.detail.value)}
                 placeholder="例如：0"
@@ -159,13 +163,20 @@ export default class AdminCategory extends Component {
             </View>
 
             <View className="btn-row">
-              <Button className="cancel-btn" onClick={this.cancelEdit}>
+              <Button
+                type="default"
+                size="large"
+                onClick={this.cancelEdit}
+                className="cancel-btn"
+              >
                 取消
               </Button>
               <Button
-                className="save-btn"
+                type="primary"
+                size="large"
                 onClick={this.handleSave}
                 loading={saving}
+                className="save-btn"
               >
                 保存
               </Button>
@@ -195,15 +206,15 @@ export default class AdminCategory extends Component {
                 </View>
                 <View className="card-actions">
                   <Button
-                    className="small-btn"
-                    size="mini"
+                    type="default"
+                    size="small"
                     onClick={() => this.startEdit(item)}
                   >
                     编辑
                   </Button>
                   <Button
-                    className="small-btn danger"
-                    size="mini"
+                    type="danger"
+                    size="small"
                     onClick={() => this.handleRemove(item.id)}
                   >
                     删除

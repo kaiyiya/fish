@@ -1,0 +1,47 @@
+.ui-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ui-input-prefix {
+  position: absolute;
+  left: 16px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #8c8c8c;
+  z-index: 1;
+}
+
+.ui-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background-color: #fff;
+  font-size: 28px;
+  color: #1a1a1a;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.ui-input--with-prefix {
+  padding-left: 48px;
+}
+
+.ui-input:focus {
+  border-color: #667eea;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.ui-input::placeholder {
+  color: #bfbfbf;
+}
+
+.ui-input[disabled] {
+  background-color: #f5f5f5;
+  color: #bfbfbf;
+  cursor: not-allowed;
+}

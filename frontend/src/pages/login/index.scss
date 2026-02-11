@@ -36,25 +36,10 @@
   margin-bottom: 8px;
 }
 
-.input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background-color: #f7f7f7;
-}
-
+// 输入框和按钮样式已由公共组件统一管理
 .submit-btn {
   margin-top: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  border-radius: 30px;
-  height: 60px !important;
-  line-height: 60px !important;
-  padding: 0 40px !important;
-  font-size: 30px !important;
-  font-weight: 500 !important;
-  min-width: 160px !important;
-  width: 100% !important;
+  // 使用公共Button组件，样式已在组件中定义
 }
 
 .switch-mode {

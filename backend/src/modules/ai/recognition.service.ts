@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ImageRecognition } from '../../database/entities/image-recognition.entity';
+import { Product } from '../../database/entities/product.entity';
 import { execFile } from 'child_process';
 import { join } from 'path';
 import { getFishNameCN } from './fish-name-mapper';
@@ -12,7 +13,7 @@ function getBackendDir(): string {
   // 在生产环境，__dirname 指向 backend/dist/src/modules/ai
   const currentDir = __dirname;
   console.log('[getBackendDir] __dirname:', currentDir);
-  
+
   // 检查是否已经在backend目录下
   if (currentDir.includes('backend')) {
     // 如果路径中包含backend，找到backend的位置
@@ -26,7 +27,7 @@ function getBackendDir(): string {
       return backendDir;
     }
   }
-  
+
   // 回退方案：根据是否包含dist来判断
   if (currentDir.includes('dist')) {
     // 生产环境：从 dist/src/modules/ai 向上到 backend
@@ -48,7 +49,9 @@ export class RecognitionService {
   constructor(
     @InjectRepository(ImageRecognition)
     private recognitionRepository: Repository<ImageRecognition>,
-  ) {}
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
+  ) { }
 
   /**
    * 调用基于 PyTorch 的推理脚本进行识别
@@ -61,7 +64,7 @@ export class RecognitionService {
   private runPyTorchInference(imagePath: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const backendDir = getBackendDir();
-      
+
       // 训练脚本在 src 目录下（开发环境）或 dist/src 目录下（生产环境）
       // 但实际脚本文件始终在 src 目录下
       const scriptPath = join(
@@ -75,11 +78,11 @@ export class RecognitionService {
 
       // 使用Conda环境中的Python（Windows路径）
       // 可以通过环境变量PYTHON_PATH配置
-      const pythonPath = process.env.PYTHON_PATH || 
-                        (process.platform === 'win32' 
-                          ? 'D:\\Anaconda\\envs\\pytorch\\python.exe' 
-                          : 'python');
-      
+      const pythonPath = process.env.PYTHON_PATH ||
+        (process.platform === 'win32'
+          ? 'D:\\Anaconda\\envs\\pytorch\\python.exe'
+          : 'python');
+
       // 设置工作目录为训练脚本所在目录
       const trainingDir = join(
         backendDir,
@@ -88,7 +91,7 @@ export class RecognitionService {
         'ai',
         'training',
       );
-      
+
       // 确保图片路径是绝对路径
       // Windows路径格式: C:\path\to\file 或 E:\path\to\file
       let absoluteImagePath = imagePath;
@@ -96,11 +99,11 @@ export class RecognitionService {
         // 相对路径，转换为绝对路径（相对于backend目录）
         absoluteImagePath = join(backendDir, imagePath);
       }
-      
+
       // 检查文件是否存在
       const fs = require('fs');
       const fileExists = fs.existsSync(absoluteImagePath);
-      
+
       console.log('[识别服务] PyTorch识别参数:', {
         pythonPath,
         scriptPath,
@@ -112,23 +115,23 @@ export class RecognitionService {
         cwd: trainingDir,
         __dirname,
       });
-      
+
       if (!fileExists) {
         const error = new Error(`图片文件不存在: ${absoluteImagePath}`);
         console.error('[识别服务] 文件不存在错误:', error);
         throw error;
       }
-      
+
       if (!fs.existsSync(scriptPath)) {
         const error = new Error(`训练脚本不存在: ${scriptPath}`);
         console.error('[识别服务] 脚本不存在错误:', error);
         throw error;
       }
-      
+
       execFile(
         pythonPath,
         [scriptPath, '--image', absoluteImagePath],
-        { 
+        {
           maxBuffer: 10 * 1024 * 1024,
           cwd: trainingDir,
         },
@@ -177,7 +180,7 @@ export class RecognitionService {
 
     try {
       const backendDir = getBackendDir();
-      
+
       // 如果是URL，提取本地路径
       if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
         // 提取文件名
@@ -189,7 +192,7 @@ export class RecognitionService {
         // 相对路径转换为绝对路径
         localImagePath = join(backendDir, imageUrl.substring(1));
       }
-      
+
       console.log('[识别服务] 路径转换:', {
         imageUrl,
         backendDir,
@@ -197,14 +200,14 @@ export class RecognitionService {
         __dirname,
         fileExists: require('fs').existsSync(localImagePath),
       });
-      
+
       // 调用 PyTorch 脚本进行识别
       const pyResult = await this.runPyTorchInference(localImagePath);
 
       // 将英文类别名转换为中文
       const fishNameEN = pyResult.fishName ?? 'unknown';
       const fishNameCN = getFishNameCN(fishNameEN);
-      
+
       // 转换备选结果中的名称
       const alternatives = (pyResult.alternatives || []).map((alt: any) => ({
         ...alt,
@@ -242,6 +245,58 @@ export class RecognitionService {
       };
     }
 
+    // 根据识别出的鱼类名称，搜索相关商品
+    let recommendedProducts: Product[] = [];
+    try {
+      const fishName = recognitionResult.fishName;
+      console.log('[识别服务] 搜索推荐商品，鱼类名称:', fishName);
+
+      // 使用模糊搜索查找相关商品
+      recommendedProducts = await this.productRepository
+        .createQueryBuilder('product')
+        .leftJoinAndSelect('product.category', 'category')
+        .where('product.name LIKE :keyword', { keyword: `%${fishName}%` })
+        .orWhere('product.description LIKE :keyword', { keyword: `%${fishName}%` })
+        .orderBy('product.stock', 'DESC') // 优先显示有库存的
+        .addOrderBy('product.price', 'ASC') // 价格从低到高
+        .limit(6) // 最多返回6个推荐商品
+        .getMany();
+
+      console.log('[识别服务] 找到商品数量:', recommendedProducts.length);
+
+      // 如果没找到，尝试搜索备选结果
+      if (recommendedProducts.length === 0 && recognitionResult.result?.alternatives) {
+        console.log('[识别服务] 尝试搜索备选结果');
+        for (const alt of recognitionResult.result.alternatives) {
+          const altNameCN = alt.nameCN || alt.name;
+          const products = await this.productRepository
+            .createQueryBuilder('product')
+            .leftJoinAndSelect('product.category', 'category')
+            .where('product.name LIKE :keyword', { keyword: `%${altNameCN}%` })
+            .orWhere('product.description LIKE :keyword', { keyword: `%${altNameCN}%` })
+            .limit(3)
+            .getMany();
+          recommendedProducts.push(...products);
+          if (recommendedProducts.length >= 6) break;
+        }
+      }
+
+      // 如果还是没找到，返回热门商品作为推荐
+      if (recommendedProducts.length === 0) {
+        console.log('[识别服务] 未找到匹配商品，返回热门商品');
+        recommendedProducts = await this.productRepository
+          .createQueryBuilder('product')
+          .leftJoinAndSelect('product.category', 'category')
+          .where('product.stock > 0')
+          .orderBy('product.stock', 'DESC')
+          .addOrderBy('product.price', 'ASC')
+          .limit(6)
+          .getMany();
+      }
+    } catch (error) {
+      console.error('[识别服务] 搜索推荐商品失败:', error);
+    }
+
     // 保存识别记录
     const recognition = this.recognitionRepository.create({
       userId,
@@ -256,6 +311,14 @@ export class RecognitionService {
     return {
       ...recognitionResult,
       recognitionId: recognition.id,
+      recommendedProducts: recommendedProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        stock: p.stock,
+        imageUrls: p.imageUrls,
+        category: p.category ? { id: p.category.id, name: p.category.name } : null,
+      })),
     };
   }
 

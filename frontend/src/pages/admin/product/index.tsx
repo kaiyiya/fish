@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Text, Input, Textarea, Button, ScrollView } from '@tarojs/components'
+import { View, Text, Textarea, ScrollView, Image, Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { productApi } from '../../../services/api'
+import { productApi, categoryApi } from '../../../services/api'
+import { Button, Input } from '../../../components/ui'
 import './index.scss'
 
 export default class AdminProduct extends Component {
@@ -9,6 +10,7 @@ export default class AdminProduct extends Component {
     loading: true,
     saving: false,
     products: [],
+    categories: [],
     editingId: null,
     form: {
       name: '',
@@ -24,6 +26,16 @@ export default class AdminProduct extends Component {
 
   componentDidMount() {
     this.loadProducts()
+    this.loadCategories()
+  }
+
+  loadCategories = async () => {
+    try {
+      const categories = await categoryApi.getList()
+      this.setState({ categories })
+    } catch (error) {
+      console.error('加载分类列表失败:', error)
+    }
   }
 
   loadProducts = async () => {
@@ -114,11 +126,12 @@ export default class AdminProduct extends Component {
           const url = uploadResult.data.url
           this.setState((prevState) => {
             const prev = prevState.form.imageUrlsText || ''
-            const next = prev ? `${prev}\n${url}` : url
+            const urls = prev ? prev.split('\n').filter(s => s.trim()) : []
+            urls.push(url)
             return {
               form: {
                 ...prevState.form,
-                imageUrlsText: next,
+                imageUrlsText: urls.join('\n'),
               },
             }
           })
@@ -202,170 +215,281 @@ export default class AdminProduct extends Component {
     })
   }
 
+  handleCategoryChange = (e) => {
+    const index = e.detail.value
+    const category = this.state.categories[index]
+    if (category) {
+      this.handleChange('categoryId', String(category.id))
+    }
+  }
+
+  removeImage = (index) => {
+    const urls = (this.state.form.imageUrlsText || '').split('\n').filter(s => s.trim())
+    urls.splice(index, 1)
+    this.handleChange('imageUrlsText', urls.join('\n'))
+  }
+
   render() {
-    const { loading, products, editingId, form, saving } = this.state
+    const { loading, products, categories, editingId, form, saving } = this.state
+    const imageUrls = (form.imageUrlsText || '').split('\n').filter(s => s.trim())
+    const selectedCategoryIndex = categories.findIndex(c => String(c.id) === String(form.categoryId))
 
     return (
-      <View className="admin-product-page">
-        <View className="header">
-          <Text className="title">后台商品管理</Text>
-          <Button className="create-btn" onClick={this.startCreate}>
-            新建商品
+      <View className='admin-product-page'>
+        <View className='header'>
+          <View className='header-content'>
+            <Text className='title'>商品管理</Text>
+            <Text className='subtitle'>管理您的商品信息</Text>
+          </View>
+          <Button
+            type='default'
+            size='large'
+            onClick={this.startCreate}
+            className='create-btn'
+          >
+            <Text className='btn-icon'>+</Text>
+            <Text>新建商品</Text>
           </Button>
         </View>
 
         {editingId && (
-          <View className="edit-panel">
-            <Text className="panel-title">
-              {editingId === 'new' ? '新建商品' : `编辑商品 #${editingId}`}
-            </Text>
-
-            <View className="form-item">
-              <Text className="label">名称 *</Text>
-              <Input
-                className="input"
-                value={form.name}
-                onInput={(e) => this.handleChange('name', e.detail.value)}
-                placeholder="请输入商品名称"
-              />
-            </View>
-
-            <View className="form-item">
-              <Text className="label">分类ID *</Text>
-              <Input
-                className="input"
-                value={form.categoryId}
-                onInput={(e) => this.handleChange('categoryId', e.detail.value)}
-                placeholder="例如：1（海鱼）"
-              />
-            </View>
-
-            <View className="form-row">
-              <View className="form-item half">
-                <Text className="label">价格 *</Text>
-                <Input
-                  className="input"
-                  value={form.price}
-                  onInput={(e) => this.handleChange('price', e.detail.value)}
-                  placeholder="例如：88.00"
-                />
-              </View>
-              <View className="form-item half">
-                <Text className="label">库存 *</Text>
-                <Input
-                  className="input"
-                  value={form.stock}
-                  onInput={(e) => this.handleChange('stock', e.detail.value)}
-                  placeholder="例如：100"
-                />
-              </View>
-            </View>
-
-            <View className="form-item">
-              <Text className="label">描述</Text>
-              <Textarea
-                className="textarea"
-                value={form.description}
-                onInput={(e) => this.handleChange('description', e.detail.value)}
-                placeholder="商品描述"
-              />
-            </View>
-
-            <View className="form-item">
-              <Text className="label">营养信息</Text>
-              <Textarea
-                className="textarea"
-                value={form.nutritionInfo}
-                onInput={(e) => this.handleChange('nutritionInfo', e.detail.value)}
-                placeholder="营养说明"
-              />
-            </View>
-
-            <View className="form-item">
-              <Text className="label">烹饪建议</Text>
-              <Textarea
-                className="textarea"
-                value={form.cookingTips}
-                onInput={(e) => this.handleChange('cookingTips', e.detail.value)}
-                placeholder="烹饪方法建议"
-              />
-            </View>
-
-            <View className="form-item">
-              <View className="label-row">
-                <Text className="label">图片URL（一行一个）</Text>
-                <Text className="upload-link" onClick={this.handleUploadImage}>
-                  上传图片并自动填入
+          <ScrollView scrollY className='edit-panel-scroll'>
+            <View className='edit-panel'>
+              <View className="panel-header">
+                <Text className="panel-title">
+                  {editingId === 'new' ? '创建新商品' : `编辑商品 #${editingId}`}
+                </Text>
+                <Text className="panel-subtitle">
+                  {editingId === 'new' ? '填写商品信息以创建新商品' : '修改商品信息'}
                 </Text>
               </View>
-              <Textarea
-                className="textarea"
-                value={form.imageUrlsText}
-                onInput={(e) => this.handleChange('imageUrlsText', e.detail.value)}
-                placeholder="可以粘贴在线图片地址，也可以点击“上传图片”自动生成"
-              />
-            </View>
 
-            <View className="btn-row">
-              <Button className="cancel-btn" onClick={this.cancelEdit}>
-                取消
-              </Button>
-              <Button
-                className="save-btn"
-                onClick={this.handleSave}
-                loading={saving}
-              >
-                保存
-              </Button>
-            </View>
-          </View>
-        )}
-
-        <ScrollView scrollY className="list-scroll">
-          {loading ? (
-            <View className="empty">
-              <Text>加载中...</Text>
-            </View>
-          ) : products.length === 0 ? (
-            <View className="empty">
-              <Text>暂无商品</Text>
-            </View>
-          ) : (
-            products.map((item) => (
-              <View key={item.id} className="product-card">
-                <View className="card-header">
-                  <Text className="card-title">{item.name}</Text>
-                  <Text className="card-sub">
-                    ID: {item.id} / 分类: {item.categoryId}
+              {/* 基本信息卡片 */}
+              <View className='form-section'>
+                <Text className='section-title'>基本信息</Text>
+                <View className='form-item'>
+                  <Text className='label'>
+                    商品名称 <Text className='required'>*</Text>
                   </Text>
+                  <Input
+                    value={form.name}
+                    onInput={(e) => this.handleChange('name', e.detail.value)}
+                    placeholder='请输入商品名称'
+                  />
                 </View>
-                <View className="card-body">
-                  <Text className="card-line">价格：¥{item.price}</Text>
-                  <Text className="card-line">库存：{item.stock}</Text>
-                  {item.description ? (
-                    <Text className="card-desc">{item.description}</Text>
-                  ) : null}
+
+                <View className='form-item'>
+                  <Text className='label'>
+                    商品分类 <Text className='required'>*</Text>
+                  </Text>
+                  {categories.length > 0 ? (
+                    <Picker
+                      mode='selector'
+                      range={categories}
+                      rangeKey='name'
+                      value={selectedCategoryIndex >= 0 ? selectedCategoryIndex : 0}
+                      onChange={this.handleCategoryChange}
+                    >
+                      <View className='picker-view'>
+                        <Text className={selectedCategoryIndex >= 0 ? 'picker-text' : 'picker-placeholder'}>
+                          {selectedCategoryIndex >= 0 ? categories[selectedCategoryIndex].name : '请选择分类'}
+                        </Text>
+                        <Text className='picker-arrow'>▼</Text>
+                      </View>
+                    </Picker>
+                  ) : (
+                    <Input
+                      value={form.categoryId}
+                      onInput={(e) => this.handleChange('categoryId', e.detail.value)}
+                      placeholder='请输入分类ID'
+                    />
+                  )}
                 </View>
-                <View className="card-footer">
-                  <Button
-                    className="small-btn"
-                    size="mini"
-                    onClick={() => this.startEdit(item)}
-                  >
-                    编辑
-                  </Button>
-                  <Button
-                    className="small-btn danger"
-                    size="mini"
-                    onClick={() => this.handleRemove(item.id)}
-                  >
-                    删除
-                  </Button>
+
+                <View className='form-row'>
+                  <View className='form-item half'>
+                    <Text className='label'>
+                      价格 <Text className='required'>*</Text>
+                    </Text>
+                    <Input
+                      type='digit'
+                      value={form.price}
+                      onInput={(e) => this.handleChange('price', e.detail.value)}
+                      placeholder='0.00'
+                      prefix='¥'
+                    />
+                  </View>
+                  <View className='form-item half'>
+                    <Text className='label'>
+                      库存 <Text className='required'>*</Text>
+                    </Text>
+                    <Input
+                      type='number'
+                      value={form.stock}
+                      onInput={(e) => this.handleChange('stock', e.detail.value)}
+                      placeholder='0'
+                    />
+                  </View>
                 </View>
               </View>
-            ))
-          )}
-        </ScrollView>
+
+              {/* 商品描述卡片 */}
+              <View className='form-section'>
+                <Text className='section-title'>商品描述</Text>
+                <View className='form-item'>
+                  <Text className='label'>商品描述</Text>
+                  <Textarea
+                    className='textarea'
+                    value={form.description}
+                    onInput={(e) => this.handleChange('description', e.detail.value)}
+                    placeholder='请输入商品详细描述...'
+                    maxlength={500}
+                  />
+                  <Text className='char-count'>{form.description.length}/500</Text>
+                </View>
+              </View>
+
+              {/* 详细信息卡片 */}
+              <View className='form-section'>
+                <Text className='section-title'>详细信息</Text>
+                <View className='form-item'>
+                  <Text className='label'>营养信息</Text>
+                  <Textarea
+                    className='textarea'
+                    value={form.nutritionInfo}
+                    onInput={(e) => this.handleChange('nutritionInfo', e.detail.value)}
+                    placeholder='请输入营养信息...'
+                    maxlength={300}
+                  />
+                  <Text className='char-count'>{form.nutritionInfo.length}/300</Text>
+                </View>
+
+                <View className='form-item'>
+                  <Text className='label'>烹饪建议</Text>
+                  <Textarea
+                    className='textarea'
+                    value={form.cookingTips}
+                    onInput={(e) => this.handleChange('cookingTips', e.detail.value)}
+                    placeholder='请输入烹饪方法建议...'
+                    maxlength={300}
+                  />
+                  <Text className='char-count'>{form.cookingTips.length}/300</Text>
+                </View>
+              </View>
+
+              {/* 商品图片卡片 */}
+              <View className='form-section'>
+                <Text className='section-title'>商品图片</Text>
+                <View className='image-upload-area'>
+                  {imageUrls.length > 0 ? (
+                    <View className='image-list'>
+                      {imageUrls.map((url, index) => (
+                        <View key={index} className='image-item'>
+                          <Image src={url} className='preview-image' mode='aspectFill' />
+                          <View className='image-overlay'>
+                            <Text className='remove-btn' onClick={() => this.removeImage(index)}>×</Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  ) : null}
+                  <Button
+                    type='primary'
+                    size='large'
+                    onClick={this.handleUploadImage}
+                    className='upload-btn'
+                  >
+                    <Text className='upload-icon'>📷</Text>
+                    <Text>上传图片</Text>
+                  </Button>
+                  <Text className='upload-tip'>支持 JPG、PNG 格式，建议尺寸 800x800</Text>
+                </View>
+                <View className='form-item' style={{ marginTop: '20px' }}>
+                  <Text className='label'>图片URL（一行一个，可选）</Text>
+                  <Textarea
+                    className='textarea'
+                    value={form.imageUrlsText}
+                    onInput={(e) => this.handleChange('imageUrlsText', e.detail.value)}
+                    placeholder='也可以直接粘贴图片URL，每行一个'
+                  />
+                </View>
+              </View>
+
+              <View className='btn-row'>
+                <Button
+                  type='default'
+                  size='large'
+                  onClick={this.cancelEdit}
+                  className='cancel-btn'
+                >
+                  取消
+                </Button>
+                <Button
+                  type='primary'
+                  size='large'
+                  onClick={this.handleSave}
+                  loading={saving}
+                  className='save-btn'
+                >
+                  {saving ? '保存中...' : '保存商品'}
+                </Button>
+              </View>
+            </View>
+          </ScrollView>
+        )}
+
+        {!editingId && (
+          <View className='list-section'>
+            <Text className='list-title'>商品列表</Text>
+            <ScrollView scrollY className='list-scroll'>
+              {loading ? (
+                <View className='empty'>
+                  <Text>加载中...</Text>
+                </View>
+              ) : products.length === 0 ? (
+                <View className='empty'>
+                  <Text>暂无商品</Text>
+                </View>
+              ) : (
+                products.map((item) => (
+                  <View key={item.id} className='product-card'>
+                    <View className='card-header'>
+                      <Text className='card-title'>{item.name}</Text>
+                      <Text className='card-sub'>
+                        ID: {item.id} / 分类: {item.categoryId}
+                      </Text>
+                    </View>
+                    <View className='card-body'>
+                      <Text className='card-line'>价格：¥{item.price}</Text>
+                      <Text className='card-line'>库存：{item.stock}</Text>
+                      {item.description ? (
+                        <Text className='card-desc'>{item.description}</Text>
+                      ) : null}
+                    </View>
+                    <View className='card-footer'>
+                      <Button
+                        type='default'
+                        size='small'
+                        className='card-btn'
+                        onClick={() => this.startEdit(item)}
+                      >
+                        编辑
+                      </Button>
+                      <Button
+                        type='danger'
+                        size='small'
+                        className='card-btn'
+                        onClick={() => this.handleRemove(item.id)}
+                      >
+                        删除
+                      </Button>
+                    </View>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        )}
       </View>
     )
   }

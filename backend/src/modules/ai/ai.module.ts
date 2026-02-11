@@ -11,6 +11,7 @@ import { ImageRecognition } from '../../database/entities/image-recognition.enti
 import { RecommendationLog } from '../../database/entities/recommendation-log.entity';
 import { UserBehavior } from '../../database/entities/user-behavior.entity';
 import { Product } from '../../database/entities/product.entity';
+import { Category } from '../../database/entities/category.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Product } from '../../database/entities/product.entity';
       RecommendationLog,
       UserBehavior,
       Product,
+      Category,
     ]),
   ],
   controllers: [AiController],
@@ -37,4 +39,4 @@ import { Product } from '../../database/entities/product.entity';
     CollaborativeFilteringService,
   ],
 })
-export class AiModule {}
+export class AiModule { }

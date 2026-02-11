@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { View, Text, Input, Button } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { authApi } from '../../services/api'
 import { useUserStore } from '../../store/user'
+import { Button, Input } from '../../components/ui'
 import './index.scss'
 
 export default function Login() {
@@ -54,7 +55,6 @@ export default function Login() {
         <View className="form-item">
           <Text className="label">用户名</Text>
           <Input
-            className="input"
             value={username}
             onInput={(e) => setUsername(e.detail.value)}
             placeholder="请输入用户名"
@@ -65,7 +65,6 @@ export default function Login() {
           <View className="form-item">
             <Text className="label">手机号</Text>
             <Input
-              className="input"
               value={phone}
               onInput={(e) => setPhone(e.detail.value)}
               placeholder="请输入手机号"
@@ -76,7 +75,6 @@ export default function Login() {
         <View className="form-item">
           <Text className="label">密码</Text>
           <Input
-            className="input"
             type="password"
             value={password}
             onInput={(e) => setPassword(e.detail.value)}
@@ -84,7 +82,13 @@ export default function Login() {
           />
         </View>
 
-        <Button className="submit-btn" onClick={handleSubmit}>
+        <Button
+          type="primary"
+          size="large"
+          block
+          onClick={handleSubmit}
+          className="submit-btn"
+        >
           {mode === 'login' ? '登录' : '注册'}
         </Button>
 
