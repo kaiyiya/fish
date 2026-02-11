@@ -1,0 +1,57 @@
+{
+  "note": "此目录用于存放TabBar图标文件",
+  "required": [
+    {
+      "name": "home",
+      "files": [
+        "home.png",
+        "home-active.png"
+      ],
+      "size": "81x81像素",
+      "format": "PNG",
+      "colors": {
+        "normal": "#666666",
+        "active": "#1890ff"
+      }
+    },
+    {
+      "name": "recognize",
+      "files": [
+        "recognize.png",
+        "recognize-active.png"
+      ],
+      "size": "81x81像素",
+      "format": "PNG",
+      "colors": {
+        "normal": "#666666",
+        "active": "#1890ff"
+      }
+    },
+    {
+      "name": "search",
+      "files": [
+        "search.png",
+        "search-active.png"
+      ],
+      "size": "81x81像素",
+      "format": "PNG",
+      "colors": {
+        "normal": "#666666",
+        "active": "#1890ff"
+      }
+    },
+    {
+      "name": "profile",
+      "files": [
+        "profile.png",
+        "profile-active.png"
+      ],
+      "size": "81x81像素",
+      "format": "PNG",
+      "colors": {
+        "normal": "#666666",
+        "active": "#1890ff"
+      }
+    }
+  ]
+}

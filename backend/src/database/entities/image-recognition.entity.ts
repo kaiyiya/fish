@@ -16,8 +16,8 @@ export class ImageRecognition {
   @Column()
   imageUrl: string;
 
-  @Column()
-  recognizedFishId: number;
+  @Column({ nullable: true })
+  recognizedFishId: number | null;
 
   @Column('decimal', { precision: 5, scale: 2 })
   confidence: number;

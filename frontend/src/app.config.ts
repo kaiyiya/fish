@@ -24,22 +24,31 @@ export default defineAppConfig({
     color: '#666',
     selectedColor: '#1890ff',
     backgroundColor: '#fff',
+    borderStyle: 'black',
     list: [
       {
         pagePath: 'pages/index/index',
         text: '首页',
+        iconPath: 'assets/icons/home.png',
+        selectedIconPath: 'assets/icons/home-active.png',
       },
       {
         pagePath: 'pages/recognize/index',
         text: '识别',
+        iconPath: 'assets/icons/recognize.png',
+        selectedIconPath: 'assets/icons/recognize-active.png',
       },
       {
         pagePath: 'pages/search/index',
         text: '搜索',
+        iconPath: 'assets/icons/search.png',
+        selectedIconPath: 'assets/icons/search-active.png',
       },
       {
         pagePath: 'pages/profile/index',
         text: '我的',
+        iconPath: 'assets/icons/profile.png',
+        selectedIconPath: 'assets/icons/profile-active.png',
       },
     ],
   },

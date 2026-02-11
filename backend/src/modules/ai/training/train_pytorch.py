@@ -31,11 +31,11 @@ MODEL_PATH = os.path.join(MODEL_DIR, "fish_classifier_resnet18.pth")
 CLASS_INDEX_PATH = os.path.join(MODEL_DIR, "class_to_idx.pt")
 
 IMG_SIZE = 224
-BATCH_SIZE = 32
-EPOCHS = 30
+BATCH_SIZE = 16  # 降低批次大小，适应较小的数据集
+EPOCHS = 20  # 减少训练轮数，快速测试
 LEARNING_RATE = 1e-4
 WEIGHT_DECAY = 1e-4
-NUM_WORKERS = 4
+NUM_WORKERS = 2  # Windows上减少worker数量
 VAL_SPLIT = 0.2
 SEED = 42
 
@@ -95,19 +95,23 @@ def create_dataloaders(data_dir: str):
     # 验证集使用 val_transform
     val_dataset.dataset.transform = val_transform
 
+    # Windows上num_workers=0可以避免多进程问题
+    import platform
+    workers = 0 if platform.system() == 'Windows' else NUM_WORKERS
+    
     train_loader = DataLoader(
         train_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=NUM_WORKERS,
-        pin_memory=True,
+        num_workers=workers,
+        pin_memory=False if workers == 0 else True,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=BATCH_SIZE,
         shuffle=False,
-        num_workers=NUM_WORKERS,
-        pin_memory=True,
+        num_workers=workers,
+        pin_memory=False if workers == 0 else True,
     )
 
     return train_loader, val_loader, num_classes, full_dataset.class_to_idx
@@ -174,16 +178,58 @@ def evaluate(model, criterion, dataloader, device):
 
 
 def main():
-    print("🚀 使用 PyTorch 训练鱼类识别模型...")
+    print("="*60)
+    print("使用 PyTorch 训练鱼类识别模型")
+    print("="*60)
+    print(f"数据目录: {os.path.abspath(DATA_DIR)}")
+    print(f"模型保存目录: {os.path.abspath(MODEL_DIR)}")
+    print()
+    
     set_seed(SEED)
 
     os.makedirs(MODEL_DIR, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"💻 使用设备: {device}")
+    print(f"使用设备: {device}")
+    if device.type == 'cpu':
+        print("  [WARN] 使用CPU训练，速度较慢，建议使用GPU或减少训练轮数")
+    print()
 
-    train_loader, val_loader, num_classes, class_to_idx = create_dataloaders(DATA_DIR)
-    print(f"📊 检测到 {num_classes} 个鱼类类别: {list(class_to_idx.keys())}")
+    try:
+        train_loader, val_loader, num_classes, class_to_idx = create_dataloaders(DATA_DIR)
+    except RuntimeError as e:
+        print(f"[ERROR] 错误: {e}")
+        print()
+        print("请确保:")
+        print(f"  1. 数据目录存在: {os.path.abspath(DATA_DIR)}")
+        print("  2. 目录下有按类别分组的图片文件夹")
+        print("  3. 每个类别文件夹中有图片文件（jpg, jpeg, png）")
+        return
+    
+    print(f"检测到 {num_classes} 个鱼类类别: {list(class_to_idx.keys())}")
+    
+    # 统计数据集大小
+    total_train = len(train_loader.dataset)
+    total_val = len(val_loader.dataset)
+    print(f"训练集: {total_train} 张, 验证集: {total_val} 张")
+    
+    # 估算训练时间
+    batches_per_epoch = len(train_loader)
+    total_batches = batches_per_epoch * EPOCHS
+    print(f"每个epoch: {batches_per_epoch} 个batch, 共 {EPOCHS} 个epoch")
+    print(f"总batch数: {total_batches}")
+    if device.type == 'cpu':
+        estimated_time = total_batches * 2  # 假设每个batch 2秒（CPU）
+        print(f"预计训练时间: 约 {estimated_time // 60} 分钟 ({estimated_time} 秒)")
+    else:
+        estimated_time = total_batches * 0.1  # GPU更快
+        print(f"预计训练时间: 约 {estimated_time // 60} 分钟 ({estimated_time} 秒)")
+    print()
+    
+    if total_train < 50:
+        print("[WARN] 训练集图片较少，可能影响模型效果")
+        print("       建议每类至少准备 20-50 张图片")
+    print()
 
     model = create_model(num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
@@ -192,6 +238,8 @@ def main():
     )
 
     best_val_acc = 0.0
+    print(f"开始训练，共 {EPOCHS} 轮...")
+    print("="*60)
 
     for epoch in range(1, EPOCHS + 1):
         train_loss, train_acc = train_one_epoch(
@@ -200,9 +248,9 @@ def main():
         val_loss, val_acc = evaluate(model, criterion, val_loader, device)
 
         print(
-            f"Epoch [{epoch}/{EPOCHS}] "
-            f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} | "
-            f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}"
+            f"Epoch [{epoch:2d}/{EPOCHS}] | "
+            f"Train: Loss={train_loss:.4f} Acc={train_acc:.4f} | "
+            f"Val: Loss={val_loss:.4f} Acc={val_acc:.4f}"
         )
 
         # 保存最优模型
@@ -210,11 +258,17 @@ def main():
             best_val_acc = val_acc
             torch.save(model.state_dict(), MODEL_PATH)
             torch.save(class_to_idx, CLASS_INDEX_PATH)
-            print(f"✅ 保存更优模型，Val Acc = {best_val_acc:.4f}")
+            print(f"   [OK] 保存更优模型 (Val Acc = {best_val_acc:.4f})")
 
-    print("🎉 训练完成！")
-    print(f"🧠 最优模型保存在: {MODEL_PATH}")
-    print(f"📁 类别索引映射保存在: {CLASS_INDEX_PATH}")
+    print("="*60)
+    print("[SUCCESS] 训练完成！")
+    print(f"最优模型保存在: {os.path.abspath(MODEL_PATH)}")
+    print(f"类别索引映射保存在: {os.path.abspath(CLASS_INDEX_PATH)}")
+    print(f"最佳验证准确率: {best_val_acc:.4f}")
+    print()
+    print("下一步:")
+    print("  1. 重启后端服务")
+    print("  2. 在前端测试识别功能")
 
 
 if __name__ == "__main__":

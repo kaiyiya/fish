@@ -126,28 +126,43 @@ export default class Recognize extends Component {
             </View>
           )}
 
-          {result && (
+          {result ? (
             <View className="result">
               <View className="result-title">识别结果</View>
               <View className="result-item">
                 <Text className="result-label">鱼类：</Text>
-                <Text className="result-value">{result.fishName}</Text>
+                <Text className="result-value highlight">{result.fishName || '未知'}</Text>
               </View>
               <View className="result-item">
                 <Text className="result-label">置信度：</Text>
-                <Text className="result-value">{(result.confidence * 100).toFixed(2)}%</Text>
+                <Text className="result-value">{(result.confidence ? (result.confidence * 100).toFixed(2) : 0)}%</Text>
               </View>
               
-              {result.productId && (
+              {result.result && result.result.alternatives && Array.isArray(result.result.alternatives) && result.result.alternatives.length > 0 ? (
+                <View className="alternatives">
+                  <Text className="alternatives-title">备选结果：</Text>
+                  {result.result.alternatives.map((alt, index) => {
+                    const uniqueKey = alt.name || alt.nameCN || `alt-${index}`;
+                    return (
+                      <View key={uniqueKey} className="alternative-item">
+                        <Text className="alternative-name">{alt.nameCN || alt.name || '未知'}</Text>
+                        <Text className="alternative-confidence">{(alt.confidence ? (alt.confidence * 100).toFixed(2) : 0)}%</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : null}
+              
+              {result.productId ? (
                 <Button
                   className="view-product-btn"
                   onClick={() => this.viewProduct(result.productId)}
                 >
                   查看商品
                 </Button>
-              )}
+              ) : null}
             </View>
-          )}
+          ) : null}
 
           <View className="actions">
             <Button className="action-btn" onClick={this.chooseImage}>
