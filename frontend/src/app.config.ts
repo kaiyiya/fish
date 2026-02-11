@@ -54,6 +54,7 @@ export default defineAppConfig({
   },
 })
 
-function defineAppConfig(config: any) {
+// JS 环境下不需要类型声明，简单返回配置对象即可
+function defineAppConfig(config) {
   return config
 }

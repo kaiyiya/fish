@@ -1,66 +1,101 @@
 import Taro from '@tarojs/taro'
-import axios from 'axios'
 
-// API基础地址（避免在浏览器端直接访问 process.env 导致 \"process is not defined\" 报错）
-// 如需按环境区分地址，可改为从 Taro 配置或后端返回的配置里读取。
+// API 基础地址
 const BASE_URL = 'http://localhost:3000'
 
-// 创建axios实例（去掉TS类型标注，避免 Babel 报错）
-const service = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-})
+// 统一请求函数，基于 Taro.request，兼容 H5 和 小程序
+function baseRequest(options) {
+  const token = Taro.getStorageSync('token')
 
-// 请求拦截器
-service.interceptors.request.use(
-  (config) => {
-    // 从本地存储获取token
-    const token = Taro.getStorageSync('token')
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
+  const headers = Object.assign(
+    {
+      'Content-Type': 'application/json',
+    },
+    options.header || {}
+  )
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
   }
-)
 
-// 响应拦截器
-service.interceptors.response.use(
-  (response) => {
-    const res = response.data
+  return Taro.request({
+    url: BASE_URL + options.url,
+    method: options.method || 'GET',
+    data: options.data || options.params || {},
+    header: headers,
+    timeout: 10000,
+  }).then((res) => {
+    const data = res.data || {}
 
-    // 如果返回的状态码不是200，说明有错误
-    if (res.code !== 200) {
-      Taro.showToast({
-        title: res.message || '请求失败',
-        icon: 'none',
-        duration: 2000,
-      })
-
-      // 401: token过期，需要重新登录
-      if (res.code === 401) {
-        Taro.removeStorageSync('token')
-        Taro.removeStorageSync('userInfo')
-        Taro.reLaunch({
-          url: '/pages/profile/index',
+    // 兼容后端 TransformInterceptor：{ code, data, message }
+    if (typeof data.code !== 'undefined') {
+      if (data.code !== 200) {
+        Taro.showToast({
+          title: data.message || '请求失败',
+          icon: 'none',
+          duration: 2000,
         })
+
+        if (data.code === 401) {
+          Taro.removeStorageSync('token')
+          Taro.removeStorageSync('userInfo')
+          Taro.reLaunch({
+            url: '/pages/profile/index',
+          })
+        }
+
+        return Promise.reject(new Error(data.message || '请求失败'))
       }
 
-      return Promise.reject(new Error(res.message || '请求失败'))
-    } else {
-      return res.data
+      return data.data
     }
-  },
-  (error) => {
+
+    // 兼容未包裹的情况，直接返回 res.data
+    return data
+  }).catch((error) => {
     Taro.showToast({
       title: error.message || '网络错误',
       icon: 'none',
       duration: 2000,
     })
     return Promise.reject(error)
-  }
-)
+  })
+}
 
-export default service
+// 提供 axios 风格的调用方式，给现有 api.ts 使用
+const request = {
+  get(url, config = {}) {
+    return baseRequest({
+      url,
+      method: 'GET',
+      params: config.params || {},
+      header: config.headers || {},
+    })
+  },
+  post(url, data = {}, config = {}) {
+    return baseRequest({
+      url,
+      method: 'POST',
+      data,
+      header: config.headers || {},
+    })
+  },
+  patch(url, data = {}, config = {}) {
+    return baseRequest({
+      url,
+      method: 'PATCH',
+      data,
+      header: config.headers || {},
+    })
+  },
+  delete(url, config = {}) {
+    return baseRequest({
+      url,
+      method: 'DELETE',
+      data: config.data || {},
+      header: config.headers || {},
+    })
+  },
+}
+
+export default request
