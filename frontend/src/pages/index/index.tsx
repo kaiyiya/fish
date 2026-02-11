@@ -6,6 +6,7 @@ import './index.scss'
 
 export default class Index extends Component {
   state = {
+    loading: true,
     products: [],
     recommendations: [],
   }
@@ -18,9 +19,10 @@ export default class Index extends Component {
   loadProducts = async () => {
     try {
       const products = await productApi.getList()
-      this.setState({ products })
+      this.setState({ products, loading: false })
     } catch (error) {
       console.error('加载商品失败:', error)
+      this.setState({ loading: false })
     }
   }
 
@@ -31,6 +33,12 @@ export default class Index extends Component {
     } catch (error) {
       console.error('加载推荐失败:', error)
     }
+  }
+
+  onRefresh = () => {
+    this.setState({ loading: true })
+    this.loadProducts()
+    this.loadRecommendations()
   }
 
   handleProductClick = (id) => {
@@ -80,21 +88,54 @@ export default class Index extends Component {
           {/* 商品列表 */}
           <View className="section">
             <View className="section-title">热门商品</View>
-            <View className="product-list">
-              {products.map((item) => (
-                <View
-                  key={item.id}
-                  className="product-item"
-                  onClick={() => this.handleProductClick(item.id)}
-                >
-                  <Image src={item.imageUrls?.[0] || ''} className="product-image" />
-                  <View className="product-info">
-                    <Text className="product-name">{item.name}</Text>
-                    <Text className="product-price">¥{item.price}</Text>
+            {this.state.loading ? (
+              <View className="loading-state">
+                <Text className="loading-text">加载中...</Text>
+              </View>
+            ) : products.length === 0 ? (
+              <View className="empty-state">
+                <Text className="empty-icon">🐟</Text>
+                <Text className="empty-text">暂无商品</Text>
+              </View>
+            ) : (
+              <View className="product-list">
+                {products.map((item) => (
+                  <View
+                    key={item.id}
+                    className="product-item"
+                    onClick={() => this.handleProductClick(item.id)}
+                  >
+                    <View className="image-wrapper">
+                      <Image
+                        src={item.imageUrls?.[0] || ''}
+                        className="product-image"
+                        mode="aspectFill"
+                        lazyLoad
+                      />
+                      {item.stock <= 10 && item.stock > 0 && (
+                        <View className="stock-badge">
+                          <Text className="stock-text">仅剩{item.stock}件</Text>
+                        </View>
+                      )}
+                      {item.stock === 0 && (
+                        <View className="sold-out">
+                          <Text className="sold-out-text">已售罄</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View className="product-info">
+                      <Text className="product-name">{item.name}</Text>
+                      <View className="price-row">
+                        <Text className="product-price">¥{item.price}</Text>
+                        {item.stock > 0 && (
+                          <Text className="stock-info">库存: {item.stock}</Text>
+                        )}
+                      </View>
+                    </View>
                   </View>
-                </View>
-              ))}
-            </View>
+                ))}
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>

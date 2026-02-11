@@ -1,32 +1,76 @@
 .profile {
-  padding: 20px;
+  min-height: 100vh;
+  padding: 24px 16px;
+  background-color: #f5f5f5;
 }
 
 .user-info {
   background-color: #fff;
-  padding: 30px;
-  border-radius: 10px;
+  padding: 28px 22px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
 }
 
 .username {
   font-size: 32px;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.primary-btn {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 28px;
+  height: 56px !important;
+  line-height: 56px !important;
+  padding: 0 32px !important;
+  font-size: 28px !important;
+  min-width: 140px !important;
+  width: 100% !important;
+}
+
+.secondary-btn {
+  margin-top: 12px;
+  background-color: #1890ff;
+  color: #fff;
+  border-radius: 28px;
+  height: 56px !important;
+  line-height: 56px !important;
+  padding: 0 32px !important;
+  font-size: 28px !important;
+  min-width: 140px !important;
+  width: 100% !important;
 }
 
 .logout-btn {
-  margin-top: 20px;
+  margin-top: 12px;
   background-color: #ff4d4f;
   color: #fff;
+  border-radius: 28px;
+  height: 56px !important;
+  line-height: 56px !important;
+  padding: 0 32px !important;
+  font-size: 28px !important;
+  min-width: 140px !important;
+  width: 100% !important;
 }
 
 .login-prompt {
   text-align: center;
-  padding: 100px 0;
+  padding: 120px 0;
 }
 
 .login-btn {
   margin-top: 30px;
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
+  height: 60px !important;
+  line-height: 60px !important;
+  padding: 0 40px !important;
+  font-size: 30px !important;
+  border-radius: 30px !important;
+  min-width: 160px !important;
+  width: 100% !important;
 }

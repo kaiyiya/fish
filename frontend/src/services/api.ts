@@ -28,6 +28,15 @@ export const productApi = {
   getDetail: (id) => {
     return request.get(`/product/${id}`)
   },
+  create: (data) => {
+    return request.post('/product', data)
+  },
+  update: (id, data) => {
+    return request.patch(`/product/${id}`, data)
+  },
+  remove: (id) => {
+    return request.delete(`/product/${id}`)
+  },
 }
 
 // AI相关API
@@ -45,6 +54,9 @@ export const searchApi = {
   search: (keyword, type = 'keyword') => {
     return request.get('/search', { params: { keyword, type } })
   },
+  getHot: (limit = 10) => {
+    return request.get('/search/hot', { params: { limit } })
+  },
 }
 
 // 订单相关API
@@ -55,7 +67,54 @@ export const orderApi = {
   getList: () => {
     return request.get('/order')
   },
+  getAll: () => {
+    return request.get('/order/admin/all')
+  },
   getDetail: (id) => {
     return request.get(`/order/${id}`)
+  },
+  updateStatus: (id, status) => {
+    return request.patch(`/order/${id}/status`, { status })
+  },
+}
+
+// 分类相关API
+export const categoryApi = {
+  getList: () => {
+    return request.get('/category')
+  },
+  getDetail: (id) => {
+    return request.get(`/category/${id}`)
+  },
+  create: (data) => {
+    return request.post('/category', data)
+  },
+  update: (id, data) => {
+    return request.patch(`/category/${id}`, data)
+  },
+  remove: (id) => {
+    return request.delete(`/category/${id}`)
+  },
+}
+
+// 统计相关API
+export const statisticsApi = {
+  getRecognition: (params) => {
+    return request.get('/statistics/recognition', { params })
+  },
+  getRecommendation: (params) => {
+    return request.get('/statistics/recommendation', { params })
+  },
+  getSales: (params) => {
+    return request.get('/statistics/sales', { params })
+  },
+}
+
+// 上传相关API
+export const uploadApi = {
+  upload: (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post('/upload', formData)
   },
 }

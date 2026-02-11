@@ -8,6 +8,7 @@ import { storage } from '../utils/storage'
  * @property {string} username
  * @property {string} phone
  * @property {string} [avatar]
+ * @property {string} [role] - 'user' | 'admin'
  */
 
 export const useUserStore = create((set) => ({

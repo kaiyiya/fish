@@ -36,8 +36,11 @@ export default class Recognize extends Component {
     this.setState({ recognizing: true })
 
     try {
-      // 获取后端API地址
-      const baseUrl = process.env.TARO_APP_API_URL || 'http://localhost:3000'
+      // 获取后端API地址（固定地址，避免 process.env 问题）
+      const baseUrl = 'http://localhost:3000'
+      
+      // 获取token
+      const token = Taro.getStorageSync('token') || ''
       
       // 先上传图片到服务器
       const uploadRes = await Taro.uploadFile({
@@ -45,8 +48,7 @@ export default class Recognize extends Component {
         filePath: imageUrl,
         name: 'file',
         header: {
-          // 从store获取token
-          Authorization: `Bearer ${Taro.getStorageSync('token') || ''}`,
+          Authorization: `Bearer ${token}`,
         },
       })
 
@@ -55,14 +57,33 @@ export default class Recognize extends Component {
       try {
         uploadResult = JSON.parse(uploadRes.data)
       } catch (e) {
+        console.error('上传响应解析失败:', uploadRes.data)
         throw new Error('上传响应解析失败')
       }
 
-      if (!uploadResult.success || !uploadResult.data) {
+      // 检查响应格式
+      // TransformInterceptor 会把响应包装成 { code: 200, data: { success: true, data: { url } }, message: 'success' }
+      let imageUrlFromServer
+      if (uploadResult.code === 200 && uploadResult.data) {
+        // 如果 data 中有 success 和 data，说明是上传接口的原始响应被包装了
+        if (uploadResult.data.success && uploadResult.data.data) {
+          imageUrlFromServer = uploadResult.data.data.url
+        } else if (uploadResult.data.url) {
+          // 直接包含 url
+          imageUrlFromServer = uploadResult.data.url
+        } else {
+          throw new Error('响应格式不正确')
+        }
+      } else if (uploadResult.success && uploadResult.data) {
+        // 如果没有被 TransformInterceptor 包装（理论上不会发生）
+        imageUrlFromServer = uploadResult.data.url
+      } else {
         throw new Error(uploadResult.message || '上传失败')
       }
 
-      const imageUrlFromServer = uploadResult.data.url
+      if (!imageUrlFromServer) {
+        throw new Error('无法获取上传后的图片地址')
+      }
 
       // 调用识别接口
       const result = await aiApi.recognize(imageUrlFromServer)

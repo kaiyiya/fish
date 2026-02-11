@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -15,6 +16,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // 全局响应拦截器，统一返回格式：{ code, data, message }
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // 启用CORS，允许跨域
   app.enableCors({

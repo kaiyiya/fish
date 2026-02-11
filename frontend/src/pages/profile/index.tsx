@@ -19,6 +19,18 @@ export default class Profile extends Component {
     })
   }
 
+  handleGotoAdmin = () => {
+    Taro.navigateTo({
+      url: '/pages/admin/index',
+    })
+  }
+
+  handleGotoOrders = () => {
+    Taro.navigateTo({
+      url: '/pages/order/list/index',
+    })
+  }
+
   render() {
     const userInfo = useUserStore.getState().userInfo
 
@@ -27,6 +39,14 @@ export default class Profile extends Component {
         {userInfo ? (
           <View className="user-info">
             <Text className="username">{userInfo.username}</Text>
+            {userInfo.role === 'admin' && (
+              <Button className="primary-btn" onClick={this.handleGotoAdmin}>
+                后台管理
+              </Button>
+            )}
+            <Button className="secondary-btn" onClick={this.handleGotoOrders}>
+              我的订单
+            </Button>
             <Button className="logout-btn" onClick={this.handleLogout}>
               退出登录
             </Button>

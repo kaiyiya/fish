@@ -1,0 +1,188 @@
+.admin-product-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f7ff 0%, #f5f5f5 100%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 20px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  display: block;
+}
+
+.create-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 28px;
+  padding: 0 32px !important;
+  height: 56px !important;
+  line-height: 56px !important;
+  font-size: 28px !important;
+  min-width: 140px !important;
+}
+
+.edit-panel {
+  margin: 20px 16px 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.panel-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.form-item {
+  margin-bottom: 10px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-row .half {
+  flex: 1;
+}
+
+.label {
+  display: block;
+  font-size: 24px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: #f7f7f7;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upload-link {
+  font-size: 22px;
+  color: #1890ff;
+}
+
+.btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+  height: 56px !important;
+  line-height: 56px !important;
+  padding: 0 32px !important;
+  min-width: 140px !important;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  height: 56px !important;
+  line-height: 56px !important;
+  padding: 0 32px !important;
+  min-width: 140px !important;
+}
+
+.list-scroll {
+  padding: 0 16px 20px;
+  max-height: calc(100vh - 200px);
+}
+
+.empty {
+  margin-top: 100px;
+  text-align: center;
+  color: #999;
+  font-size: 26px;
+}
+
+.product-card {
+  margin-bottom: 12px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card-sub {
+  font-size: 22px;
+  color: #888;
+}
+
+.card-body {
+  margin-bottom: 6px;
+}
+
+.card-line {
+  font-size: 24px;
+  color: #555;
+}
+
+.card-desc {
+  font-size: 22px;
+  color: #888;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.small-btn {
+  padding: 0 24px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-size: 24px !important;
+  border-radius: 22px !important;
+  min-width: 100px !important;
+}
+
+.small-btn.danger {
+  background-color: #ff4d4f;
+  color: #fff;
+}
+
