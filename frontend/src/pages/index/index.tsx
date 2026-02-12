@@ -125,11 +125,12 @@ export default class Index extends Component {
               </View>
             ) : (
               <View className="product-list">
-                {products.map((item) => (
+                {products.map((item, index) => (
                   <View
                     key={item.id}
                     className="product-item"
                     onClick={() => this.handleProductClick(item.id)}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <View className="image-wrapper">
                       {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
