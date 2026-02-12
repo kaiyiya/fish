@@ -72,6 +72,16 @@
   width: 100%;
 }
 
+.address-row {
+  display: flex;
+  gap: 12px;
+}
+
+.address-input {
+  flex: 1;
+  min-width: 0;
+}
+
 .checkbox {
   width: 40px;
   height: 40px;

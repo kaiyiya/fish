@@ -47,6 +47,9 @@ export const aiApi = {
   getRecommendations: (type = 'personalized') => {
     return request.get('/ai/recommend', { params: { type } })
   },
+  chat: (question) => {
+    return request.post('/ai/chat', { question })
+  },
 }
 
 // 搜索相关API
@@ -204,6 +207,11 @@ export const addressApi = {
   },
   setDefault: (id) => {
     return request.patch(`/address/${id}/default`)
+  },
+  reverseGeocode: (latitude, longitude) => {
+    return request.get('/address/reverse-geocode', {
+      params: { latitude, longitude }
+    })
   },
 }
 

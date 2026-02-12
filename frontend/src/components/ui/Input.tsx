@@ -9,9 +9,11 @@ import './Input.scss'
  * @property {string} [placeholder] - 占位符
  * @property {string} [value] - 值
  * @property {function} [onInput] - 输入事件
+ * @property {function} [onConfirm] - 确认事件（回车）
  * @property {boolean} [disabled] - 是否禁用
  * @property {string} [className] - 自定义类名
  * @property {string} [prefix] - 前缀（如价格符号）
+ * @property {number} [maxlength] - 最大长度
  */
 
 // 使用 JSDoc 而不是 TypeScript interface，避免编译错误
@@ -22,9 +24,11 @@ export default class Input extends Component {
       placeholder = '',
       value = '',
       onInput,
+      onConfirm,
       disabled = false,
       className = '',
       prefix,
+      maxlength,
     } = this.props
 
     const inputClass = `ui-input ${prefix ? 'ui-input--with-prefix' : ''} ${className}`
@@ -38,7 +42,9 @@ export default class Input extends Component {
           placeholder={placeholder}
           value={value}
           onInput={onInput}
+          onConfirm={onConfirm}
           disabled={disabled}
+          maxlength={maxlength}
         />
       </View>
     )

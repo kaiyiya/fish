@@ -79,4 +79,8 @@ REDIS_PORT=6379
 # JWT配置
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=7d
+
+# DeepSeek API配置（可选，用于AI对话功能）
+# 如果不配置，将使用本地规则匹配作为备选方案
+DEEPSEEK_API_KEY=your_deepseek_api_key
 ```

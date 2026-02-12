@@ -95,16 +95,16 @@ export default class AddressEdit extends Component {
         await addressApi.create(form)
         Taro.showToast({ title: '添加成功', icon: 'success' })
       }
+      // 保存成功后返回上一页
       setTimeout(() => {
         Taro.navigateBack()
-      }, 500)
+      }, 800)
     } catch (error) {
       logger.error('保存地址失败', error)
       Taro.showToast({ 
         title: error.message || '保存失败，请稍后重试', 
         icon: 'none' 
       })
-    } finally {
       this.setState({ submitting: false })
     }
   }
@@ -161,45 +161,40 @@ export default class AddressEdit extends Component {
             <View className="form-item">
               <Text className="form-label">手机号码</Text>
               <Input
-                type="number"
+                type="text"
                 value={form.phone}
                 onInput={(e) => this.handleInputChange('phone', e.detail.value)}
                 placeholder="请输入手机号码"
+                maxlength={11}
                 className="form-input"
               />
             </View>
 
             <View className="form-item">
-              <Text className="form-label">所在省份</Text>
-              <Input
-                type="text"
-                value={form.province}
-                onInput={(e) => this.handleInputChange('province', e.detail.value)}
-                placeholder="请输入省份"
-                className="form-input"
-              />
-            </View>
-
-            <View className="form-item">
-              <Text className="form-label">所在城市</Text>
-              <Input
-                type="text"
-                value={form.city}
-                onInput={(e) => this.handleInputChange('city', e.detail.value)}
-                placeholder="请输入城市"
-                className="form-input"
-              />
-            </View>
-
-            <View className="form-item">
-              <Text className="form-label">所在区县</Text>
-              <Input
-                type="text"
-                value={form.district}
-                onInput={(e) => this.handleInputChange('district', e.detail.value)}
-                placeholder="请输入区县"
-                className="form-input"
-              />
+              <Text className="form-label">所在地区</Text>
+              <View className="address-row">
+                <Input
+                  type="text"
+                  value={form.province}
+                  onInput={(e) => this.handleInputChange('province', e.detail.value)}
+                  placeholder="省"
+                  className="form-input address-input"
+                />
+                <Input
+                  type="text"
+                  value={form.city}
+                  onInput={(e) => this.handleInputChange('city', e.detail.value)}
+                  placeholder="市"
+                  className="form-input address-input"
+                />
+                <Input
+                  type="text"
+                  value={form.district}
+                  onInput={(e) => this.handleInputChange('district', e.detail.value)}
+                  placeholder="区/县"
+                  className="form-input address-input"
+                />
+              </View>
             </View>
 
             <View className="form-item">

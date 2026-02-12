@@ -115,4 +115,48 @@ export class AddressService {
       where: { userId, isDefault: true },
     });
   }
+
+  /**
+   * 逆地理编码：根据经纬度获取地址信息
+   * 注意：这里使用腾讯地图API，需要配置API密钥
+   * 实际项目中应该将API密钥放在环境变量中
+   */
+  async reverseGeocode(latitude: number, longitude: number): Promise<{
+    province: string;
+    city: string;
+    district: string;
+    address: string;
+  } | null> {
+    try {
+      // 使用腾讯地图逆地理编码API
+      // 注意：需要申请腾讯地图API密钥，并配置在环境变量中
+      const TENCENT_MAP_KEY = process.env.TENCENT_MAP_KEY || '';
+      
+      if (!TENCENT_MAP_KEY) {
+        // 如果没有配置API密钥，返回null，让前端提示用户手动填写
+        console.warn('腾讯地图API密钥未配置，无法进行逆地理编码');
+        return null;
+      }
+
+      const url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${latitude},${longitude}&key=${TENCENT_MAP_KEY}&get_poi=0`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === 0 && data.result) {
+        const { address_component, formatted_addresses } = data.result;
+        return {
+          province: address_component?.province || '',
+          city: address_component?.city || '',
+          district: address_component?.district || '',
+          address: formatted_addresses?.recommend || formatted_addresses?.rough || '',
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('逆地理编码失败:', error);
+      return null;
+    }
+  }
 }

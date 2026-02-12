@@ -7,6 +7,7 @@ import { UserBehavior } from '../../database/entities/user-behavior.entity';
 import { Product } from '../../database/entities/product.entity';
 import { Address } from '../../database/entities/address.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class OrderService {
@@ -21,6 +22,7 @@ export class OrderService {
     private productRepository: Repository<Product>,
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
+    private notificationService: NotificationService,
   ) {}
 
   async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -97,6 +99,20 @@ export class OrderService {
     );
     await this.behaviorRepository.save(behaviors);
 
+    // 发送订单创建通知
+    try {
+      await this.notificationService.create({
+        userId,
+        type: 'order',
+        title: '订单创建成功',
+        content: `您的订单 ${orderNo} 已创建成功，订单金额：¥${createOrderDto.totalAmount}`,
+        relatedId: savedOrder.id,
+      });
+    } catch (error) {
+      // 通知发送失败不影响订单创建
+      console.error('发送订单通知失败:', error);
+    }
+
     return this.findOne(savedOrder.id);
   }
 
@@ -127,7 +143,35 @@ export class OrderService {
     if (!order) {
       throw new NotFoundException('Order not found');
     }
+    const oldStatus = order.status;
     order.status = status;
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    // 发送订单状态变更通知
+    if (oldStatus !== status) {
+      try {
+        const statusMessages = {
+          pending: '待处理',
+          paid: '已支付',
+          shipped: '已发货',
+          completed: '已完成',
+          cancelled: '已取消',
+        };
+
+        const statusMessage = statusMessages[status] || status;
+        await this.notificationService.create({
+          userId: order.userId,
+          type: 'order',
+          title: `订单状态更新：${statusMessage}`,
+          content: `您的订单 ${order.orderNo} 状态已更新为：${statusMessage}`,
+          relatedId: order.id,
+        });
+      } catch (error) {
+        // 通知发送失败不影响状态更新
+        console.error('发送订单状态通知失败:', error);
+      }
+    }
+
+    return savedOrder;
   }
 }

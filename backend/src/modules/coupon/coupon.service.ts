@@ -4,6 +4,7 @@ import { Repository, MoreThan, LessThan } from 'typeorm';
 import { Coupon } from '../../database/entities/coupon.entity';
 import { UserCoupon } from '../../database/entities/user-coupon.entity';
 import { CreateCouponDto } from './dto/create-coupon.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class CouponService {
@@ -12,6 +13,7 @@ export class CouponService {
     private couponRepository: Repository<Coupon>,
     @InjectRepository(UserCoupon)
     private userCouponRepository: Repository<UserCoupon>,
+    private notificationService: NotificationService,
   ) {}
 
   /**
@@ -93,7 +95,29 @@ export class CouponService {
     coupon.usedCount += 1;
     await this.couponRepository.save(coupon);
 
-    return this.userCouponRepository.save(userCoupon);
+    const savedUserCoupon = await this.userCouponRepository.save(userCoupon);
+
+    // 发送优惠券领取通知
+    try {
+      const couponTypeText = {
+        discount: '折扣券',
+        reduce: '满减券',
+        free: '免运费券',
+      }[coupon.type] || '优惠券';
+
+      await this.notificationService.create({
+        userId,
+        type: 'promotion',
+        title: '优惠券领取成功',
+        content: `您已成功领取${couponTypeText}：${coupon.name}，${coupon.description || ''}`,
+        relatedId: coupon.id,
+      });
+    } catch (error) {
+      // 通知发送失败不影响优惠券领取
+      console.error('发送优惠券通知失败:', error);
+    }
+
+    return savedUserCoupon;
   }
 
   /**

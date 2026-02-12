@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from '../../database/entities/review.entity';
 import { Product } from '../../database/entities/product.entity';
+import { User } from '../../database/entities/user.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ReviewService {
@@ -12,6 +14,9 @@ export class ReviewService {
     private reviewRepository: Repository<Review>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private notificationService: NotificationService,
   ) {}
 
   /**
@@ -45,7 +50,29 @@ export class ReviewService {
       ...createReviewDto,
     });
 
-    return this.reviewRepository.save(review);
+    const savedReview = await this.reviewRepository.save(review);
+
+    // 发送评价通知给管理员
+    try {
+      const adminUsers = await this.userRepository.find({
+        where: { role: 'admin' },
+      });
+
+      if (adminUsers.length > 0) {
+        const userIds = adminUsers.map(u => u.id);
+        await this.notificationService.createBatch(userIds, {
+          type: 'review',
+          title: '收到新评价',
+          content: `商品 ${product.name} 收到了一条新评价，评分：${createReviewDto.rating}星`,
+          relatedId: savedReview.id,
+        });
+      }
+    } catch (error) {
+      // 通知发送失败不影响评价创建
+      console.error('发送评价通知失败:', error);
+    }
+
+    return savedReview;
   }
 
   /**

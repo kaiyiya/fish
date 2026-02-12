@@ -4,6 +4,7 @@ import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { RecognitionService } from './recognition.service';
 import { RecommendationService } from './recommendation.service';
+import { ChatService } from './chat.service';
 import { CollaborativeFilteringService } from './algorithms/collaborative-filtering.service';
 import { ContentBasedService } from './algorithms/content-based.service';
 import { PopularityBasedService } from './algorithms/popularity-based.service';
@@ -28,6 +29,7 @@ import { Category } from '../../database/entities/category.entity';
     AiService,
     RecognitionService,
     RecommendationService,
+    ChatService,
     CollaborativeFilteringService,
     ContentBasedService,
     PopularityBasedService,

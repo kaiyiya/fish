@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AddressService } from './address.service';
@@ -89,5 +90,17 @@ export class AddressController {
     @Param('id') id: string,
   ) {
     return this.addressService.setDefault(user.id, +id);
+  }
+
+  /**
+   * 逆地理编码：根据经纬度获取地址信息
+   */
+  @Get('reverse-geocode')
+  async reverseGeocode(
+    @CurrentUser() user: any,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    return this.addressService.reverseGeocode(+latitude, +longitude);
   }
 }
