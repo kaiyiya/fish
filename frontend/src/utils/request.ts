@@ -56,14 +56,31 @@ function baseRequest(options) {
   }).catch((error) => {
     // 对于业务错误（code !== 200），已经在上面处理了
     // 这里只处理网络错误等
-    if (!error.message || !error.message.includes('请求失败')) {
+    console.error('[Request Error]', error)
+    
+    // 提取错误信息
+    let errorMessage = '网络错误'
+    if (error.errMsg) {
+      errorMessage = error.errMsg
+    } else if (error.message) {
+      errorMessage = error.message
+    } else if (typeof error === 'string') {
+      errorMessage = error
+    }
+    
+    // 如果错误信息不包含"请求失败"，说明是网络错误，需要显示
+    if (!errorMessage.includes('请求失败')) {
       Taro.showToast({
-        title: error.message || '网络错误',
+        title: errorMessage,
         icon: 'none',
-        duration: 2000,
+        duration: 3000,
       })
     }
-    return Promise.reject(error)
+    
+    // 创建一个包含错误信息的 Error 对象
+    const err = new Error(errorMessage)
+    err.data = error
+    return Promise.reject(err)
   })
 }
 

@@ -23,7 +23,7 @@ export class OrderService {
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
     private notificationService: NotificationService,
-  ) {}
+  ) { }
 
   async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
     // 验证地址是否存在且属于当前用户
@@ -39,7 +39,7 @@ export class OrderService {
     const products = await this.productRepository.find({
       where: { id: In(productIds) },
     });
-    
+
     if (products.length !== productIds.length) {
       throw new NotFoundException('部分商品不存在');
     }
@@ -50,7 +50,7 @@ export class OrderService {
       if (!product) {
         throw new NotFoundException(`商品ID ${item.productId} 不存在`);
       }
-      
+
       if (product.stock < item.quantity) {
         throw new BadRequestException(`商品 ${product.name} 库存不足，当前库存：${product.stock}`);
       }
@@ -65,7 +65,7 @@ export class OrderService {
 
     // 生成订单号
     const orderNo = `ORD${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    
+
     const order = this.orderRepository.create({
       userId,
       orderNo,
@@ -119,7 +119,7 @@ export class OrderService {
   async findByUser(userId: number): Promise<Order[]> {
     return this.orderRepository.find({
       where: { userId },
-      relations: ['items'],
+      relations: ['items', 'items.product'],
       order: { created_at: 'DESC' },
     });
   }
@@ -127,13 +127,13 @@ export class OrderService {
   async findOne(id: number): Promise<Order> {
     return this.orderRepository.findOne({
       where: { id },
-      relations: ['items'],
+      relations: ['items', 'items.product'],
     });
   }
 
   async findAll(): Promise<Order[]> {
     return this.orderRepository.find({
-      relations: ['items'],
+      relations: ['items', 'items.product'],
       order: { created_at: 'DESC' },
     });
   }

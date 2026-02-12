@@ -123,40 +123,36 @@ export default class AdminOrder extends Component {
 
                 <View className="card-footer">
                   {order.status === 'pending' && (
-                    <>
-                      <Button
-                        type="secondary"
-                        size="small"
+                    <View className="admin-action-buttons">
+                      <View
+                        className="admin-action-btn admin-btn-secondary"
                         onClick={() => this.handleStatusChange(order.id, 'paid')}
                       >
-                        标记已支付
-                      </Button>
-                      <Button
-                        type="danger"
-                        size="small"
+                        <Text className="btn-text">标记已支付</Text>
+                      </View>
+                      <View
+                        className="admin-action-btn admin-btn-danger"
                         onClick={() => this.handleStatusChange(order.id, 'cancelled')}
                       >
-                        取消订单
-                      </Button>
-                    </>
+                        <Text className="btn-text">取消订单</Text>
+                      </View>
+                    </View>
                   )}
                   {order.status === 'paid' && (
-                    <Button
-                      type="secondary"
-                      size="small"
+                    <View
+                      className="admin-action-btn admin-btn-secondary single"
                       onClick={() => this.handleStatusChange(order.id, 'shipped')}
                     >
-                      标记已发货
-                    </Button>
+                      <Text className="btn-text">标记已发货</Text>
+                    </View>
                   )}
                   {order.status === 'shipped' && (
-                    <Button
-                      type="secondary"
-                      size="small"
+                    <View
+                      className="admin-action-btn admin-btn-secondary single"
                       onClick={() => this.handleStatusChange(order.id, 'completed')}
                     >
-                      标记已完成
-                    </Button>
+                      <Text className="btn-text">标记已完成</Text>
+                    </View>
                   )}
                 </View>
               </View>

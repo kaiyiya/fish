@@ -42,6 +42,14 @@ export default class AdminProduct extends Component {
   loadProducts = async () => {
     try {
       const products = await productApi.getList()
+      // 调试日志：检查图片数据
+      console.log('加载的商品列表:', products.map(p => ({
+        id: p.id,
+        name: p.name,
+        imageUrls: p.imageUrls,
+        imageUrlsType: typeof p.imageUrls,
+        imageUrlsIsArray: Array.isArray(p.imageUrls),
+      })))
       this.setState({ products, loading: false })
     } catch (error) {
       logger.error('加载商品列表失败', error)
@@ -67,6 +75,29 @@ export default class AdminProduct extends Component {
   }
 
   startEdit = (product) => {
+    // 处理imageUrls：可能是数组、字符串或null
+    let imageUrlsArray = []
+    if (product.imageUrls) {
+      if (Array.isArray(product.imageUrls)) {
+        imageUrlsArray = product.imageUrls
+      } else if (typeof product.imageUrls === 'string') {
+        // 如果是JSON字符串，尝试解析
+        try {
+          imageUrlsArray = JSON.parse(product.imageUrls)
+        } catch (e) {
+          // 如果不是JSON，当作单个URL处理
+          imageUrlsArray = [product.imageUrls]
+        }
+      }
+    }
+    
+    console.log('编辑商品，图片数据:', {
+      id: product.id,
+      imageUrls: product.imageUrls,
+      imageUrlsType: typeof product.imageUrls,
+      parsed: imageUrlsArray,
+    })
+    
     this.setState({
       editingId: product.id,
       form: {
@@ -77,7 +108,7 @@ export default class AdminProduct extends Component {
         description: product.description || '',
         nutritionInfo: product.nutritionInfo || '',
         cookingTips: product.cookingTips || '',
-        imageUrlsText: (product.imageUrls || []).join('\n'),
+        imageUrlsText: imageUrlsArray.join('\n'),
       },
     })
   }
@@ -103,7 +134,9 @@ export default class AdminProduct extends Component {
       success: async (res) => {
         const tempFilePath = res.tempFilePaths[0]
         try {
-          const baseUrl = 'http://localhost:3000'
+          // 使用配置中的 baseURL
+          const config = require('../../../config')
+          const baseUrl = config.baseURL || 'http://localhost:3000'
           const uploadRes = await Taro.uploadFile({
             url: `${baseUrl}/upload`,
             filePath: tempFilePath,
@@ -117,22 +150,54 @@ export default class AdminProduct extends Component {
           try {
             uploadResult = JSON.parse(uploadRes.data)
           } catch (e) {
+            console.error('上传响应解析失败:', uploadRes.data)
             throw new Error('上传响应解析失败')
           }
 
-          if (!uploadResult.success || !uploadResult.data) {
-            throw new Error(uploadResult.message || '上传失败')
+          console.log('上传原始响应:', uploadResult)
+
+          // 处理后端 TransformInterceptor 格式：{ code: 200, data: {...}, message: 'success' }
+          let imageUrl = null
+          if (uploadResult.code === 200 && uploadResult.data) {
+            // TransformInterceptor 包装后的格式
+            const wrappedData = uploadResult.data
+            // 检查是否是 { success: true, data: { url, filename } } 格式
+            if (wrappedData.success && wrappedData.data) {
+              imageUrl = wrappedData.data.url
+            } else if (wrappedData.url) {
+              // 直接是 { url, filename } 格式
+              imageUrl = wrappedData.url
+            } else {
+              // 尝试其他可能的格式
+              imageUrl = wrappedData.url || wrappedData
+            }
+          } else if (uploadResult.success && uploadResult.data) {
+            // 未经过 TransformInterceptor 的格式
+            imageUrl = uploadResult.data.url || uploadResult.data
+          } else {
+            throw new Error(uploadResult.message || uploadResult.msg || '上传失败')
           }
 
-          const url = uploadResult.data.url
+          if (!imageUrl) {
+            console.error('无法提取图片URL，响应数据:', uploadResult)
+            throw new Error('未获取到图片URL，请检查上传接口响应格式')
+          }
+
+          console.log('提取的图片URL:', imageUrl)
+
           this.setState((prevState) => {
             const prev = prevState.form.imageUrlsText || ''
             const urls = prev ? prev.split('\n').filter(s => s.trim()) : []
-            urls.push(url)
+            // 避免重复添加
+            if (!urls.includes(imageUrl)) {
+              urls.push(imageUrl)
+            }
+            const newImageUrlsText = urls.join('\n')
+            console.log('更新后的图片URL列表:', newImageUrlsText)
             return {
               form: {
                 ...prevState.form,
-                imageUrlsText: urls.join('\n'),
+                imageUrlsText: newImageUrlsText,
               },
             }
           })
@@ -210,8 +275,16 @@ export default class AdminProduct extends Component {
         description: form.description || undefined,
         nutritionInfo: form.nutritionInfo || undefined,
         cookingTips: form.cookingTips || undefined,
-        imageUrls,
+        // 只有当imageUrls数组不为空时才传递
+        imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       }
+      
+      // 调试日志
+      console.log('保存商品数据:', {
+        ...payload,
+        imageUrlsCount: imageUrls.length,
+        imageUrlsText: form.imageUrlsText,
+      })
 
       if (editingId === 'new') {
         await productApi.create(payload)
@@ -363,7 +436,7 @@ export default class AdminProduct extends Component {
                 </View>
 
                 <View className='form-row'>
-                  <View className='form-item half'>
+                  <View className='form-item half price-item'>
                     <Text className='label'>
                       价格 <Text className='required'>*</Text>
                     </Text>
@@ -375,7 +448,7 @@ export default class AdminProduct extends Component {
                       prefix='¥'
                     />
                   </View>
-                  <View className='form-item half'>
+                  <View className='form-item half stock-item'>
                     <Text className='label'>
                       库存 <Text className='required'>*</Text>
                     </Text>
@@ -448,7 +521,11 @@ export default class AdminProduct extends Component {
                         </View>
                       ))}
                     </View>
-                  ) : null}
+                  ) : (
+                    <View className='no-images-hint'>
+                      <Text className='hint-text'>暂无图片，请上传或输入图片URL</Text>
+                    </View>
+                  )}
                   <Button
                     type='primary'
                     size='large'
@@ -466,8 +543,13 @@ export default class AdminProduct extends Component {
                     className='textarea'
                     value={form.imageUrlsText}
                     onInput={(e) => this.handleChange('imageUrlsText', e.detail.value)}
-                    placeholder='也可以直接粘贴图片URL，每行一个'
+                    placeholder='也可以直接粘贴图片URL，每行一个&#10;例如：&#10;http://localhost:3000/uploads/image1.jpg&#10;http://localhost:3000/uploads/image2.jpg'
                   />
+                  {imageUrls.length > 0 && (
+                    <Text className='image-count-hint'>
+                      当前有 {imageUrls.length} 张图片
+                    </Text>
+                  )}
                 </View>
               </View>
 
@@ -509,6 +591,15 @@ export default class AdminProduct extends Component {
               ) : (
                 products.map((item) => (
                   <View key={item.id} className='product-card'>
+                    {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
+                      <View className='card-image-wrapper'>
+                        <Image
+                          src={item.imageUrls[0]}
+                          className='card-image'
+                          mode='aspectFill'
+                        />
+                      </View>
+                    ) : null}
                     <View className='card-header'>
                       <Text className='card-title'>{item.name}</Text>
                       <Text className='card-sub'>

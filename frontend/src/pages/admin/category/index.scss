@@ -69,20 +69,21 @@
   .ui-input-wrapper {
     .ui-input {
       background-color: #ffffff !important;
-      border-color: #bfbfbf !important;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border-color: #d9d9d9 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
     }
     
     .ui-input:focus {
       border-color: #667eea !important;
       background-color: #ffffff !important;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+      box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.2), 0 4px 16px rgba(102, 126, 234, 0.25) !important;
+      transform: translateY(-1px) !important;
     }
     
     .ui-input:hover {
-      border-color: #999999 !important;
+      border-color: #667eea !important;
       background-color: #ffffff !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15), 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
     }
   }
 }
@@ -179,16 +180,21 @@
 }
 
 .category-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
   margin-bottom: 16px;
-  padding: 24px;
+  padding: 24px !important;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0f0f0;
   transition: all 0.3s;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  position: relative !important;
 }
 
 .category-card:active {
@@ -197,7 +203,10 @@
 }
 
 .card-content {
-  flex: 1;
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  margin-right: 16px !important;
 }
 
 .card-left {
@@ -218,19 +227,32 @@
 }
 
 .card-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  padding-left: 16px !important;
   
-  // 确保按钮对齐
+  // 确保按钮完整显示，不被遮挡
   .ui-button {
-    height: 48px !important;
-    line-height: 48px !important;
-    min-width: 100px !important;
-    flex-shrink: 0;
+    height: 56px !important;
+    line-height: 56px !important;
+    min-width: 120px !important;
+    max-width: 140px !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    position: relative !important;
+    z-index: 10 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
   }
 }
 

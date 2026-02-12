@@ -18,7 +18,31 @@ export default class ProductList extends Component {
   loadProducts = async () => {
     try {
       const products = await productApi.getList()
-      this.setState({ products, loading: false })
+      // 处理imageUrls数据格式
+      const processedProducts = products.map(product => {
+        let imageUrls = product.imageUrls
+        // 如果imageUrls是字符串，尝试解析为数组
+        if (typeof imageUrls === 'string') {
+          try {
+            imageUrls = JSON.parse(imageUrls)
+          } catch (e) {
+            // 如果不是JSON，当作单个URL处理
+            imageUrls = imageUrls ? [imageUrls] : []
+          }
+        } else if (!Array.isArray(imageUrls)) {
+          imageUrls = []
+        }
+        return {
+          ...product,
+          imageUrls: imageUrls || [],
+        }
+      })
+      console.log('商品列表图片数据:', processedProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        imageUrls: p.imageUrls,
+      })))
+      this.setState({ products: processedProducts, loading: false })
     } catch (error) {
       logger.error('加载商品列表失败', error)
       Taro.showToast({ title: error.message || '加载失败，请稍后重试', icon: 'none' })
@@ -61,12 +85,19 @@ export default class ProductList extends Component {
                   onClick={() => this.handleProductClick(item.id)}
                 >
                   <View className="image-wrapper">
-                    <Image
-                      src={item.imageUrls?.[0] || ''}
-                      className="product-image"
-                      mode="aspectFill"
-                      lazyLoad
-                    />
+                    {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
+                      <Image
+                        src={item.imageUrls[0]}
+                        className="product-image"
+                        mode="aspectFill"
+                        lazyLoad
+                      />
+                    ) : (
+                      <View className="product-image-placeholder">
+                        <Text className="placeholder-icon">🐟</Text>
+                        <Text className="placeholder-text">暂无图片</Text>
+                      </View>
+                    )}
                     {item.stock <= 10 && item.stock > 0 && (
                       <View className="stock-badge">
                         <Text className="stock-text">仅剩{item.stock}件</Text>

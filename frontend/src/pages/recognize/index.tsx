@@ -121,8 +121,33 @@ export default class Recognize extends Component {
     return (
       <View className="recognize">
         <View className="container">
+          {recognizing && (
+            <View className="recognizing-overlay">
+              <View className="recognizing-content">
+                <View className="recognizing-spinner">
+                  <View className="spinner-ring"></View>
+                  <View className="spinner-ring"></View>
+                  <View className="spinner-ring"></View>
+                </View>
+                <Text className="recognizing-text">AI 正在识别中...</Text>
+                <Text className="recognizing-hint">请稍候，这可能需要几秒钟</Text>
+              </View>
+            </View>
+          )}
+          
           {imageUrl ? (
-            <Image src={imageUrl} className="preview-image" mode="aspectFit" />
+            <View className="preview-wrapper">
+              <Image src={imageUrl} className="preview-image" mode="aspectFit" />
+              {recognizing && (
+                <View className="preview-overlay">
+                  <View className="overlay-spinner">
+                    <View className="spinner-dot"></View>
+                    <View className="spinner-dot"></View>
+                    <View className="spinner-dot"></View>
+                  </View>
+                </View>
+              )}
+            </View>
           ) : (
             <View className="placeholder">
               <Text className="placeholder-text">点击下方按钮选择图片</Text>

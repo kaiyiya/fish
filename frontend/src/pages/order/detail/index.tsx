@@ -48,6 +48,28 @@ export default class OrderDetail extends Component {
     }
   }
 
+  getStatusText = (status) => {
+    const statusMap = {
+      'pending': '待支付',
+      'paid': '已支付',
+      'completed': '已完成',
+      'cancelled': '已取消',
+      'refunded': '已退款',
+    }
+    return statusMap[status] || status || '未知状态'
+  }
+
+  getStatusColor = (status) => {
+    const colorMap = {
+      'pending': '#ff9800',
+      'paid': '#1890ff',
+      'completed': '#52c41a',
+      'cancelled': '#999999',
+      'refunded': '#ff4d4f',
+    }
+    return colorMap[status] || '#667eea'
+  }
+
   render() {
     const { loading, order } = this.state
 
@@ -74,43 +96,66 @@ export default class OrderDetail extends Component {
 
     const items = order.items || []
 
+    const statusText = this.getStatusText(order.status)
+    const statusColor = this.getStatusColor(order.status)
+
     return (
       <View className="order-detail-page">
-        <View className="order-header">
-          <Text className="order-status">{order.status}</Text>
-          <Text className="order-no">订单号：{order.orderNo || '-'}</Text>
-          <Text className="order-time">
-            下单时间：{this.formatDate(order.created_at)}
-          </Text>
+        <View className="order-header" style={{ background: `linear-gradient(135deg, ${statusColor} 0%, ${statusColor}dd 100%)` }}>
+          <View className="status-badge" style={{ background: `rgba(255, 255, 255, 0.25)` }}>
+            <Text className="order-status">{statusText}</Text>
+          </View>
+          <View className="order-info-group">
+            <View className="order-info-item">
+              <Text className="info-label">订单号</Text>
+              <Text className="info-value">{order.orderNo || '-'}</Text>
+            </View>
+            <View className="order-info-item">
+              <Text className="info-label">下单时间</Text>
+              <Text className="info-value">{this.formatDate(order.created_at)}</Text>
+            </View>
+          </View>
         </View>
 
         <View className="order-summary">
-          <Text className="label">总金额：</Text>
-          <Text className="price">¥{order.totalAmount}</Text>
+          <View className="summary-content">
+            <Text className="summary-label">订单总金额</Text>
+            <Text className="summary-price">¥{order.totalAmount}</Text>
+          </View>
         </View>
 
-        <ScrollView scrollY className="item-scroll">
-          {items.map((item) => (
-            <View key={item.id} className="order-item-row">
-              <View className="item-line">
-                <Text className="label">商品ID：</Text>
-                <Text className="value">{item.productId}</Text>
+        <View className="items-section">
+          <Text className="section-title">商品明细</Text>
+          <ScrollView scrollY className="item-scroll">
+            {items.length === 0 ? (
+              <View className="empty-items">
+                <Text className="empty-items-text">暂无商品信息</Text>
               </View>
-              <View className="item-line">
-                <Text className="label">数量：</Text>
-                <Text className="value">{item.quantity}</Text>
-              </View>
-              <View className="item-line">
-                <Text className="label">单价：</Text>
-                <Text className="value">¥{item.price}</Text>
-              </View>
-              <View className="item-line">
-                <Text className="label">小计：</Text>
-                <Text className="value">¥{item.subtotal}</Text>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
+            ) : (
+              items.map((item) => (
+                <View key={item.id} className="order-item-card">
+                  <View className="item-header">
+                    <Text className="item-title">商品 #{item.productId}</Text>
+                  </View>
+                  <View className="item-details">
+                    <View className="item-detail-row">
+                      <Text className="detail-label">数量</Text>
+                      <Text className="detail-value">{item.quantity} 件</Text>
+                    </View>
+                    <View className="item-detail-row">
+                      <Text className="detail-label">单价</Text>
+                      <Text className="detail-value price-text">¥{item.price}</Text>
+                    </View>
+                    <View className="item-detail-row subtotal-row">
+                      <Text className="detail-label">小计</Text>
+                      <Text className="detail-value subtotal-text">¥{item.subtotal}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))
+            )}
+          </ScrollView>
+        </View>
       </View>
     )
   }

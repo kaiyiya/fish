@@ -7,50 +7,54 @@
 
 .ui-input-prefix {
   position: absolute;
-  left: 16px;
+  left: 24px;
   font-size: 28px;
   font-weight: 600;
   color: #8c8c8c;
   z-index: 1;
+  pointer-events: none;
+  user-select: none;
 }
 
 .ui-input {
   width: 100%;
-  padding: 18px 20px;
-  border: 2px solid #bfbfbf;
-  border-radius: 12px;
+  padding: 20px 24px;
+  border: 3px solid #d9d9d9;
+  border-radius: 16px;
   background-color: #ffffff;
-  font-size: 28px;
+  font-size: 30px;
   color: #1a1a1a;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  min-height: 64px;
+  min-height: 72px;
   line-height: 1.5;
   // 确保输入框看起来可输入
   -webkit-appearance: none;
   appearance: none;
-  // 添加轻微阴影，让输入框更突出
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  // 增强阴影，让输入框更明显
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .ui-input--with-prefix {
-  padding-left: 48px;
+  padding-left: 56px;
+  text-align: left;
 }
 
 // 悬停效果（H5环境）
 .ui-input:hover {
-  border-color: #999999;
+  border-color: #667eea;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15), 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
-// 聚焦效果
+// 聚焦效果 - 更明显的视觉反馈
 .ui-input:focus {
   border-color: #667eea;
   background-color: #ffffff;
   outline: none;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
-  border-width: 2px;
+  box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.2), 0 4px 16px rgba(102, 126, 234, 0.25);
+  border-width: 3px;
+  transform: translateY(-1px);
 }
 
 // 占位符样式
@@ -72,4 +76,5 @@
 .ui-input:active {
   border-color: #667eea;
   background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(102, 126, 234, 0.2);
 }

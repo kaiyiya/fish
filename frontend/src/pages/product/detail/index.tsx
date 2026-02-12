@@ -45,10 +45,28 @@ export default class ProductDetail extends Component {
 
   loadDetail = async (id) => {
     try {
+      const store = useUserStore.getState()
+      const userInfo = store && store.userInfo
+      
       const [product, ratingData] = await Promise.all([
         productApi.getDetail(id),
         reviewApi.getProductRating(id).catch(() => ({ average: 0, count: 0 })),
       ])
+      
+      // 处理imageUrls数据格式
+      if (product) {
+        let imageUrls = product.imageUrls
+        if (typeof imageUrls === 'string') {
+          try {
+            imageUrls = JSON.parse(imageUrls)
+          } catch (e) {
+            imageUrls = imageUrls ? [imageUrls] : []
+          }
+        } else if (!Array.isArray(imageUrls)) {
+          imageUrls = []
+        }
+        product.imageUrls = imageUrls || []
+      }
       
       this.setState({ 
         product, 
@@ -241,6 +259,22 @@ export default class ProductDetail extends Component {
     const { product, addingToCart } = this.state
     if (!product || addingToCart) return
 
+    // 检查登录状态
+    const store = useUserStore.getState()
+    const userInfo = store && store.userInfo
+    if (!userInfo) {
+      Taro.showModal({
+        title: '需要登录',
+        content: '加入购物车需要先登录，是否前往登录？',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/login/index' })
+          }
+        },
+      })
+      return
+    }
+
     if (product.stock !== undefined && product.stock === 0) {
       Taro.showToast({ title: '商品已售罄', icon: 'none' })
       return
@@ -248,16 +282,20 @@ export default class ProductDetail extends Component {
 
     this.setState({ addingToCart: true })
     try {
-      await cartApi.addToCart({
+      logger.info('加入购物车请求', { productId: product.id, quantity: 1 })
+      const result = await cartApi.addToCart({
         productId: product.id,
         quantity: 1,
       })
-      Taro.showToast({ title: '已加入购物车', icon: 'success' })
+      logger.info('加入购物车成功', result)
+      Taro.showToast({ title: '已加入购物车', icon: 'success', duration: 2000 })
     } catch (error) {
       logger.error('加入购物车失败', error)
+      const errorMessage = error?.message || error?.data?.message || '加入购物车失败，请稍后重试'
       Taro.showToast({ 
-        title: error.message || '加入购物车失败，请稍后重试', 
-        icon: 'none' 
+        title: errorMessage, 
+        icon: 'none',
+        duration: 3000
       })
     } finally {
       this.setState({ addingToCart: false })
@@ -339,6 +377,11 @@ export default class ProductDetail extends Component {
       return (
         <View className="product-detail">
           <View className="loading-container">
+            <View className="loading-spinner">
+              <View className="spinner-dot"></View>
+              <View className="spinner-dot"></View>
+              <View className="spinner-dot"></View>
+            </View>
             <Text className="loading-text">加载中...</Text>
           </View>
         </View>
@@ -444,9 +487,15 @@ export default class ProductDetail extends Component {
               </View>
             ) : (
               <View className="price-row">
-                <Text className="detail-price">¥{product.price}</Text>
+                <View className="price-wrapper">
+                  <Text className="price-symbol">¥</Text>
+                  <Text className="detail-price">{product.price}</Text>
+                </View>
                 {product.stock !== undefined && (
-                  <Text className="stock-info">库存: {product.stock}件</Text>
+                  <View className={`stock-badge ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                    <Text className="stock-icon">{product.stock > 0 ? '✓' : '✗'}</Text>
+                    <Text className="stock-info">库存 {product.stock}件</Text>
+                  </View>
                 )}
               </View>
             )}
@@ -455,7 +504,9 @@ export default class ProductDetail extends Component {
           {product.description ? (
             <View className="detail-section">
               <Text className="section-title">商品描述</Text>
-              <Text className="section-content">{product.description}</Text>
+              <View className="section-content-wrapper">
+                <Text className="section-content" selectable>{product.description}</Text>
+              </View>
             </View>
           ) : null}
 
@@ -569,7 +620,11 @@ export default class ProductDetail extends Component {
                 ))}
               </View>
             ) : (
-              <Text className="no-reviews">暂无评价</Text>
+              <View className="no-reviews-wrapper">
+                <Text className="no-reviews-icon">💬</Text>
+                <Text className="no-reviews">暂无评价</Text>
+                <Text className="no-reviews-hint">成为第一个评价的用户吧</Text>
+              </View>
             )}
           </View>
         </ScrollView>
