@@ -246,11 +246,18 @@
   flex-direction: row !important;
   gap: 16px !important;
   align-items: center !important;
+  align-content: center !important;
   justify-content: center !important;
   width: 100% !important;
   margin-top: 8px !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+  
+  // 确保所有按钮在同一水平线上
+  .action-btn {
+    align-self: center !important;
+    vertical-align: middle !important;
+  }
 }
 
 .action-btn {
@@ -263,11 +270,13 @@
   font-size: 30px !important;
   font-weight: 600 !important;
   height: 72px !important;
-  line-height: 72px !important;
+  line-height: calc(72px - 6px) !important;
   padding: 0 24px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  align-self: center !important;
+  vertical-align: middle !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -276,6 +285,7 @@
   overflow: visible !important;
   position: relative !important;
   z-index: 1 !important;
+  margin: 0 !important;
   
   &:active {
     transform: scale(0.96) translateY(1px) !important;
@@ -292,8 +302,14 @@
 .action-btn.primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: #fff !important;
-  border: none !important;
+  border: 3px solid transparent !important;
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35), 0 2px 4px rgba(102, 126, 234, 0.2) !important;
+  /* 确保高度一致，使用透明边框匹配普通按钮的边框 */
+  box-sizing: border-box !important;
+  height: 72px !important;
+  line-height: calc(72px - 6px) !important;
+  align-self: center !important;
+  vertical-align: middle !important;
   
   &:active {
     transform: scale(0.95) translateY(1px) !important;
@@ -491,22 +507,14 @@
   padding: 8px 0 16px;
   
   &::-webkit-scrollbar {
-    height: 6px;
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
   }
   
-  &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 3px;
-    
-    &:hover {
-      background: rgba(102, 126, 234, 0.5);
-    }
-  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .product-card {

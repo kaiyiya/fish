@@ -3,6 +3,8 @@
   background: linear-gradient(180deg, #f8f9ff 0%, #f5f7fa 50%, #ffffff 100%);
   padding-bottom: 24px;
   position: relative;
+  display: flex;
+  flex-direction: column;
   
   &::before {
     content: '';
@@ -16,6 +18,14 @@
     pointer-events: none;
     z-index: 0;
   }
+}
+
+.edit-panel-scroll {
+  flex: 1;
+  padding-bottom: 200px !important;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .header {
@@ -144,6 +154,7 @@
 .edit-panel {
   margin: 24px 16px;
   padding: 40px 32px;
+  padding-bottom: 60px;
   border-radius: 24px;
   background: #fff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(102, 126, 234, 0.05);
@@ -151,6 +162,9 @@
   position: relative;
   z-index: 1;
   animation: fadeInUp 0.5s ease-out;
+  min-height: calc(100vh - 200px);
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -206,6 +220,8 @@
   border: 1px solid rgba(102, 126, 234, 0.1);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   transition: all 0.3s;
+  overflow: visible;
+  position: relative;
   
   &:hover {
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.08);
@@ -509,10 +525,16 @@
 .char-count {
   display: block;
   text-align: right;
-  font-size: 24px;
-  color: #8c8c8c;
-  margin-top: 12px;
-  font-weight: 500;
+  font-size: 26px;
+  color: #667eea;
+  margin-top: 16px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.08);
+  border-radius: 12px;
+  display: inline-block;
+  float: right;
+  clear: both;
   
   &::before {
     content: '已输入 ';
@@ -595,18 +617,22 @@
 }
 
 .upload-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
   height: 88px !important;
   line-height: 88px !important;
-  border-radius: 20px !important;
-  font-size: 30px !important;
-  font-weight: 600 !important;
+  border-radius: 24px !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(102, 126, 234, 0.2) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 0 32px !important;
+  min-width: 200px !important;
   
   &:active {
     transform: scale(0.96) translateY(1px) !important;
@@ -614,7 +640,7 @@
   }
   
   &:hover {
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 0 2px 4px rgba(102, 126, 234, 0.25) !important;
+    box-shadow: 0 10px 28px rgba(102, 126, 234, 0.5), 0 2px 4px rgba(102, 126, 234, 0.25) !important;
     transform: translateY(-2px) !important;
   }
 }
@@ -669,11 +695,19 @@
   display: flex !important;
   justify-content: flex-end !important;
   align-items: center !important;
+  align-content: center !important;
   gap: 20px !important;
   margin-top: 48px !important;
-  padding-top: 36px !important;
+  padding: 36px 0 40px 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   border-top: 2px solid rgba(102, 126, 234, 0.1) !important;
-  position: relative;
+  position: relative !important;
+  z-index: 10 !important;
+  overflow: visible !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  flex-wrap: nowrap !important;
   
   &::before {
     content: '';
@@ -685,6 +719,12 @@
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     border-radius: 1px;
   }
+  
+  // 确保所有按钮在同一水平线上
+  .ui-button {
+    align-self: center !important;
+    vertical-align: middle !important;
+  }
 }
 
 .cancel-btn,
@@ -692,21 +732,37 @@
   height: 72px !important;
   line-height: 72px !important;
   min-width: 160px !important;
+  max-width: 200px !important;
+  flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  align-self: center !important;
+  vertical-align: middle !important;
   border-radius: 20px !important;
   font-size: 30px !important;
   font-weight: 600 !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  position: relative !important;
+  z-index: 11 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .cancel-btn {
   background: #fff !important;
   border: 3px solid #d9d9d9 !important;
   color: #333 !important;
+  /* 确保边框包含在高度内 */
+  box-sizing: border-box !important;
+  /* 确保高度一致，减去边框宽度 */
+  height: 72px !important;
+  line-height: calc(72px - 6px) !important;
   
   &:active {
     transform: scale(0.96) translateY(1px) !important;
@@ -722,9 +778,13 @@
 
 .save-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border: none !important;
+  border: 3px solid transparent !important;
   color: #fff !important;
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35), 0 2px 4px rgba(102, 126, 234, 0.2) !important;
+  /* 确保高度一致，使用透明边框匹配cancel-btn的边框 */
+  box-sizing: border-box !important;
+  height: 72px !important;
+  line-height: calc(72px - 6px) !important;
   
   &:active {
     transform: scale(0.96) translateY(1px) !important;

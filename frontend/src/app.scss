@@ -57,3 +57,35 @@ button.buy-btn {
   border-radius: 30px !important;
   min-width: 160px !important;
 }
+
+/* 全局隐藏滚动条 - 保持滚动功能但隐藏滚动条 */
+* {
+  /* Webkit浏览器（Chrome, Safari, Edge） */
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+  
+  /* Firefox */
+  scrollbar-width: none;
+  
+  /* IE和Edge旧版 */
+  -ms-overflow-style: none;
+}
+
+/* 确保所有滚动容器都隐藏滚动条 */
+scroll-view,
+.scroll-view,
+ScrollView {
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+  
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

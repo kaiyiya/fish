@@ -246,22 +246,14 @@
   margin: 0 -4px;
   
   &::-webkit-scrollbar {
-    height: 6px;
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
   }
   
-  &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 3px;
-    
-    &:hover {
-      background: rgba(102, 126, 234, 0.5);
-    }
-  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .recommend-item {

@@ -266,7 +266,7 @@ export default class Cart extends Component {
               return (
                 <View key={cart.id} className="cart-item">
                   <View 
-                    className="checkbox" 
+                    className={`checkbox ${isSelected ? 'checked' : ''}`}
                     onClick={() => this.handleToggleSelect(cart.id)}
                   >
                     {isSelected && <Text className="check-icon">✓</Text>}

@@ -3,12 +3,14 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { orderApi } from '../../../services/api'
 import { logger } from '../../../utils/logger'
+import { Button } from '../../../components/ui'
 import './index.scss'
 
 export default class OrderDetail extends Component {
   state = {
     loading: true,
     order: null,
+    paying: false,
   }
 
   componentDidMount() {
@@ -70,8 +72,42 @@ export default class OrderDetail extends Component {
     return colorMap[status] || '#667eea'
   }
 
+  handlePay = async () => {
+    const { order, paying } = this.state
+    if (!order || paying) return
+
+    if (order.status !== 'pending') {
+      Taro.showToast({ title: '订单状态不正确', icon: 'none' })
+      return
+    }
+
+    this.setState({ paying: true })
+    try {
+      // TODO: 接入微信支付
+      // 目前先模拟支付流程
+      Taro.showToast({ 
+        title: '支付功能开发中，敬请期待', 
+        icon: 'none',
+        duration: 2000
+      })
+      
+      // 模拟支付成功后的操作
+      // await orderApi.pay(order.id)
+      // Taro.showToast({ title: '支付成功', icon: 'success' })
+      // this.loadDetail(order.id)
+    } catch (error) {
+      logger.error('支付失败', error)
+      Taro.showToast({ 
+        title: error.message || '支付失败，请稍后重试', 
+        icon: 'none' 
+      })
+    } finally {
+      this.setState({ paying: false })
+    }
+  }
+
   render() {
-    const { loading, order } = this.state
+    const { loading, order, paying } = this.state
 
     if (loading) {
       return (
@@ -156,6 +192,21 @@ export default class OrderDetail extends Component {
             )}
           </ScrollView>
         </View>
+
+        {order.status === 'pending' && (
+          <View className="order-footer">
+            <Button
+              type="primary"
+              size="large"
+              onClick={this.handlePay}
+              loading={paying}
+              disabled={paying}
+              className="pay-btn"
+            >
+              {paying ? '支付中...' : '立即支付'}
+            </Button>
+          </View>
+        )}
       </View>
     )
   }

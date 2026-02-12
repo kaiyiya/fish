@@ -432,16 +432,6 @@ export default class ProductDetail extends Component {
                     </Text>
                   </View>
                 )}
-                {isAdmin && !editing && (
-                  <Button
-                    type="default"
-                    size="small"
-                    onClick={this.handleEdit}
-                    className="edit-btn"
-                  >
-                    编辑
-                  </Button>
-                )}
               </View>
             </View>
             {editing ? (
@@ -562,7 +552,7 @@ export default class ProductDetail extends Component {
                         reviewForm: { ...reviewForm, rating: star }
                       })}
                     >
-                      ⭐
+                      {reviewForm.rating >= star ? '⭐' : '☆'}
                     </Text>
                   ))}
                 </View>

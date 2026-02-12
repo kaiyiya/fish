@@ -133,13 +133,20 @@
 // 输入框样式已由公共Input组件统一管理
 
 .btn-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 2px solid #f0f0f0;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  align-content: center !important;
+  gap: 16px !important;
+  margin-top: 32px !important;
+  padding-top: 24px !important;
+  border-top: 2px solid #f0f0f0 !important;
+  
+  // 确保所有按钮在同一水平线上
+  .ui-button {
+    align-self: center !important;
+    vertical-align: middle !important;
+  }
 }
 
 .cancel-btn,
@@ -148,10 +155,15 @@
   height: 64px !important;
   line-height: 64px !important;
   min-width: 140px !important;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  align-self: center !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .list-section {
@@ -230,6 +242,7 @@
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
+  align-content: center !important;
   justify-content: flex-end !important;
   gap: 12px !important;
   flex-shrink: 0 !important;
@@ -245,6 +258,9 @@
     max-width: 140px !important;
     flex: 0 0 auto !important;
     flex-shrink: 0 !important;
+    align-self: center !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
