@@ -3,6 +3,7 @@ import { View, Text, Textarea, ScrollView, Image, Picker } from '@tarojs/compone
 import Taro from '@tarojs/taro'
 import { productApi, categoryApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
+import { logger } from '../../../utils/logger'
 import './index.scss'
 
 export default class AdminProduct extends Component {
@@ -12,16 +13,16 @@ export default class AdminProduct extends Component {
     products: [],
     categories: [],
     editingId: null,
-    form: {
-      name: '',
-      categoryId: '',
-      price: '',
-      stock: '',
-      description: '',
-      nutritionInfo: '',
-      cookingTips: '',
-      imageUrlsText: '',
-    },
+      form: {
+        name: '',
+        categoryId: null,
+        price: '',
+        stock: '',
+        description: '',
+        nutritionInfo: '',
+        cookingTips: '',
+        imageUrlsText: '',
+      },
   }
 
   componentDidMount() {
@@ -34,7 +35,7 @@ export default class AdminProduct extends Component {
       const categories = await categoryApi.getList()
       this.setState({ categories })
     } catch (error) {
-      console.error('加载分类列表失败:', error)
+      logger.error('加载分类列表失败', error)
     }
   }
 
@@ -43,7 +44,7 @@ export default class AdminProduct extends Component {
       const products = await productApi.getList()
       this.setState({ products, loading: false })
     } catch (error) {
-      console.error('加载商品列表失败:', error)
+      logger.error('加载商品列表失败', error)
       Taro.showToast({ title: '加载失败', icon: 'none' })
       this.setState({ loading: false })
     }
@@ -54,7 +55,7 @@ export default class AdminProduct extends Component {
       editingId: 'new',
       form: {
         name: '',
-        categoryId: '',
+        categoryId: null, // 使用 null 而不是空字符串
         price: '',
         stock: '',
         description: '',
@@ -70,7 +71,7 @@ export default class AdminProduct extends Component {
       editingId: product.id,
       form: {
         name: product.name || '',
-        categoryId: String(product.categoryId || ''),
+        categoryId: product.categoryId ? String(product.categoryId) : null,
         price: String(product.price || ''),
         stock: String(product.stock || ''),
         description: product.description || '',
@@ -138,7 +139,7 @@ export default class AdminProduct extends Component {
 
           Taro.showToast({ title: '上传成功', icon: 'success' })
         } catch (error) {
-          console.error('上传图片失败:', error)
+          logger.error('上传图片失败', error)
           Taro.showToast({
             title: error.message || '上传失败',
             icon: 'none',
@@ -149,11 +150,47 @@ export default class AdminProduct extends Component {
   }
 
   handleSave = async () => {
-    const { editingId, form, saving } = this.state
+    const { editingId, form, saving, categories } = this.state
     if (!editingId || saving) return
 
-    if (!form.name || !form.categoryId || !form.price || !form.stock) {
+    if (!form.name || !form.price || !form.stock) {
       Taro.showToast({ title: '请完整填写必填项', icon: 'none' })
+      return
+    }
+
+    // 如果提供了分类ID，验证分类是否存在
+    let categoryId = null
+    if (form.categoryId && form.categoryId !== null && form.categoryId !== '') {
+      const categoryIdStr = String(form.categoryId).trim()
+      if (categoryIdStr !== '') {
+        categoryId = Number(categoryIdStr)
+        if (isNaN(categoryId)) {
+          Taro.showToast({ title: '请选择有效的商品分类', icon: 'none' })
+          return
+        }
+        if (categories.length > 0) {
+          const categoryExists = categories.some(c => c.id === categoryId)
+          if (!categoryExists) {
+            Taro.showToast({
+              title: '请选择有效的商品分类',
+              icon: 'none',
+              duration: 2000,
+            })
+            return
+          }
+        }
+      }
+    }
+
+    // 验证价格和库存
+    const price = Number(form.price)
+    const stock = Number(form.stock)
+    if (isNaN(price) || price <= 0) {
+      Taro.showToast({ title: '请输入有效的价格', icon: 'none' })
+      return
+    }
+    if (isNaN(stock) || stock < 0) {
+      Taro.showToast({ title: '请输入有效的库存数量', icon: 'none' })
       return
     }
 
@@ -167,9 +204,9 @@ export default class AdminProduct extends Component {
 
       const payload = {
         name: form.name,
-        categoryId: Number(form.categoryId),
-        price: Number(form.price),
-        stock: Number(form.stock),
+        categoryId: categoryId || undefined, // 如果为 null，则不传该字段
+        price: price,
+        stock: stock,
         description: form.description || undefined,
         nutritionInfo: form.nutritionInfo || undefined,
         cookingTips: form.cookingTips || undefined,
@@ -187,10 +224,22 @@ export default class AdminProduct extends Component {
       this.setState({ editingId: null })
       this.loadProducts()
     } catch (error) {
-      console.error('保存商品失败:', error)
+      logger.error('保存商品失败', error)
+      // 提取错误信息
+      let errorMessage = '保存失败'
+      if (error.message) {
+        // 如果错误信息包含中文，直接使用
+        if (error.message.includes('分类') || error.message.includes('不存在')) {
+          errorMessage = error.message
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
       Taro.showToast({
-        title: error.message || '保存失败',
+        title: errorMessage,
         icon: 'none',
+        duration: 3000,
       })
     } finally {
       this.setState({ saving: false })
@@ -208,7 +257,7 @@ export default class AdminProduct extends Component {
           Taro.showToast({ title: '删除成功', icon: 'success' })
           this.loadProducts()
         } catch (error) {
-          console.error('删除商品失败:', error)
+          logger.error('删除商品失败', error)
           Taro.showToast({ title: '删除失败', icon: 'none' })
         }
       },
@@ -232,7 +281,10 @@ export default class AdminProduct extends Component {
   render() {
     const { loading, products, categories, editingId, form, saving } = this.state
     const imageUrls = (form.imageUrlsText || '').split('\n').filter(s => s.trim())
-    const selectedCategoryIndex = categories.findIndex(c => String(c.id) === String(form.categoryId))
+    // 计算当前选中的分类索引（如果分类ID为空或找不到，返回 -1）
+    const selectedCategoryIndex = form.categoryId && form.categoryId !== null && form.categoryId !== ''
+      ? categories.findIndex(c => String(c.id) === String(form.categoryId))
+      : -1
 
     return (
       <View className='admin-product-page'>
@@ -279,30 +331,34 @@ export default class AdminProduct extends Component {
                 </View>
 
                 <View className='form-item'>
-                  <Text className='label'>
-                    商品分类 <Text className='required'>*</Text>
-                  </Text>
+                  <Text className='label'>商品分类</Text>
                   {categories.length > 0 ? (
                     <Picker
                       mode='selector'
                       range={categories}
                       rangeKey='name'
                       value={selectedCategoryIndex >= 0 ? selectedCategoryIndex : 0}
-                      onChange={this.handleCategoryChange}
+                      onChange={(e) => {
+                        const index = e.detail.value
+                        const category = this.state.categories[index]
+                        if (category) {
+                          this.handleChange('categoryId', String(category.id))
+                        }
+                      }}
                     >
                       <View className='picker-view'>
                         <Text className={selectedCategoryIndex >= 0 ? 'picker-text' : 'picker-placeholder'}>
-                          {selectedCategoryIndex >= 0 ? categories[selectedCategoryIndex].name : '请选择分类'}
+                          {selectedCategoryIndex >= 0 && categories[selectedCategoryIndex] 
+                            ? categories[selectedCategoryIndex].name 
+                            : categories.length > 0 ? '请选择分类' : '暂无分类'}
                         </Text>
                         <Text className='picker-arrow'>▼</Text>
                       </View>
                     </Picker>
                   ) : (
-                    <Input
-                      value={form.categoryId}
-                      onInput={(e) => this.handleChange('categoryId', e.detail.value)}
-                      placeholder='请输入分类ID'
-                    />
+                    <View className='picker-view'>
+                      <Text className='picker-placeholder'>暂无分类，请先在分类管理中创建</Text>
+                    </View>
                   )}
                 </View>
 

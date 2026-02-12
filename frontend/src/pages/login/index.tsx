@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { authApi } from '../../services/api'
 import { useUserStore } from '../../store/user'
 import { Button, Input } from '../../components/ui'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default function Login() {
@@ -39,10 +40,11 @@ export default function Login() {
         }, 500)
       }
     } catch (error) {
-      console.error('登录/注册失败:', error)
+      logger.error('登录/注册失败', error)
       Taro.showToast({
-        title: '操作失败，请检查账号信息',
+        title: error.message || '操作失败，请检查账号信息',
         icon: 'none',
+        duration: 2000,
       })
     }
   }

@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { orderApi } from '../../../services/api'
+import { logger } from '../../../utils/logger'
 import './index.scss'
 
 export default class OrderDetail extends Component {
@@ -26,7 +27,7 @@ export default class OrderDetail extends Component {
       const order = await orderApi.getDetail(id)
       this.setState({ order, loading: false })
     } catch (error) {
-      console.error('加载订单详情失败:', error)
+      logger.error('加载订单详情失败', error)
       Taro.showToast({ title: '加载失败', icon: 'none' })
       this.setState({ loading: false })
     }
@@ -53,7 +54,9 @@ export default class OrderDetail extends Component {
     if (loading) {
       return (
         <View className="order-detail-page">
-          <Text>加载中...</Text>
+          <View className="loading-container">
+            <Text className="loading-text">加载中...</Text>
+          </View>
         </View>
       )
     }
@@ -61,7 +64,10 @@ export default class OrderDetail extends Component {
     if (!order) {
       return (
         <View className="order-detail-page">
-          <Text>订单不存在</Text>
+          <View className="empty-container">
+            <Text className="empty-icon">📋</Text>
+            <Text className="empty-text">订单不存在</Text>
+          </View>
         </View>
       )
     }

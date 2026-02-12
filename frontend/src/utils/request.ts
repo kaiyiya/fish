@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro'
+import config from '../config'
 
 // API 基础地址
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = config.baseURL
 
 // 统一请求函数，基于 Taro.request，兼容 H5 和 小程序
 function baseRequest(options) {
@@ -23,7 +24,7 @@ function baseRequest(options) {
     method: options.method || 'GET',
     data: options.data || options.params || {},
     header: headers,
-    timeout: 10000,
+    timeout: config.timeout,
   }).then((res) => {
     const data = res.data || {}
 
@@ -53,11 +54,15 @@ function baseRequest(options) {
     // 兼容未包裹的情况，直接返回 res.data
     return data
   }).catch((error) => {
-    Taro.showToast({
-      title: error.message || '网络错误',
-      icon: 'none',
-      duration: 2000,
-    })
+    // 对于业务错误（code !== 200），已经在上面处理了
+    // 这里只处理网络错误等
+    if (!error.message || !error.message.includes('请求失败')) {
+      Taro.showToast({
+        title: error.message || '网络错误',
+        icon: 'none',
+        duration: 2000,
+      })
+    }
     return Promise.reject(error)
   })
 }

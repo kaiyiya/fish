@@ -14,11 +14,9 @@ export class UserBehavior {
     id: number;
 
     @Column()
-    @Index()
     userId: number;
 
     @Column()
-    @Index()
     productId: number;
 
     @Column()

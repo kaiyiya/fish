@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { productApi, aiApi } from '../../services/api'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default class Index extends Component {
@@ -21,7 +22,8 @@ export default class Index extends Component {
       const products = await productApi.getList()
       this.setState({ products, loading: false })
     } catch (error) {
-      console.error('加载商品失败:', error)
+      logger.error('加载商品失败', error)
+      Taro.showToast({ title: '加载商品失败', icon: 'none' })
       this.setState({ loading: false })
     }
   }
@@ -31,7 +33,8 @@ export default class Index extends Component {
       const recommendations = await aiApi.getRecommendations()
       this.setState({ recommendations })
     } catch (error) {
-      console.error('加载推荐失败:', error)
+      logger.error('加载推荐失败', error)
+      // 推荐失败不影响主流程，静默处理
     }
   }
 

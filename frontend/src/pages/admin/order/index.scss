@@ -116,8 +116,20 @@
 
 .card-footer {
   display: flex;
+  align-items: center;
   gap: 12px;
   justify-content: flex-end;
+  
+  // 确保按钮对齐
+  .ui-button {
+    height: 48px !important;
+    line-height: 48px !important;
+    min-width: 100px !important;
+    flex-shrink: 0;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 }
 
 // 状态按钮样式已由公共Button组件统一管理

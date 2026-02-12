@@ -118,3 +118,141 @@ export const uploadApi = {
     return request.post('/upload', formData)
   },
 }
+
+// 购物车相关API
+export const cartApi = {
+  addToCart: (data) => {
+    return request.post('/cart', data)
+  },
+  getList: () => {
+    return request.get('/cart')
+  },
+  getCount: () => {
+    return request.get('/cart/count')
+  },
+  updateItem: (id, data) => {
+    return request.patch(`/cart/${id}`, data)
+  },
+  removeItem: (id) => {
+    return request.delete(`/cart/${id}`)
+  },
+  clearCart: () => {
+    return request.delete('/cart')
+  },
+}
+
+// 评价相关API
+export const reviewApi = {
+  create: (data) => {
+    return request.post('/review', data)
+  },
+  getProductReviews: (productId, params) => {
+    return request.get(`/review/product/${productId}`, { params })
+  },
+  getProductRating: (productId) => {
+    return request.get(`/review/product/${productId}/rating`)
+  },
+  getUserReviews: () => {
+    return request.get('/review/user')
+  },
+  remove: (id) => {
+    return request.delete(`/review/${id}`)
+  },
+  markHelpful: (id) => {
+    return request.post(`/review/${id}/helpful`)
+  },
+}
+
+// 收藏相关API
+export const favoriteApi = {
+  add: (productId) => {
+    return request.post(`/favorite/${productId}`)
+  },
+  remove: (productId) => {
+    return request.delete(`/favorite/${productId}`)
+  },
+  getList: () => {
+    return request.get('/favorite')
+  },
+  check: (productId) => {
+    return request.get(`/favorite/${productId}/check`)
+  },
+  getCount: (productId) => {
+    return request.get(`/favorite/${productId}/count`)
+  },
+}
+
+// 地址相关API
+export const addressApi = {
+  create: (data) => {
+    return request.post('/address', data)
+  },
+  getList: () => {
+    return request.get('/address')
+  },
+  getDefault: () => {
+    return request.get('/address/default')
+  },
+  getDetail: (id) => {
+    return request.get(`/address/${id}`)
+  },
+  update: (id, data) => {
+    return request.patch(`/address/${id}`, data)
+  },
+  remove: (id) => {
+    return request.delete(`/address/${id}`)
+  },
+  setDefault: (id) => {
+    return request.patch(`/address/${id}/default`)
+  },
+}
+
+// 优惠券相关API
+export const couponApi = {
+  getAvailable: () => {
+    return request.get('/coupon/available')
+  },
+  receive: (couponId) => {
+    return request.post(`/coupon/${couponId}/receive`)
+  },
+  getUserCoupons: (params) => {
+    return request.get('/coupon/user', { params })
+  },
+  use: (userCouponId, orderId) => {
+    return request.post(`/coupon/${userCouponId}/use`, { orderId })
+  },
+  getAll: () => {
+    return request.get('/coupon/admin/all')
+  },
+  create: (data) => {
+    return request.post('/coupon', data)
+  },
+  update: (id, data) => {
+    return request.patch(`/coupon/${id}`, data)
+  },
+  remove: (id) => {
+    return request.delete(`/coupon/${id}`)
+  },
+}
+
+// 通知相关API
+export const notificationApi = {
+  getList: (params) => {
+    return request.get('/notification', { params })
+  },
+  getUnreadCount: () => {
+    return request.get('/notification/unread/count')
+  },
+  markAsRead: (id) => {
+    return request.post(`/notification/${id}/read`)
+  },
+  markAllAsRead: () => {
+    return request.post('/notification/read-all')
+  },
+  remove: (id) => {
+    return request.delete(`/notification/${id}`)
+  },
+  clearAll: () => {
+    return request.delete('/notification')
+  },
+}

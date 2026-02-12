@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { statisticsApi, productApi, orderApi } from '../../services/api'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default class AdminDashboard extends Component {
@@ -37,7 +38,7 @@ export default class AdminDashboard extends Component {
         loading: false,
       })
     } catch (error) {
-      console.error('加载统计数据失败:', error)
+      logger.error('加载统计数据失败', error)
       this.setState({ loading: false })
     }
   }

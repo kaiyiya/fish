@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { categoryApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
+import { logger } from '../../../utils/logger'
 import './index.scss'
 
 export default class AdminCategory extends Component {
@@ -26,7 +27,7 @@ export default class AdminCategory extends Component {
       const categories = await categoryApi.getList()
       this.setState({ categories, loading: false })
     } catch (error) {
-      console.error('加载分类列表失败:', error)
+      logger.error('加载分类列表失败', error)
       Taro.showToast({ title: '加载失败', icon: 'none' })
       this.setState({ loading: false })
     }
@@ -93,7 +94,7 @@ export default class AdminCategory extends Component {
       this.setState({ editingId: null })
       this.loadCategories()
     } catch (error) {
-      console.error('保存分类失败:', error)
+      logger.error('保存分类失败', error)
       Taro.showToast({
         title: error.message || '保存失败',
         icon: 'none',
@@ -114,7 +115,7 @@ export default class AdminCategory extends Component {
           Taro.showToast({ title: '删除成功', icon: 'success' })
           this.loadCategories()
         } catch (error) {
-          console.error('删除分类失败:', error)
+          logger.error('删除分类失败', error)
           Taro.showToast({ title: '删除失败', icon: 'none' })
         }
       },
@@ -140,26 +141,37 @@ export default class AdminCategory extends Component {
 
         {editingId && (
           <View className="edit-panel">
-            <Text className="panel-title">
-              {editingId === 'new' ? '新建分类' : `编辑分类 #${editingId}`}
-            </Text>
-
-            <View className="form-item">
-              <Text className="label">分类名称 *</Text>
-              <Input
-                value={form.name}
-                onInput={(e) => this.handleChange('name', e.detail.value)}
-                placeholder="例如：海鱼"
-              />
+            <View className="panel-header">
+              <Text className="panel-title">
+                {editingId === 'new' ? '新建分类' : `编辑分类 #${editingId}`}
+              </Text>
+              <Text className="panel-subtitle">
+                {editingId === 'new' ? '填写分类信息以创建新分类' : '修改分类信息'}
+              </Text>
             </View>
 
-            <View className="form-item">
-              <Text className="label">排序（数字越小越靠前）</Text>
-              <Input
-                value={form.sortOrder}
-                onInput={(e) => this.handleChange('sortOrder', e.detail.value)}
-                placeholder="例如：0"
-              />
+            <View className="form-section">
+              <Text className="section-title">基本信息</Text>
+              <View className="form-item">
+                <Text className="label">
+                  分类名称 <Text className="required">*</Text>
+                </Text>
+                <Input
+                  value={form.name}
+                  onInput={(e) => this.handleChange('name', e.detail.value)}
+                  placeholder="例如：海鱼"
+                />
+              </View>
+
+              <View className="form-item">
+                <Text className="label">排序（数字越小越靠前）</Text>
+                <Input
+                  type="number"
+                  value={form.sortOrder}
+                  onInput={(e) => this.handleChange('sortOrder', e.detail.value)}
+                  placeholder="例如：0"
+                />
+              </View>
             </View>
 
             <View className="btn-row">
@@ -184,16 +196,19 @@ export default class AdminCategory extends Component {
           </View>
         )}
 
-        <ScrollView scrollY className="list-scroll">
-          {loading ? (
-            <View className="empty">
-              <Text>加载中...</Text>
-            </View>
-          ) : categories.length === 0 ? (
-            <View className="empty">
-              <Text>暂无分类</Text>
-            </View>
-          ) : (
+        {!editingId && (
+          <View className="list-section">
+            <Text className="list-title">分类列表</Text>
+            <ScrollView scrollY className="list-scroll">
+              {loading ? (
+                <View className="empty">
+                  <Text>加载中...</Text>
+                </View>
+              ) : categories.length === 0 ? (
+                <View className="empty">
+                  <Text>暂无分类</Text>
+                </View>
+              ) : (
             categories.map((item) => (
               <View key={item.id} className="category-card">
                 <View className="card-content">
@@ -222,8 +237,10 @@ export default class AdminCategory extends Component {
                 </View>
               </View>
             ))
-          )}
-        </ScrollView>
+              )}
+            </ScrollView>
+          </View>
+        )}
       </View>
     )
   }

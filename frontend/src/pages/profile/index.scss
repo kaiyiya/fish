@@ -179,12 +179,48 @@
   display: block;
 }
 
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .menu-arrow {
   font-size: 32px;
   color: #bfbfbf;
   font-weight: 300;
-  margin-left: 12px;
   flex-shrink: 0;
+}
+
+.unread-badge {
+  background: #ff4d4f;
+  color: #fff;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.unread-text {
+  font-size: 20px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cart-icon {
+  background: linear-gradient(135deg, #fff0e6 0%, #ffd8ba 100%);
+}
+
+.address-icon {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+}
+
+.notification-icon {
+  background: linear-gradient(135deg, #fff0f6 0%, #ffd6e7 100%);
 }
 
 /* 退出登录 */

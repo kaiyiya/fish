@@ -3,9 +3,70 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useUserStore } from '../../store/user'
 import { Button } from '../../components/ui'
+import { notificationApi } from '../../services/api'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default class Profile extends Component {
+  state = {
+    unreadCount: 0,
+  }
+
+  componentDidMount() {
+    // 确保从本地存储恢复用户状态
+    const store = useUserStore.getState()
+    const token = Taro.getStorageSync('token')
+    const userInfo = Taro.getStorageSync('userInfo')
+    
+    if (token && userInfo && (!store.token || !store.userInfo)) {
+      store.setToken(token)
+      store.setUserInfo(userInfo)
+      // 强制更新组件
+      this.forceUpdate()
+    }
+
+    // 加载未读通知数量
+    if (userInfo) {
+      this.loadUnreadCount()
+    }
+  }
+
+  componentDidShow() {
+    // 每次页面显示时刷新未读数量
+    const store = useUserStore.getState()
+    if (store && store.userInfo) {
+      this.loadUnreadCount()
+    }
+  }
+
+  loadUnreadCount = async () => {
+    try {
+      const result = await notificationApi.getUnreadCount()
+      this.setState({ unreadCount: result.count || 0 })
+    } catch (error) {
+      logger.error('加载未读通知数量失败', error)
+      // 静默处理，不影响主流程
+    }
+  }
+
+  handleGotoNotifications = () => {
+    Taro.navigateTo({
+      url: '/pages/notification/list/index',
+    })
+  }
+
+  handleGotoAddress = () => {
+    Taro.navigateTo({
+      url: '/pages/address/list/index',
+    })
+  }
+
+  handleGotoCart = () => {
+    Taro.navigateTo({
+      url: '/pages/cart/index',
+    })
+  }
+
   handleLogin = () => {
     Taro.navigateTo({
       url: '/pages/login/index',
@@ -74,6 +135,15 @@ export default class Profile extends Component {
 
               {/* 功能菜单 */}
               <View className="menu-section">
+                <View className="menu-item" onClick={this.handleGotoCart}>
+                  <View className="menu-icon cart-icon">🛒</View>
+                  <View className="menu-content">
+                    <Text className="menu-title">购物车</Text>
+                    <Text className="menu-desc">查看购物车商品</Text>
+                  </View>
+                  <Text className="menu-arrow">›</Text>
+                </View>
+
                 <View className="menu-item" onClick={this.handleGotoOrders}>
                   <View className="menu-icon order-icon">📋</View>
                   <View className="menu-content">
@@ -81,6 +151,31 @@ export default class Profile extends Component {
                     <Text className="menu-desc">查看订单详情</Text>
                   </View>
                   <Text className="menu-arrow">›</Text>
+                </View>
+
+                <View className="menu-item" onClick={this.handleGotoAddress}>
+                  <View className="menu-icon address-icon">📍</View>
+                  <View className="menu-content">
+                    <Text className="menu-title">收货地址</Text>
+                    <Text className="menu-desc">管理收货地址</Text>
+                  </View>
+                  <Text className="menu-arrow">›</Text>
+                </View>
+
+                <View className="menu-item" onClick={this.handleGotoNotifications}>
+                  <View className="menu-icon notification-icon">🔔</View>
+                  <View className="menu-content">
+                    <Text className="menu-title">消息通知</Text>
+                    <Text className="menu-desc">查看系统通知</Text>
+                  </View>
+                  <View className="menu-right">
+                    {this.state.unreadCount > 0 && (
+                      <View className="unread-badge">
+                        <Text className="unread-text">{this.state.unreadCount}</Text>
+                      </View>
+                    )}
+                    <Text className="menu-arrow">›</Text>
+                  </View>
                 </View>
 
                 {userInfo.role === 'admin' && (

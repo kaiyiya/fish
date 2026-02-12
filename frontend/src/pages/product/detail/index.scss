@@ -23,17 +23,40 @@
 .loading-text {
   font-size: 28px;
   color: #999;
+  margin-top: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .empty-icon {
-  font-size: 80px;
+  font-size: 96px;
   display: block;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  opacity: 0.6;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .empty-text {
-  font-size: 28px;
-  color: #999;
+  font-size: 30px;
+  color: #666;
+  font-weight: 500;
 }
 
 .detail-image {
@@ -75,12 +98,50 @@
   box-shadow: 0 -6px 24px rgba(15, 35, 95, 0.12);
 }
 
+.detail-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .detail-name {
-  display: block;
+  flex: 1;
   font-size: 34px;
   font-weight: 700;
   color: #1f2933;
-  margin-bottom: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.favorite-btn {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5f5f5;
+  transition: all 0.3s;
+
+  &.active {
+    background: #fff0f0;
+  }
+
+  .favorite-icon {
+    font-size: 32px;
+  }
+}
+
+.edit-btn {
+  min-width: 100px !important;
+  height: 48px !important;
+  line-height: 48px !important;
+  font-size: 26px !important;
 }
 
 .price-row {
@@ -99,6 +160,69 @@
 .stock-info {
   font-size: 24px;
   color: #8c8c8c;
+}
+
+.edit-form {
+  margin-top: 16px;
+  padding: 24px;
+  background: #fafbfc;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  
+  // 确保输入框在编辑表单中更明显
+  .ui-input-wrapper {
+    .ui-input {
+      background-color: #ffffff !important;
+      border-color: #bfbfbf !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .ui-input:focus {
+      border-color: #667eea !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .ui-input:hover {
+      border-color: #999999 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+.edit-item {
+  margin-bottom: 20px;
+}
+
+.edit-item:last-child {
+  margin-bottom: 0;
+}
+
+.edit-label {
+  display: block;
+  font-size: 26px;
+  font-weight: 500;
+  color: #434343;
+  margin-bottom: 12px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.cancel-edit-btn,
+.save-edit-btn {
+  min-width: 120px !important;
+  height: 56px !important;
+  line-height: 56px !important;
+  font-size: 28px !important;
 }
 
 .detail-section {
@@ -150,18 +274,207 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 16px;
   z-index: 100;
 }
 
+.add-cart-btn {
+  flex: 1;
+  height: 80px !important;
+  line-height: 80px !important;
+  font-size: 28px !important;
+  border-radius: 12px !important;
+  border: 2px solid #1890ff !important;
+  color: #1890ff !important;
+  background: #fff !important;
+
+  &[disabled] {
+    border-color: #d9d9d9 !important;
+    color: #d9d9d9 !important;
+  }
+}
+
 .buy-btn {
-  // 使用公共Button组件，样式已在组件中定义
+  flex: 1;
+  height: 80px !important;
+  line-height: 80px !important;
+  font-size: 28px !important;
+  border-radius: 12px !important;
   box-shadow: 0 4px 16px rgba(255, 77, 79, 0.3);
-  padding: 0 40px !important;
-  min-width: 160px !important;
 
   &[disabled] {
     background: #d9d9d9;
     box-shadow: none;
   }
+}
+
+.review-section {
+  margin-top: 12px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  border-radius: 12px;
+  border: 1px solid #ffd591;
+}
+
+.rating-score {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ff4d4f;
+}
+
+.rating-stars {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.rating-count {
+  font-size: 24px;
+  color: #666;
+  font-weight: 500;
+}
+
+.write-review-btn {
+  margin-bottom: 20px;
+  height: 64px !important;
+  line-height: 64px !important;
+  font-size: 28px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
+}
+
+.review-form {
+  padding: 24px;
+  background: linear-gradient(135deg, #fafbfc 0%, #f0f7ff 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  border: 2px solid #e6f7ff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.rating-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.rating-label {
+  font-size: 28px;
+  color: #333;
+  font-weight: 500;
+}
+
+.star {
+  font-size: 36px;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.3s;
+  line-height: 1;
+
+  &.active {
+    color: #ffc107;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.review-input {
+  margin-bottom: 20px;
+}
+
+.review-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  align-items: center;
+}
+
+.review-list {
+  margin-top: 20px;
+}
+
+.review-item {
+  padding: 20px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.02);
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 8px;
+  }
+}
+
+.review-user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.review-username {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.review-rating {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.review-content {
+  font-size: 26px;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+.review-time {
+  font-size: 22px;
+  color: #999;
+  padding-left: 12px;
+}
+
+.no-reviews {
+  font-size: 28px;
+  color: #999;
+  text-align: center;
+  padding: 60px 20px;
+  background: #fafafa;
+  border-radius: 12px;
+  margin-top: 16px;
 }

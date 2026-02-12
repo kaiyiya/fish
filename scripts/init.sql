@@ -7,5 +7,8 @@ CREATE DATABASE IF NOT EXISTS fish_app
 -- 使用数据库
 USE fish_app;
 
--- 设置时区
 SET time_zone = '+08:00';
+
+-- 说明：
+-- 表结构由 TypeORM 在后端启动时自动创建
+-- 示例数据请在表创建完成后，手动执行 backend/scripts/seed_products.sql

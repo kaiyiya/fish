@@ -11,16 +11,30 @@ import { storage } from '../utils/storage'
  * @property {string} [role] - 'user' | 'admin'
  */
 
+// 初始化时从本地存储恢复状态
+const initUserInfo = storage.get('userInfo')
+const initToken = storage.get('token')
+
 export const useUserStore = create((set) => ({
-  userInfo: storage.get('userInfo'),
-  token: storage.get('token'),
+  userInfo: initUserInfo || null,
+  token: initToken || null,
   setUserInfo: (userInfo) => {
-    storage.set('userInfo', userInfo)
-    set({ userInfo })
+    if (userInfo) {
+      storage.set('userInfo', userInfo)
+      set({ userInfo })
+    } else {
+      storage.remove('userInfo')
+      set({ userInfo: null })
+    }
   },
   setToken: (token) => {
-    storage.set('token', token)
-    set({ token })
+    if (token) {
+      storage.set('token', token)
+      set({ token })
+    } else {
+      storage.remove('token')
+      set({ token: null })
+    }
   },
   logout: () => {
     storage.remove('userInfo')

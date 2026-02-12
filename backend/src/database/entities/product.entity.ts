@@ -17,10 +17,10 @@ export class Product {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   categoryId: number;
 
-  @ManyToOne(() => Category)
+  @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 

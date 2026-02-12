@@ -10,6 +10,12 @@ import { SearchModule } from './modules/search/search.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { CategoryModule } from './modules/category/category.module';
+import { CartModule } from './modules/cart/cart.module';
+import { ReviewModule } from './modules/review/review.module';
+import { FavoriteModule } from './modules/favorite/favorite.module';
+import { AddressModule } from './modules/address/address.module';
+import { CouponModule } from './modules/coupon/coupon.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './modules/health/health.controller';
 
@@ -32,6 +38,12 @@ import { HealthController } from './modules/health/health.controller';
         StatisticsModule,
         UploadModule,
         CategoryModule,
+        CartModule,
+        ReviewModule,
+        FavoriteModule,
+        AddressModule,
+        CouponModule,
+        NotificationModule,
     ],
     controllers: [HealthController],
 })

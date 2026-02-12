@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UserBehavior } from '../../database/entities/user-behavior.entity';
+import { Category } from '../../database/entities/category.entity';
 
 @Injectable()
 export class ProductService {
@@ -12,9 +13,21 @@ export class ProductService {
     private productRepository: Repository<Product>,
     @InjectRepository(UserBehavior)
     private behaviorRepository: Repository<UserBehavior>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
+    // 如果提供了分类ID，验证分类是否存在
+    if (createProductDto.categoryId !== undefined && createProductDto.categoryId !== null) {
+      const category = await this.categoryRepository.findOne({
+        where: { id: createProductDto.categoryId },
+      });
+      if (!category) {
+        throw new BadRequestException(`分类ID ${createProductDto.categoryId} 不存在，请先创建该分类`);
+      }
+    }
+
     const product = this.productRepository.create(createProductDto);
     return this.productRepository.save(product);
   }
@@ -45,6 +58,19 @@ export class ProductService {
     const product = await this.productRepository.findOne({ where: { id } });
     if (!product) {
       throw new NotFoundException('Product not found');
+    }
+
+    // 如果更新了分类ID，验证分类是否存在（如果提供了分类ID）
+    if (data.categoryId !== undefined && data.categoryId !== null) {
+      const category = await this.categoryRepository.findOne({
+        where: { id: data.categoryId },
+      });
+      if (!category) {
+        throw new BadRequestException(`分类ID ${data.categoryId} 不存在，请先创建该分类`);
+      }
+    } else if (data.categoryId === null) {
+      // 允许设置为 null（清空分类）
+      data.categoryId = null;
     }
 
     Object.assign(product, data);

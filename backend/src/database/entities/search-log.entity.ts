@@ -14,7 +14,6 @@ export class SearchLog {
   id: number;
 
   @Column({ nullable: true })
-  @Index()
   userId: number; // 可为空，支持未登录用户搜索
 
   @Column()

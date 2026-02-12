@@ -77,6 +77,27 @@
   background: #fafbfc;
   border-radius: 16px;
   border: 1px solid #e8e8e8;
+  
+  // 确保输入框在表单区域内更明显
+  .ui-input-wrapper {
+    .ui-input {
+      background-color: #ffffff !important;
+      border-color: #bfbfbf !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .ui-input:focus {
+      border-color: #667eea !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .ui-input:hover {
+      border-color: #999999 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+  }
 }
 
 .section-title {
@@ -145,27 +166,39 @@
   z-index: 1;
 }
 
+// 这些样式已被公共 Input 组件替代，保留作为备用
 .input {
   width: 100%;
-  padding: 16px 20px;
-  border: 2px solid #e8e8e8;
+  padding: 18px 20px;
+  border: 2px solid #d9d9d9;
   border-radius: 12px;
-  background-color: #fff;
+  background-color: #ffffff;
   font-size: 28px;
   color: #1a1a1a;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   box-sizing: border-box;
+  min-height: 64px;
+  line-height: 1.5;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input:hover {
+  border-color: #b3b3b3;
+  background-color: #fafafa;
 }
 
 .input:focus {
   border-color: #667eea;
-  background-color: #fff;
+  background-color: #ffffff;
   outline: none;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+  border-width: 2px;
 }
 
 .input::placeholder {
   color: #bfbfbf;
+  font-size: 28px;
 }
 
 .input.with-prefix {
@@ -176,57 +209,89 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border: 2px solid #e8e8e8;
+  padding: 18px 20px;
+  border: 2px solid #d9d9d9;
   border-radius: 12px;
-  background-color: #fff;
-  min-height: 60px;
-  transition: all 0.3s;
+  background-color: #ffffff;
+  min-height: 64px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.picker-view:hover {
+  border-color: #b3b3b3;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .picker-view:active {
   border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 }
 
 .picker-text {
   font-size: 28px;
   color: #1a1a1a;
+  flex: 1;
 }
 
 .picker-placeholder {
   font-size: 28px;
   color: #bfbfbf;
+  flex: 1;
 }
 
 .picker-arrow {
-  font-size: 20px;
+  font-size: 24px;
   color: #8c8c8c;
+  margin-left: 12px;
 }
 
 .textarea {
   width: 100%;
   min-height: 120px;
-  padding: 16px 20px;
-  border: 2px solid #e8e8e8;
+  padding: 18px 20px;
+  border: 2px solid #d9d9d9;
   border-radius: 12px;
-  background-color: #fff;
+  background-color: #ffffff;
   font-size: 28px;
   color: #1a1a1a;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   box-sizing: border-box;
   resize: none;
+  line-height: 1.6;
+  // 确保文本域看起来可输入
+  -webkit-appearance: none;
+  appearance: none;
 }
 
+// 悬停效果（H5环境）
+.textarea:hover {
+  border-color: #b3b3b3;
+  background-color: #fafafa;
+}
+
+// 聚焦效果
 .textarea:focus {
   border-color: #667eea;
-  background-color: #fff;
+  background-color: #ffffff;
   outline: none;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+  border-width: 2px;
 }
 
+// 占位符样式
 .textarea::placeholder {
   color: #bfbfbf;
+  font-size: 28px;
+}
+
+// 确保文本域在移动端也有明显的视觉反馈
+.textarea:active {
+  border-color: #667eea;
+  background-color: #ffffff;
 }
 
 .char-count {
@@ -319,6 +384,7 @@
 .btn-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 16px;
   margin-top: 40px;
   padding-top: 32px;
@@ -327,7 +393,14 @@
 
 .cancel-btn,
 .save-btn {
-  // 使用公共Button组件，样式已在组件中定义
+  // 确保按钮高度一致，垂直对齐
+  height: 64px !important;
+  line-height: 64px !important;
+  min-width: 140px !important;
+  flex-shrink: 0;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .list-section {
@@ -415,6 +488,7 @@
 .card-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 12px;
   padding-top: 16px;
   border-top: 1px solid #f0f0f0;
@@ -423,4 +497,9 @@
 .card-btn {
   min-width: 100px !important;
   flex-shrink: 0;
+  height: 48px !important;
+  line-height: 48px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }

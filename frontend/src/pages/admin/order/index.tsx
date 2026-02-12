@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { orderApi } from '../../../services/api'
 import { Button } from '../../../components/ui'
+import { logger } from '../../../utils/logger'
 import './index.scss'
 
 export default class AdminOrder extends Component {
@@ -20,7 +21,7 @@ export default class AdminOrder extends Component {
       const orders = await orderApi.getAll()
       this.setState({ orders, loading: false })
     } catch (error) {
-      console.error('加载订单列表失败:', error)
+      logger.error('加载订单列表失败', error)
       Taro.showToast({ title: '加载失败', icon: 'none' })
       this.setState({ loading: false })
     }
@@ -54,7 +55,7 @@ export default class AdminOrder extends Component {
       Taro.showToast({ title: '更新成功', icon: 'success' })
       this.loadOrders()
     } catch (error) {
-      console.error('更新订单状态失败:', error)
+      logger.error('更新订单状态失败', error)
       Taro.showToast({ title: '更新失败', icon: 'none' })
     }
   }

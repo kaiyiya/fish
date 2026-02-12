@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
@@ -14,6 +14,18 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // 检查用户名是否已存在
+    const existingUser = await this.findByUsername(createUserDto.username);
+    if (existingUser) {
+      throw new ConflictException('用户名已存在');
+    }
+
+    // 检查手机号是否已存在
+    const existingPhone = await this.findByPhone(createUserDto.phone);
+    if (existingPhone) {
+      throw new ConflictException('手机号已被注册');
+    }
+
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
       ...createUserDto,

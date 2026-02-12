@@ -1,0 +1,155 @@
+.address-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f7ff 0%, #f5f5f5 40%, #f5f5f5 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.address-scroll {
+  flex: 1;
+  padding-bottom: 120px;
+}
+
+.loading-container,
+.empty-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.loading-text {
+  font-size: 28px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 80px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.empty-text {
+  font-size: 28px;
+  color: #999;
+  margin-bottom: 40px;
+}
+
+.login-btn {
+  min-width: 200px !important;
+  height: 70px !important;
+  line-height: 70px !important;
+  font-size: 28px !important;
+  border-radius: 12px !important;
+}
+
+.address-list {
+  padding: 20px 24px;
+}
+
+.address-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+
+  &.default {
+    border: 2px solid #1890ff;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.address-content {
+  margin-bottom: 16px;
+}
+
+.address-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.address-name {
+  font-size: 30px;
+  font-weight: 600;
+  color: #333;
+}
+
+.address-phone {
+  font-size: 28px;
+  color: #666;
+}
+
+.default-badge {
+  background: #1890ff;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 22px;
+}
+
+.address-detail {
+  font-size: 26px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.address-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  transition: all 0.3s;
+
+  &:active {
+    background: #e8e8e8;
+  }
+
+  &.delete {
+    background: #fff0f0;
+
+    .action-text {
+      color: #ff4d4f;
+    }
+  }
+}
+
+.action-text {
+  font-size: 26px;
+  color: #333;
+}
+
+.address-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 24px 20px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.add-address-btn {
+  height: 80px !important;
+  line-height: 80px !important;
+  font-size: 28px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+}

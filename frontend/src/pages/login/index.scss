@@ -1,55 +1,108 @@
 .login-page {
   min-height: 100vh;
-  padding: 40px 20px;
-  background-color: #f5f5f5;
+  padding: 60px 20px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 20s infinite ease-in-out;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-10%, -10%) rotate(180deg);
+  }
 }
 
 .login-card {
   width: 100%;
-  max-width: 480px;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 30px 24px 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 48px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .title {
   display: block;
-  font-size: 32px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 24px;
+  font-size: 40px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 40px;
   text-align: center;
+  letter-spacing: 1px;
 }
 
 .form-item {
-  margin-bottom: 20px;
+  margin-bottom: 28px;
 }
 
 .label {
   display: block;
-  font-size: 26px;
-  color: #666;
-  margin-bottom: 8px;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 500;
 }
 
-// 输入框和按钮样式已由公共组件统一管理
 .submit-btn {
-  margin-top: 16px;
-  // 使用公共Button组件，样式已在组件中定义
+  margin-top: 32px;
+  height: 88px !important;
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+  transition: all 0.3s !important;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+  }
 }
 
 .switch-mode {
-  margin-top: 20px;
+  margin-top: 32px;
   text-align: center;
-  font-size: 24px;
-  color: #1890ff;
+  font-size: 26px;
+  color: #667eea;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.3s;
+
+  &:active {
+    background: rgba(102, 126, 234, 0.1);
+  }
 }
 
 .switch-mode text {
-  text-decoration: underline;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+
+  &:active {
+    border-bottom-color: #667eea;
+  }
 }
 

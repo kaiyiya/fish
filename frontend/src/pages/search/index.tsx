@@ -1,7 +1,8 @@
 import { Component } from 'react'
-import { View, Text, Input, ScrollView } from '@tarojs/components'
+import { View, Text, Input, ScrollView, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { searchApi } from '../../services/api'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default class Search extends Component {
@@ -21,7 +22,8 @@ export default class Search extends Component {
       const hot = await searchApi.getHot(10)
       this.setState({ hotKeywords: hot || [] })
     } catch (error) {
-      console.error('加载热门搜索失败:', error)
+      logger.error('加载热门搜索失败', error)
+      // 热门搜索失败不影响主流程
     }
   }
 
@@ -42,9 +44,9 @@ export default class Search extends Component {
       const results = await searchApi.search(realKeyword, 'keyword')
       this.setState({ results, loading: false })
     } catch (error) {
-      console.error('搜索失败:', error)
-      Taro.showToast({ title: '搜索失败', icon: 'none' })
-      this.setState({ loading: false })
+      logger.error('搜索失败', error)
+      Taro.showToast({ title: error.message || '搜索失败，请稍后重试', icon: 'none' })
+      this.setState({ loading: false, results: [] })
     }
   }
 
@@ -100,28 +102,59 @@ export default class Search extends Component {
 
         <View className="result-section">
           {loading ? (
-            <Text>搜索中...</Text>
-          ) : results.length === 0 ? (
-            <Text>暂无搜索结果</Text>
-          ) : (
+            <View className="loading-state">
+              <Text className="loading-text">搜索中...</Text>
+            </View>
+          ) : results.length === 0 && keyword ? (
+            <View className="empty-state">
+              <Text className="empty-icon">🔍</Text>
+              <Text className="empty-text">暂无搜索结果</Text>
+              <Text className="empty-desc">试试其他关键词吧</Text>
+            </View>
+          ) : results.length > 0 ? (
             <ScrollView scrollY className="result-scroll">
-              {results.map((item) => (
-                <View
-                  key={item.id}
-                  className="result-item"
-                  onClick={() => this.handleProductClick(item.id)}
-                >
-                  <View className="result-main">
-                    <Text className="result-name">{item.name}</Text>
-                    <Text className="result-price">¥{item.price}</Text>
-                  </View>
-                  {item.description ? (
-                    <Text className="result-desc">{item.description}</Text>
-                  ) : null}
-                </View>
-              ))}
+              <View className="result-list">
+                {results.map((item) => {
+                  const firstImage = item.imageUrls && item.imageUrls.length > 0 
+                    ? item.imageUrls[0] 
+                    : ''
+                  return (
+                    <View
+                      key={item.id}
+                      className="result-item"
+                      onClick={() => this.handleProductClick(item.id)}
+                    >
+                      {firstImage ? (
+                        <Image
+                          src={firstImage}
+                          className="result-image"
+                          mode="aspectFill"
+                        />
+                      ) : (
+                        <View className="result-image-placeholder">
+                          <Text className="placeholder-icon">🐟</Text>
+                        </View>
+                      )}
+                      <View className="result-info">
+                        <Text className="result-name">{item.name}</Text>
+                        {item.description && (
+                          <Text className="result-desc" numberOfLines={2}>
+                            {item.description}
+                          </Text>
+                        )}
+                        <View className="result-footer">
+                          <Text className="result-price">¥{item.price}</Text>
+                          {item.stock !== undefined && item.stock > 0 && (
+                            <Text className="result-stock">库存: {item.stock}</Text>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  )
+                })}
+              </View>
             </ScrollView>
-          )}
+          ) : null}
         </View>
       </View>
     )

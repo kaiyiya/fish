@@ -3,6 +3,8 @@ import { View, Image, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { aiApi } from '../../services/api'
 import { Button } from '../../components/ui'
+import config from '../../config'
+import { logger } from '../../utils/logger'
 import './index.scss'
 
 export default class Recognize extends Component {
@@ -37,8 +39,8 @@ export default class Recognize extends Component {
     this.setState({ recognizing: true })
 
     try {
-      // 获取后端API地址（固定地址，避免 process.env 问题）
-      const baseUrl = 'http://localhost:3000'
+      // 获取后端API地址
+      const baseUrl = config.baseURL
       
       // 获取token
       const token = Taro.getStorageSync('token') || ''
@@ -58,7 +60,7 @@ export default class Recognize extends Component {
       try {
         uploadResult = JSON.parse(uploadRes.data)
       } catch (e) {
-        console.error('上传响应解析失败:', uploadRes.data)
+        logger.error('上传响应解析失败', uploadRes.data)
         throw new Error('上传响应解析失败')
       }
 
@@ -96,7 +98,7 @@ export default class Recognize extends Component {
         icon: 'success',
       })
     } catch (error) {
-      console.error('识别失败:', error)
+      logger.error('识别失败', error)
       Taro.showToast({
         title: error.message || '识别失败，请重试',
         icon: 'none',
