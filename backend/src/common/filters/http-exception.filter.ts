@@ -19,16 +19,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
+    const res =
       exception instanceof HttpException
         ? exception.getResponse()
         : '服务器内部错误';
 
+    const message =
+      typeof res === 'string'
+        ? res
+        : (res as any).message || (res as any).error || '服务器内部错误';
+
     response.status(status).json({
+      // 与全局 TransformInterceptor 保持一致的结构，方便前端统一处理
+      code: status,
+      data: null,
+      message,
+      // 保留额外调试信息
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: typeof message === 'string' ? message : (message as any).message,
     });
   }
 }
