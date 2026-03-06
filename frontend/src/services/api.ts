@@ -79,6 +79,10 @@ export const orderApi = {
   updateStatus: (id, status) => {
     return request.patch(`/order/${id}/status`, { status })
   },
+  exportOrders: () => {
+    // 注意：导出接口需要特殊处理，直接返回完整 URL
+    return 'http://localhost:3000/order/admin/export'
+  },
 }
 
 // 分类相关API

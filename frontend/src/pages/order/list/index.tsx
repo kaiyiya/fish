@@ -63,6 +63,97 @@ export default class OrderList extends Component {
     }
   }
 
+  handleExportOrders = async () => {
+    try {
+      // 检查是否是管理员（可以在用户信息中存储 role）
+      const userInfo = Taro.getStorageSync('userInfo')
+      if (!userInfo || userInfo.role !== 'admin') {
+        Taro.showToast({
+          title: '仅限管理员操作',
+          icon: 'none',
+          duration: 2000,
+        })
+        return
+      }
+
+      // 确认导出
+      const res = await Taro.showModal({
+        title: '导出订单',
+        content: '确定要导出所有订单到 Excel 表格吗？',
+        confirmText: '导出',
+        cancelText: '取消',
+      })
+
+      if (res.confirm) {
+        // 使用 Taro.downloadFile 来下载文件
+        const exportUrl = orderApi.exportOrders()
+        
+        // 获取 token 并添加到请求头
+        const token = Taro.getStorageSync('token')
+        
+        Taro.showLoading({ title: '生成 Excel...', mask: true })
+        
+        // 使用 downloadFile API 下载文件
+        const downloadTask = Taro.downloadFile({
+          url: exportUrl,
+          header: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+          success: (res) => {
+            Taro.hideLoading()
+            if (res.statusCode === 200) {
+              // H5 环境下，直接打开新窗口下载
+              if (Taro.getEnv() === Taro.ENV_TYPE.WEB) {
+                window.open(exportUrl, '_blank')
+              } else {
+                // 小程序环境保存文件
+                Taro.saveFile({
+                  tempFilePath: res.tempFilePath,
+                  success: (saveRes) => {
+                    Taro.showToast({
+                      title: '文件已保存',
+                      icon: 'success',
+                    })
+                    // 可以打开文件查看
+                    Taro.openDocument({
+                      filePath: saveRes.savedFilePath,
+                    })
+                  },
+                  fail: (err) => {
+                    console.error('保存文件失败', err)
+                    Taro.showToast({
+                      title: '保存失败',
+                      icon: 'none',
+                    })
+                  },
+                })
+              }
+            } else {
+              Taro.showToast({
+                title: '导出失败',
+                icon: 'none',
+              })
+            }
+          },
+          fail: (err) => {
+            Taro.hideLoading()
+            console.error('下载失败', err)
+            Taro.showToast({
+              title: '网络错误',
+              icon: 'none',
+            })
+          },
+        })
+      }
+    } catch (error) {
+      logger.error('导出订单失败', error)
+      Taro.showToast({
+        title: '导出失败',
+        icon: 'none',
+      })
+    }
+  }
+
   getStatusText = (status) => {
     const statusMap = {
       pending: '待支付',
@@ -115,21 +206,49 @@ export default class OrderList extends Component {
       <View className="order-list-page">
         {/* 状态筛选 */}
         <View className="status-filter">
-          {[
-            { key: 'all', label: '全部' },
-            { key: 'pending', label: '待支付' },
-            { key: 'paid', label: '待发货' },
-            { key: 'shipped', label: '待收货' },
-            { key: 'completed', label: '已完成' },
-          ].map((item) => (
-            <View
-              key={item.key}
-              className={`filter-item ${statusFilter === item.key ? 'active' : ''}`}
-              onClick={() => this.setState({ statusFilter: item.key })}
-            >
-              <Text>{item.label}</Text>
-            </View>
-          ))}
+          <View
+            className={`filter-item ${statusFilter === 'all' ? 'active' : ''}`}
+            onClick={() => this.setState({ statusFilter: 'all' })}
+          >
+            <Text>全部</Text>
+          </View>
+          <View
+            className={`filter-item ${statusFilter === 'pending' ? 'active' : ''}`}
+            onClick={() => this.setState({ statusFilter: 'pending' })}
+          >
+            <Text>待支付</Text>
+          </View>
+          <View
+            className={`filter-item ${statusFilter === 'paid' ? 'active' : ''}`}
+            onClick={() => this.setState({ statusFilter: 'paid' })}
+          >
+            <Text>待发货</Text>
+          </View>
+          <View
+            className={`filter-item ${statusFilter === 'shipped' ? 'active' : ''}`}
+            onClick={() => this.setState({ statusFilter: 'shipped' })}
+          >
+            <Text>待收货</Text>
+          </View>
+          <View
+            className={`filter-item ${statusFilter === 'completed' ? 'active' : ''}`}
+            onClick={() => this.setState({ statusFilter: 'completed' })}
+          >
+            <Text>已完成</Text>
+          </View>
+          
+          {/* 导出按钮（仅管理员可见） */}
+          {(() => {
+            const userInfo = typeof Taro !== 'undefined' && Taro.getStorageSync ? Taro.getStorageSync('userInfo') : null
+            return userInfo?.role === 'admin' && (
+              <View
+                className="filter-item export-btn"
+                onClick={this.handleExportOrders}
+              >
+                <Text>📊 导出 Excel</Text>
+              </View>
+            )
+          })()}
         </View>
 
         {loading ? (

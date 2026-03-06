@@ -1,4 +1,4 @@
-{
+  {
   "name": "fish-app-frontend",
   "version": "1.0.0",
   "description": "卖鱼小程序前端 - 基于Taro",
@@ -31,7 +31,11 @@
   "babel": {
     "presets": [
       [
-        "taro"
+        "taro",
+        {
+          "framework": "react",
+          "ts": true
+        }
       ]
     ]
   },

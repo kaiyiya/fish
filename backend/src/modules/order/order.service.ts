@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
+import * as Excel from 'exceljs';
 import { Order } from '../../database/entities/order.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
 import { UserBehavior } from '../../database/entities/user-behavior.entity';
@@ -173,5 +174,117 @@ export class OrderService {
     }
 
     return savedOrder;
+  }
+
+  /**
+   * 导出订单到 Excel
+   */
+  async exportToExcel(res: any) {
+    // 获取所有订单数据
+    const orders = await this.findAll();
+
+    // 创建工作簿和工作表
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet('订单列表');
+
+    // 设置列头
+    worksheet.columns = [
+      { header: '订单号', key: 'orderNo', width: 25 },
+      { header: '下单时间', key: 'created_at', width: 20 },
+      { header: '用户 ID', key: 'userId', width: 10 },
+      { header: '商品名称', key: 'productNames', width: 40 },
+      { header: '商品数量', key: 'totalQuantity', width: 12 },
+      { header: '订单金额', key: 'totalAmount', width: 12 },
+      { header: '订单状态', key: 'status', width: 12 },
+      { header: '收货人', key: 'receiverName', width: 15 },
+      { header: '联系电话', key: 'receiverPhone', width: 15 },
+      { header: '收货地址', key: 'fullAddress', width: 50 },
+    ];
+
+    // 设置表头样式
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' },
+    };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // 填充数据
+    for (const order of orders) {
+      // 获取收货地址信息
+      const address = await this.addressRepository.findOne({ where: { id: order.addressId } });
+      
+      // 合并商品名称和数量
+      const productNames = order.items.map(item => item.product?.name || '未知商品').join('; ');
+      const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      worksheet.addRow({
+        orderNo: order.orderNo,
+        created_at: new Date(order.created_at).toLocaleString('zh-CN'),
+        userId: order.userId,
+        productNames,
+        totalQuantity,
+        totalAmount: `¥${order.totalAmount}`,
+        status: this.translateStatus(order.status),
+        receiverName: address?.name || '-',
+        receiverPhone: address?.phone || '-',
+        fullAddress: this.buildFullAddress(address),
+      });
+    }
+
+    // 设置所有列的对齐方式
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        row.alignment = { vertical: 'middle', wrapText: true };
+      }
+    });
+
+    // 设置响应头，触发浏览器下载
+    const fileName = `订单列表_${new Date().toISOString().split('T')[0]}.xlsx`;
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(fileName)}"`
+    );
+    res.setHeader(
+      'Access-Control-Expose-Headers',
+      'Content-Disposition'
+    );
+
+    // 写入 Excel 到响应流
+    await workbook.xlsx.write(res);
+    res.end();
+  }
+
+  /**
+   * 翻译订单状态
+   */
+  private translateStatus(status: string): string {
+    const statusMap: Record<string, string> = {
+      pending: '待处理',
+      paid: '已支付',
+      shipped: '已发货',
+      completed: '已完成',
+      cancelled: '已取消',
+    };
+    return statusMap[status] || status;
+  }
+
+  /**
+   * 构建完整地址
+   */
+  private buildFullAddress(address: Address | null): string {
+    if (!address) return '-';
+    const parts = [
+      address.province,
+      address.city,
+      address.district,
+      address.detail,
+    ].filter(Boolean);
+    return parts.join(' ') || '-';
   }
 }

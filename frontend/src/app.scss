@@ -58,34 +58,37 @@ button.buy-btn {
   min-width: 160px !important;
 }
 
-/* 全局隐藏滚动条 - 保持滚动功能但隐藏滚动条 */
-* {
-  /* Webkit浏览器（Chrome, Safari, Edge） */
-  &::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
-  
-  /* Firefox */
-  scrollbar-width: none;
-  
-  /* IE和Edge旧版 */
-  -ms-overflow-style: none;
-}
+/* 全局隐藏滚动条 - 保持滚动功能但隐藏滚动条
+ * 注意：微信小程序的 WXSS 不支持 ::-webkit-scrollbar 这类写法，
+ * 会在编译 app-origin.wxss 时报 unexpected token `*`，
+ * 所以这里在小程序项目中先关闭这两段样式。
+ */
+// * {
+//   /* Webkit浏览器（Chrome, Safari, Edge） */
+//   &::-webkit-scrollbar {
+//     display: none;
+//     width: 0;
+//     height: 0;
+//     background: transparent;
+//   }
+//   
+//   /* Firefox */
+//   scrollbar-width: none;
+//   
+//   /* IE和Edge旧版 */
+//   -ms-overflow-style: none;
+// }
 
-/* 确保所有滚动容器都隐藏滚动条 */
-scroll-view,
-.scroll-view,
-ScrollView {
-  &::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
-  
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+// scroll-view,
+// .scroll-view,
+// ScrollView {
+//   &::-webkit-scrollbar {
+//     display: none;
+//     width: 0;
+//     height: 0;
+//     background: transparent;
+//   }
+//   
+//   scrollbar-width: none;
+//   -ms-overflow-style: none;
+// }
