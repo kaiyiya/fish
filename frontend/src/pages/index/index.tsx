@@ -132,13 +132,12 @@ export default class Index extends Component {
                     onClick={() => this.handleProductClick(item.id)}
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
-                    <View className="image-wrapper">
+                    <View  >
                       {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
                         <Image
                           src={item.imageUrls[0]}
-                          className="product-image"
-                          mode="aspectFill"
-                          lazyLoad
+                          // className="product-image"
+                          // mode="aspectFill"
                         />
                       ) : (
                         <View className="product-image-placeholder">
