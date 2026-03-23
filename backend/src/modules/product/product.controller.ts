@@ -34,10 +34,7 @@ export class ProductController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async findOne(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: any) {
     // 记录用户浏览行为（用于推荐算法）
     await this.productService.recordView(user.id, +id);
     return this.productService.findOne(+id);

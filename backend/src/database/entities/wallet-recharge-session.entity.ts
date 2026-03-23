@@ -21,7 +21,11 @@ export class WalletRechargeSession {
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ type: 'enum', enum: ['pending', 'success', 'failed'], default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'success', 'failed'],
+    default: 'pending',
+  })
   status: WalletRechargeStatus;
 
   // 二维码 token，用于“扫码确认”完成充值
@@ -38,4 +42,3 @@ export class WalletRechargeSession {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

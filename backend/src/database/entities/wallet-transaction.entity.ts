@@ -46,4 +46,3 @@ export class WalletTransaction {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

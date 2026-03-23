@@ -22,7 +22,11 @@ export class Notification {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'enum', enum: ['order', 'system', 'promotion', 'review'], default: 'system' })
+  @Column({
+    type: 'enum',
+    enum: ['order', 'system', 'promotion', 'review'],
+    default: 'system',
+  })
   type: string; // 类型：order(订单), system(系统), promotion(促销), review(评价)
 
   @Column()

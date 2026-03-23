@@ -7,10 +7,7 @@ import { UserCoupon } from '../../database/entities/user-coupon.entity';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Coupon, UserCoupon]),
-    NotificationModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Coupon, UserCoupon]), NotificationModule],
   controllers: [CouponController],
   providers: [CouponService],
   exports: [CouponService],

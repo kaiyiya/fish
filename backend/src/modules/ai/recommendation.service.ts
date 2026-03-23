@@ -30,7 +30,11 @@ export class RecommendationService {
     type: string = 'personalized',
     topN: number = 20,
   ) {
-    let recommendations: Array<{ productId: number; score: number; reason?: string }> = [];
+    let recommendations: Array<{
+      productId: number;
+      score: number;
+      reason?: string;
+    }> = [];
     let algorithmType = type;
 
     try {
@@ -38,13 +42,19 @@ export class RecommendationService {
         case 'collaborative':
         case 'usercf':
           // 基于用户的协同过滤
-          recommendations = await this.collaborativeFiltering.userBasedCF(userId, topN);
+          recommendations = await this.collaborativeFiltering.userBasedCF(
+            userId,
+            topN,
+          );
           algorithmType = 'usercf';
           break;
 
         case 'itemcf':
           // 基于物品的协同过滤
-          recommendations = await this.collaborativeFiltering.itemBasedCF(userId, topN);
+          recommendations = await this.collaborativeFiltering.itemBasedCF(
+            userId,
+            topN,
+          );
           algorithmType = 'itemcf';
           break;
 
@@ -56,27 +66,41 @@ export class RecommendationService {
 
         case 'popular':
           // 热门推荐（用于冷启动）
-          recommendations = await this.popularityBased.getPopularProducts(30, topN);
+          recommendations = await this.popularityBased.getPopularProducts(
+            30,
+            topN,
+          );
           algorithmType = 'popular';
           break;
 
         case 'hybrid':
           // 混合推荐
-          recommendations = await this.collaborativeFiltering.hybridCF(userId, 0.6, 0.4, topN);
+          recommendations = await this.collaborativeFiltering.hybridCF(
+            userId,
+            0.6,
+            0.4,
+            topN,
+          );
           algorithmType = 'hybrid';
           break;
 
         case 'personalized':
         default:
           // 个性化推荐（智能选择策略）
-          recommendations = await this.getPersonalizedRecommendations(userId, topN);
+          recommendations = await this.getPersonalizedRecommendations(
+            userId,
+            topN,
+          );
           algorithmType = 'personalized';
           break;
       }
 
       // 如果没有推荐结果，使用热门推荐作为兜底
       if (recommendations.length === 0) {
-        recommendations = await this.popularityBased.getPopularProducts(30, topN);
+        recommendations = await this.popularityBased.getPopularProducts(
+          30,
+          topN,
+        );
         algorithmType = 'popular';
       }
 
@@ -108,14 +132,22 @@ export class RecommendationService {
         .filter((item) => item !== null);
 
       // 记录推荐日志
-      await this.logRecommendations(userId, recommendations, type, algorithmType);
+      await this.logRecommendations(
+        userId,
+        recommendations,
+        type,
+        algorithmType,
+      );
 
       return result;
     } catch (error) {
       console.error('推荐算法执行错误:', error);
-      
+
       // 降级到热门推荐
-      const fallbackRecs = await this.popularityBased.getPopularProducts(30, topN);
+      const fallbackRecs = await this.popularityBased.getPopularProducts(
+        30,
+        topN,
+      );
       const productIds = fallbackRecs.map((r) => r.productId);
       if (productIds.length === 0) {
         return [];
@@ -152,7 +184,11 @@ export class RecommendationService {
   ): Promise<Array<{ productId: number; score: number; reason?: string }>> {
     // 检查用户是否有足够的历史行为
     // 通过调用UserCF来间接检查（如果没有数据会返回空数组）
-    const testRecs = await this.collaborativeFiltering.userBasedCF(userId, 10, 0.1);
+    const testRecs = await this.collaborativeFiltering.userBasedCF(
+      userId,
+      10,
+      0.1,
+    );
     const hasEnoughData = testRecs.length > 0;
 
     // 如果用户行为数据不足，使用热门推荐或内容推荐

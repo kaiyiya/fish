@@ -32,7 +32,11 @@ export class UserCoupon {
   @JoinColumn({ name: 'couponId' })
   coupon: Coupon;
 
-  @Column({ type: 'enum', enum: ['unused', 'used', 'expired'], default: 'unused' })
+  @Column({
+    type: 'enum',
+    enum: ['unused', 'used', 'expired'],
+    default: 'unused',
+  })
   status: string; // 状态：unused(未使用), used(已使用), expired(已过期)
 
   @Column({ nullable: true })

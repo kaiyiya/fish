@@ -17,7 +17,10 @@ export class AiController {
 
   @Post('recognize')
   @UseGuards(JwtAuthGuard)
-  async recognize(@CurrentUser() user: any, @Body() body: { imageUrl: string }) {
+  async recognize(
+    @CurrentUser() user: any,
+    @Body() body: { imageUrl: string },
+  ) {
     return this.recognitionService.recognize(user.id, body.imageUrl);
   }
 
@@ -32,10 +35,7 @@ export class AiController {
 
   @Post('chat')
   @UseGuards(JwtAuthGuard)
-  async chat(
-    @CurrentUser() user: any,
-    @Body() body: { question: string },
-  ) {
+  async chat(@CurrentUser() user: any, @Body() body: { question: string }) {
     return this.chatService.chat(user.id, body.question);
   }
 }

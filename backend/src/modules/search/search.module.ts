@@ -6,10 +6,7 @@ import { ProductModule } from '../product/product.module';
 import { SearchLog } from '../../database/entities/search-log.entity';
 
 @Module({
-  imports: [
-    ProductModule,
-    TypeOrmModule.forFeature([SearchLog]),
-  ],
+  imports: [ProductModule, TypeOrmModule.forFeature([SearchLog])],
   controllers: [SearchController],
   providers: [SearchService],
 })

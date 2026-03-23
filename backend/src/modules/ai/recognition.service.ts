@@ -20,7 +20,7 @@ function getBackendDir(): string {
     // Windows使用反斜杠，Unix使用正斜杠
     const pathSep = currentDir.includes('\\') ? '\\' : '/';
     const parts = currentDir.split(pathSep);
-    const backendIndex = parts.findIndex(p => p === 'backend');
+    const backendIndex = parts.findIndex((p) => p === 'backend');
     if (backendIndex >= 0) {
       const backendDir = parts.slice(0, backendIndex + 1).join(pathSep);
       console.log('[getBackendDir] 从路径中提取backendDir:', backendDir);
@@ -51,7 +51,7 @@ export class RecognitionService {
     private recognitionRepository: Repository<ImageRecognition>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   /**
    * 调用基于 PyTorch 的推理脚本进行识别
@@ -78,19 +78,14 @@ export class RecognitionService {
 
       // 使用Conda环境中的Python（Windows路径）
       // 可以通过环境变量PYTHON_PATH配置
-      const pythonPath = process.env.PYTHON_PATH ||
+      const pythonPath =
+        process.env.PYTHON_PATH ||
         (process.platform === 'win32'
           ? 'D:\\Anaconda\\envs\\pytorch\\python.exe'
           : 'python');
 
       // 设置工作目录为训练脚本所在目录
-      const trainingDir = join(
-        backendDir,
-        'src',
-        'modules',
-        'ai',
-        'training',
-      );
+      const trainingDir = join(backendDir, 'src', 'modules', 'ai', 'training');
 
       // 确保图片路径是绝对路径
       // Windows路径格式: C:\path\to\file 或 E:\path\to\file
@@ -146,7 +141,7 @@ export class RecognitionService {
             console.log('[识别服务] PyTorch原始输出:', text);
             // 过滤掉警告信息，只取JSON行
             const lines = text.split('\n');
-            const jsonLine = lines.find(line => line.trim().startsWith('{'));
+            const jsonLine = lines.find((line) => line.trim().startsWith('{'));
             if (!jsonLine) {
               throw new Error('未找到有效的JSON输出: ' + text);
             }
@@ -248,47 +243,80 @@ export class RecognitionService {
     // 根据识别出的鱼类名称，搜索相关商品
     let recommendedProducts: Product[] = [];
     try {
-      const fishName = recognitionResult.fishName;
-      console.log('[识别服务] 搜索推荐商品，鱼类名称:', fishName);
+      const searchByKeyword = async (
+        keyword: string,
+        limit: number,
+      ): Promise<Product[]> => {
+        const kw = keyword?.trim();
+        if (!kw) return [];
 
-      // 使用模糊搜索查找相关商品
-      recommendedProducts = await this.productRepository
-        .createQueryBuilder('product')
-        .leftJoinAndSelect('product.category', 'category')
-        .where('product.name LIKE :keyword', { keyword: `%${fishName}%` })
-        .orWhere('product.description LIKE :keyword', { keyword: `%${fishName}%` })
-        .orderBy('product.stock', 'DESC') // 优先显示有库存的
-        .addOrderBy('product.price', 'ASC') // 价格从低到高
-        .limit(6) // 最多返回6个推荐商品
-        .getMany();
+        // 用库存+价格排序保证结果更像“推荐”
+        return this.productRepository
+          .createQueryBuilder('product')
+          .leftJoinAndSelect('product.category', 'category')
+          .where(
+            '(product.name LIKE :keyword OR product.description LIKE :keyword OR product.cookingTips LIKE :keyword OR product.nutritionInfo LIKE :keyword)',
+            {
+              keyword: `%${kw}%`,
+            },
+          )
+          .andWhere('product.stock > 0')
+          .orderBy('product.stock', 'DESC')
+          .addOrderBy('product.price', 'ASC')
+          .limit(limit)
+          .getMany();
+      };
 
-      console.log('[识别服务] 找到商品数量:', recommendedProducts.length);
+      const primaryKeyword = recognitionResult.fishName;
+      const altList = (recognitionResult.result?.alternatives || []) as Array<{
+        nameCN?: string;
+        name?: string;
+        confidence?: number;
+      }>;
 
-      // 如果没找到，尝试搜索备选结果
-      if (recommendedProducts.length === 0 && recognitionResult.result?.alternatives) {
-        console.log('[识别服务] 尝试搜索备选结果');
-        for (const alt of recognitionResult.result.alternatives) {
-          const altNameCN = alt.nameCN || alt.name;
-          const products = await this.productRepository
-            .createQueryBuilder('product')
-            .leftJoinAndSelect('product.category', 'category')
-            .where('product.name LIKE :keyword', { keyword: `%${altNameCN}%` })
-            .orWhere('product.description LIKE :keyword', { keyword: `%${altNameCN}%` })
-            .limit(3)
-            .getMany();
-          recommendedProducts.push(...products);
-          if (recommendedProducts.length >= 6) break;
-        }
+      // 始终把备选结果也纳入：否则当主类别是“虾/虾类”这种泛化词时，永远能搜到商品，
+      // 但备选类别就永远不会被用到，从而造成“无论怎么扫都像同一种推荐”的问题。
+      const altKeywords = altList
+        .slice()
+        .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
+        .slice(0, 2)
+        .map((alt) => alt.nameCN || alt.name || '')
+        .filter((s) => !!s);
+
+      const keywords = Array.from(
+        new Set([primaryKeyword, ...altKeywords]),
+      ).filter((s) => !!s);
+      console.log('[识别服务] 搜索推荐商品，关键词:', keywords);
+
+      const buckets: Product[] = [];
+      for (const keyword of keywords) {
+        const limit = keyword === primaryKeyword ? 6 : 3;
+        const products = await searchByKeyword(keyword, limit);
+        buckets.push(...products);
       }
 
-      // 如果还是没找到，返回热门商品作为推荐
+      // 去重 + 再次排序
+      const productMap = new Map<number, Product>();
+      for (const p of buckets) productMap.set(p.id, p);
+
+      recommendedProducts = Array.from(productMap.values())
+        .sort(
+          (a, b) =>
+            Number(b.stock) - Number(a.stock) ||
+            Number(a.price) - Number(b.price),
+        )
+        .slice(0, 6);
+
+      console.log('[识别服务] 最终推荐商品数量:', recommendedProducts.length);
+
+      // 若仍为空，返回热门商品
       if (recommendedProducts.length === 0) {
         console.log('[识别服务] 未找到匹配商品，返回热门商品');
         recommendedProducts = await this.productRepository
           .createQueryBuilder('product')
           .leftJoinAndSelect('product.category', 'category')
           .where('product.stock > 0')
-          .orderBy('product.stock', 'DESC')
+          .orderBy('product.freshnessLevel', 'DESC')
           .addOrderBy('product.price', 'ASC')
           .limit(6)
           .getMany();
@@ -311,13 +339,15 @@ export class RecognitionService {
     return {
       ...recognitionResult,
       recognitionId: recognition.id,
-      recommendedProducts: recommendedProducts.map(p => ({
+      recommendedProducts: recommendedProducts.map((p) => ({
         id: p.id,
         name: p.name,
         price: p.price,
         stock: p.stock,
         imageUrls: p.imageUrls,
-        category: p.category ? { id: p.category.id, name: p.category.name } : null,
+        category: p.category
+          ? { id: p.category.id, name: p.category.name }
+          : null,
       })),
     };
   }

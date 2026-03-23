@@ -57,7 +57,10 @@ export class FavoriteController {
     @CurrentUser() user: any,
     @Param('productId') productId: string,
   ) {
-    const isFavorite = await this.favoriteService.isFavorite(user.id, +productId);
+    const isFavorite = await this.favoriteService.isFavorite(
+      user.id,
+      +productId,
+    );
     return { isFavorite };
   }
 

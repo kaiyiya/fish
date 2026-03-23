@@ -18,8 +18,8 @@ export class FavoriteService {
    */
   async addFavorite(userId: number, productId: number): Promise<Favorite> {
     // 验证商品是否存在
-    const product = await this.productRepository.findOne({ 
-      where: { id: productId } 
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
     });
     if (!product) {
       throw new NotFoundException('商品不存在');

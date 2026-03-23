@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../../database/entities/product.entity';
@@ -19,12 +23,17 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     // 如果提供了分类ID，验证分类是否存在
-    if (createProductDto.categoryId !== undefined && createProductDto.categoryId !== null) {
+    if (
+      createProductDto.categoryId !== undefined &&
+      createProductDto.categoryId !== null
+    ) {
       const category = await this.categoryRepository.findOne({
         where: { id: createProductDto.categoryId },
       });
       if (!category) {
-        throw new BadRequestException(`分类ID ${createProductDto.categoryId} 不存在，请先创建该分类`);
+        throw new BadRequestException(
+          `分类ID ${createProductDto.categoryId} 不存在，请先创建该分类`,
+        );
       }
     }
 
@@ -34,13 +43,13 @@ export class ProductService {
 
   async findAll(query: any): Promise<Product[]> {
     const queryBuilder = this.productRepository.createQueryBuilder('product');
-    
+
     if (query.categoryId) {
       queryBuilder.where('product.categoryId = :categoryId', {
         categoryId: query.categoryId,
       });
     }
-    
+
     if (query.keyword) {
       queryBuilder.andWhere('product.name LIKE :keyword', {
         keyword: `%${query.keyword}%`,
@@ -66,7 +75,9 @@ export class ProductService {
         where: { id: data.categoryId },
       });
       if (!category) {
-        throw new BadRequestException(`分类ID ${data.categoryId} 不存在，请先创建该分类`);
+        throw new BadRequestException(
+          `分类ID ${data.categoryId} 不存在，请先创建该分类`,
+        );
       }
     } else if (data.categoryId === null) {
       // 允许设置为 null（清空分类）

@@ -32,4 +32,3 @@ export class OrderStatusHistory {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

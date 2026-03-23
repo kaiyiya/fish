@@ -18,7 +18,11 @@ export class Coupon {
   @Column('text', { nullable: true })
   description: string; // 优惠券描述
 
-  @Column({ type: 'enum', enum: ['discount', 'reduce', 'free'], default: 'discount' })
+  @Column({
+    type: 'enum',
+    enum: ['discount', 'reduce', 'free'],
+    default: 'discount',
+  })
   type: string; // 类型：discount(折扣), reduce(满减), free(免运费)
 
   @Column('decimal', { precision: 10, scale: 2 })

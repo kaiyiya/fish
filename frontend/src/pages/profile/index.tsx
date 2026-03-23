@@ -93,6 +93,10 @@ export default class Profile extends Component {
             title: '已退出登录',
             icon: 'success',
           })
+          // 强制刷新页面：确保登录态变化后能立即更新视图
+          setTimeout(() => {
+            Taro.reLaunch({ url: '/pages/profile/index' })
+          }, 300)
         }
       },
     })

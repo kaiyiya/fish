@@ -9,6 +9,7 @@ export default defineAppConfig({
     'pages/admin/order/index',
     'pages/admin/category/index',
     'pages/admin/data-center/index',
+    'pages/admin/user-center/index',
     'pages/search/index',
     'pages/cart/index',
     'pages/address/list/index',

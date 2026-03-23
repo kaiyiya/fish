@@ -50,10 +50,7 @@ export class AddressController {
    * 获取地址详情
    */
   @Get(':id')
-  async findOne(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: any, @Param('id') id: string) {
     return this.addressService.findOne(user.id, +id);
   }
 
@@ -73,10 +70,7 @@ export class AddressController {
    * 删除地址
    */
   @Delete(':id')
-  async remove(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: any, @Param('id') id: string) {
     await this.addressService.remove(user.id, +id);
     return { message: '删除成功' };
   }
@@ -85,10 +79,7 @@ export class AddressController {
    * 设置默认地址
    */
   @Patch(':id/default')
-  async setDefault(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async setDefault(@CurrentUser() user: any, @Param('id') id: string) {
     return this.addressService.setDefault(user.id, +id);
   }
 

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import * as Excel from 'exceljs';
@@ -38,7 +42,7 @@ export class OrderService {
     private orderCreationLogRepository: Repository<OrderCreationLog>,
     private notificationService: NotificationService,
     private walletService: WalletService,
-  ) { }
+  ) {}
 
   async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
     // 验证地址是否存在且属于当前用户
@@ -50,7 +54,7 @@ export class OrderService {
     }
 
     // 验证商品库存并扣减
-    const productIds = createOrderDto.items.map(item => item.productId);
+    const productIds = createOrderDto.items.map((item) => item.productId);
     const products = await this.productRepository.find({
       where: { id: In(productIds) },
     });
@@ -61,19 +65,21 @@ export class OrderService {
 
     // 检查库存
     for (const item of createOrderDto.items) {
-      const product = products.find(p => p.id === item.productId);
+      const product = products.find((p) => p.id === item.productId);
       if (!product) {
         throw new NotFoundException(`商品ID ${item.productId} 不存在`);
       }
 
       if (product.stock < item.quantity) {
-        throw new BadRequestException(`商品 ${product.name} 库存不足，当前库存：${product.stock}`);
+        throw new BadRequestException(
+          `商品 ${product.name} 库存不足，当前库存：${product.stock}`,
+        );
       }
     }
 
     // 批量扣减库存（提高性能）
     for (const item of createOrderDto.items) {
-      const product = products.find(p => p.id === item.productId);
+      const product = products.find((p) => p.id === item.productId);
       product.stock -= item.quantity;
     }
     await this.productRepository.save(products);
@@ -129,7 +135,7 @@ export class OrderService {
         productId: item.productId,
         behaviorType: 'purchase',
         behaviorValue: 10.0, // 购买行为权重较高
-      })
+      }),
     );
     await this.behaviorRepository.save(behaviors);
 
@@ -166,7 +172,12 @@ export class OrderService {
     }
 
     // 先扣钱包余额（余额不足会直接抛错）
-    await this.walletService.payWithWallet(userId, orderId, Number(order.totalAmount), 'wallet_mock');
+    await this.walletService.payWithWallet(
+      userId,
+      orderId,
+      Number(order.totalAmount),
+      'wallet_mock',
+    );
 
     // 写支付方式，确保展示正确
     order.paymentMethod = 'wallet_mock';
@@ -215,7 +226,15 @@ export class OrderService {
   /**
    * 管理后台：按用户查询订单，并附带收货信息快照，便于后台查看/管理。
    */
-  async findByUserAdmin(userId: number): Promise<Array<Order & { receiverName?: string; receiverPhone?: string; fullAddress?: string }>> {
+  async findByUserAdmin(userId: number): Promise<
+    Array<
+      Order & {
+        receiverName?: string;
+        receiverPhone?: string;
+        fullAddress?: string;
+      }
+    >
+  > {
     const orders = await this.orderRepository.find({
       where: { userId },
       relations: ['items', 'items.product'],
@@ -228,14 +247,18 @@ export class OrderService {
     const snapshots = await this.orderShippingSnapshotRepository.find({
       where: { orderId: In(ids) },
     });
-    const snapshotMap = new Map<number, OrderShippingSnapshot>(snapshots.map((s) => [s.orderId, s]));
+    const snapshotMap = new Map<number, OrderShippingSnapshot>(
+      snapshots.map((s) => [s.orderId, s]),
+    );
 
     return orders.map((order) => {
       const snapshot = snapshotMap.get(order.id);
       (order as any).receiverName = snapshot?.name;
       (order as any).receiverPhone = snapshot?.phone;
       (order as any).fullAddress = snapshot
-        ? [snapshot.province, snapshot.city, snapshot.district, snapshot.detail].filter(Boolean).join(' ')
+        ? [snapshot.province, snapshot.city, snapshot.district, snapshot.detail]
+            .filter(Boolean)
+            .join(' ')
         : undefined;
       return order as any;
     });
@@ -255,7 +278,11 @@ export class OrderService {
     });
   }
 
-  async updateStatus(id: number, status: string, changedBy: number | null = null): Promise<Order> {
+  async updateStatus(
+    id: number,
+    status: string,
+    changedBy: number | null = null,
+  ): Promise<Order> {
     const order = await this.orderRepository.findOne({ where: { id } });
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -333,16 +360,26 @@ export class OrderService {
       pattern: 'solid',
       fgColor: { argb: 'FFE0E0E0' },
     };
-    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).alignment = {
+      vertical: 'middle',
+      horizontal: 'center',
+    };
 
     // 填充数据
     for (const order of orders) {
       // 获取收货地址信息
-      const address = await this.addressRepository.findOne({ where: { id: order.addressId } });
-      
+      const address = await this.addressRepository.findOne({
+        where: { id: order.addressId },
+      });
+
       // 合并商品名称和数量
-      const productNames = order.items.map(item => item.product?.name || '未知商品').join('; ');
-      const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+      const productNames = order.items
+        .map((item) => item.product?.name || '未知商品')
+        .join('; ');
+      const totalQuantity = order.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      );
 
       worksheet.addRow({
         orderNo: order.orderNo,
@@ -369,16 +406,13 @@ export class OrderService {
     const fileName = `订单列表_${new Date().toISOString().split('T')[0]}.xlsx`;
     res.setHeader(
       'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(fileName)}"`
+      `attachment; filename="${encodeURIComponent(fileName)}"`,
     );
-    res.setHeader(
-      'Access-Control-Expose-Headers',
-      'Content-Disposition'
-    );
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
 
     // 写入 Excel 到响应流
     await workbook.xlsx.write(res);

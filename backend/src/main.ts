@@ -38,7 +38,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  
+
   console.log(`🚀 后端服务已启动，运行在: http://localhost:${port}`);
   console.log(`📁 上传文件目录: ${uploadDir}`);
 }

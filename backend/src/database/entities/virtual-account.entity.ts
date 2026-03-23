@@ -27,4 +27,3 @@ export class VirtualAccount {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

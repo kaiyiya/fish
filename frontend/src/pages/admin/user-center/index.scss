@@ -1,0 +1,79 @@
+.admin-user-center {
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+.header {
+  padding: 24px 16px 12px;
+  background: #fff;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+}
+
+.content {
+  padding: 16px;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-size: 20px;
+  color: #666;
+}
+
+.row-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.hint {
+  margin-top: 12px;
+  font-size: 20px;
+  color: #333;
+}
+
+.users-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-row {
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.user-text {
+  display: block;
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 6px;
+}
+

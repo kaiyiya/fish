@@ -35,9 +35,10 @@ export default function Login() {
         setToken(res.access_token)
         setUserInfo(res.user)
         Taro.showToast({ title: '登录成功', icon: 'success' })
+        // 强制刷新页面：避免 Profile 页因为订阅机制原因未重新渲染
         setTimeout(() => {
-          Taro.switchTab({ url: '/pages/profile/index' })
-        }, 500)
+          Taro.reLaunch({ url: '/pages/profile/index' })
+        }, 300)
       }
     } catch (error) {
       logger.error('登录/注册失败', error)

@@ -43,10 +43,7 @@ export class CouponController {
    */
   @Post(':id/receive')
   @UseGuards(JwtAuthGuard)
-  async receiveCoupon(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async receiveCoupon(@CurrentUser() user: any, @Param('id') id: string) {
     return this.couponService.receiveCoupon(user.id, +id);
   }
 

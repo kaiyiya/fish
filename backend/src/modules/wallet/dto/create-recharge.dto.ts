@@ -7,4 +7,3 @@ export class CreateRechargeDto {
   @Max(99999999)
   amount: number;
 }
-

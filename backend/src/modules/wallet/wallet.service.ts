@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as QRCode from 'qrcode';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../../database/entities/user.entity';
 
 import { VirtualAccount } from '../../database/entities/virtual-account.entity';
 import { WalletRechargeSession } from '../../database/entities/wallet-recharge-session.entity';
@@ -17,11 +22,15 @@ export class WalletService {
     private rechargeSessionRepository: Repository<WalletRechargeSession>,
     @InjectRepository(WalletTransaction)
     private walletTransactionRepository: Repository<WalletTransaction>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private configService: ConfigService,
   ) {}
 
   async ensureAccount(userId: number): Promise<VirtualAccount> {
-    let account = await this.virtualAccountRepository.findOne({ where: { userId } });
+    let account = await this.virtualAccountRepository.findOne({
+      where: { userId },
+    });
     if (!account) {
       account = this.virtualAccountRepository.create({
         userId,
@@ -77,7 +86,9 @@ export class WalletService {
   }
 
   async confirmRechargeByToken(token: string) {
-    const session = await this.rechargeSessionRepository.findOne({ where: { token } });
+    const session = await this.rechargeSessionRepository.findOne({
+      where: { token },
+    });
     if (!session) throw new NotFoundException('充值码不存在');
     if (session.status !== 'pending') {
       return {
@@ -132,13 +143,77 @@ export class WalletService {
     };
   }
 
-  async payWithWallet(userId: number, orderId: number, amount: number, paymentMethod = 'wallet_mock') {
+  /**
+   * 管理员手动给普通用户充值（不走二维码 token）
+   * - 更新用户 virtual_account.balance
+   * - 记录一条 wallet_transaction 作为流水
+   */
+  async adminRecharge(userId: number, amount: number) {
+    if (amount <= 0) throw new BadRequestException('充值金额必须大于0');
+
+    const balanceAfter = await this.virtualAccountRepository.manager.transaction(async (manager) => {
+      const beforeAccount = await manager.findOne(VirtualAccount, { where: { userId } });
+      const accountToUse =
+        beforeAccount ||
+        manager.create(VirtualAccount, {
+          userId,
+          balance: 0,
+          currency: 'CNY',
+        });
+
+      const before = Number(accountToUse.balance);
+      accountToUse.balance = before + Number(amount);
+      await manager.save(accountToUse);
+
+      const after = Number(accountToUse.balance);
+
+      await manager.save(
+        manager.create(WalletTransaction, {
+          userId,
+          type: 'recharge',
+          amount: Number(amount),
+          balanceBefore: before,
+          balanceAfter: after,
+          orderId: null,
+          rechargeSessionId: null,
+          status: 'success',
+        }),
+      );
+
+      return after;
+    });
+
+    const account = await this.virtualAccountRepository.findOne({ where: { userId } });
+    return {
+      userId,
+      balance: Number(account?.balance ?? balanceAfter),
+      currency: account?.currency ?? 'CNY',
+    };
+  }
+
+  /**
+   * 管理员通过手机号给用户充值
+   */
+  async adminRechargeByPhone(phone: string, amount: number) {
+    const user = await this.userRepository.findOne({ where: { phone } });
+    if (!user) throw new NotFoundException('手机号对应用户不存在');
+    return this.adminRecharge(user.id, amount);
+  }
+
+  async payWithWallet(
+    userId: number,
+    orderId: number,
+    amount: number,
+    paymentMethod = 'wallet_mock',
+  ) {
     if (amount <= 0) throw new BadRequestException('支付金额无效');
 
     const account = await this.ensureAccount(userId);
 
     await this.virtualAccountRepository.manager.transaction(async (manager) => {
-      const beforeAccount = await manager.findOne(VirtualAccount, { where: { userId } });
+      const beforeAccount = await manager.findOne(VirtualAccount, {
+        where: { userId },
+      });
       if (!beforeAccount) throw new NotFoundException('虚拟账户不存在');
       const before = Number(beforeAccount.balance);
 
@@ -146,7 +221,10 @@ export class WalletService {
       const result = await manager
         .createQueryBuilder()
         .update(VirtualAccount)
-        .set({ balance: () => 'balance - :amount', updated_at: () => 'CURRENT_TIMESTAMP' })
+        .set({
+          balance: () => 'balance - :amount',
+          updated_at: () => 'CURRENT_TIMESTAMP',
+        })
         .where('userId = :userId', { userId })
         .andWhere('balance >= :amount', { amount })
         .execute();
@@ -155,7 +233,9 @@ export class WalletService {
         throw new BadRequestException('余额不足');
       }
 
-      const afterAccount = await manager.findOne(VirtualAccount, { where: { userId } });
+      const afterAccount = await manager.findOne(VirtualAccount, {
+        where: { userId },
+      });
       if (!afterAccount) throw new NotFoundException('虚拟账户不存在');
       const after = Number(afterAccount.balance);
 
@@ -180,4 +260,3 @@ export class WalletService {
     return { balance };
   }
 }
-

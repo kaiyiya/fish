@@ -29,4 +29,3 @@ export class OrderCreationLog {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

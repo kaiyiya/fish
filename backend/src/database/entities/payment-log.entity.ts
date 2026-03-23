@@ -38,4 +38,3 @@ export class PaymentLog {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

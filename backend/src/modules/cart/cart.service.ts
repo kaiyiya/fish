@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from '../../database/entities/cart.entity';
@@ -16,9 +20,15 @@ export class CartService {
   /**
    * 添加商品到购物车
    */
-  async addToCart(userId: number, productId: number, quantity: number = 1): Promise<Cart> {
+  async addToCart(
+    userId: number,
+    productId: number,
+    quantity: number = 1,
+  ): Promise<Cart> {
     // 验证商品是否存在
-    const product = await this.productRepository.findOne({ where: { id: productId } });
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
     if (!product) {
       throw new NotFoundException('商品不存在');
     }
@@ -66,7 +76,11 @@ export class CartService {
   /**
    * 更新购物车商品数量
    */
-  async updateCartItem(userId: number, cartId: number, quantity: number): Promise<Cart> {
+  async updateCartItem(
+    userId: number,
+    cartId: number,
+    quantity: number,
+  ): Promise<Cart> {
     const cart = await this.cartRepository.findOne({
       where: { id: cartId, userId },
       relations: ['product'],

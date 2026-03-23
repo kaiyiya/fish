@@ -14,20 +14,27 @@ export class NotificationService {
   /**
    * 创建通知
    */
-  async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
-    const notification = this.notificationRepository.create(createNotificationDto);
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const notification = this.notificationRepository.create(
+      createNotificationDto,
+    );
     return this.notificationRepository.save(notification);
   }
 
   /**
    * 批量创建通知（给多个用户）
    */
-  async createBatch(userIds: number[], createNotificationDto: Omit<CreateNotificationDto, 'userId'>): Promise<Notification[]> {
-    const notifications = userIds.map(userId => 
+  async createBatch(
+    userIds: number[],
+    createNotificationDto: Omit<CreateNotificationDto, 'userId'>,
+  ): Promise<Notification[]> {
+    const notifications = userIds.map((userId) =>
       this.notificationRepository.create({
         ...createNotificationDto,
         userId,
-      })
+      }),
     );
     return this.notificationRepository.save(notifications);
   }
@@ -50,12 +57,13 @@ export class NotificationService {
       where.type = type;
     }
 
-    const [notifications, total] = await this.notificationRepository.findAndCount({
-      where,
-      order: { created_at: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const [notifications, total] =
+      await this.notificationRepository.findAndCount({
+        where,
+        order: { created_at: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
 
     return { notifications, total };
   }
@@ -72,7 +80,10 @@ export class NotificationService {
   /**
    * 标记通知为已读
    */
-  async markAsRead(userId: number, notificationId: number): Promise<Notification> {
+  async markAsRead(
+    userId: number,
+    notificationId: number,
+  ): Promise<Notification> {
     const notification = await this.notificationRepository.findOne({
       where: { id: notificationId, userId },
     });

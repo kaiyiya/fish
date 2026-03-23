@@ -21,32 +21,32 @@ import { HealthController } from './modules/health/health.controller';
 import { WalletModule } from './modules/wallet/wallet.module';
 
 @Module({
-    imports: [
-        // 配置模块
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: '.env',
-        }),
-        // 数据库模块
-        DatabaseModule,
-        // 业务模块
-        UserModule,
-        AuthModule,
-        ProductModule,
-        OrderModule,
-        AiModule,
-        SearchModule,
-        StatisticsModule,
-        UploadModule,
-        CategoryModule,
-        CartModule,
-        ReviewModule,
-        FavoriteModule,
-        AddressModule,
-        CouponModule,
-        NotificationModule,
-        WalletModule,
-    ],
-    controllers: [HealthController],
+  imports: [
+    // 配置模块
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    // 数据库模块
+    DatabaseModule,
+    // 业务模块
+    UserModule,
+    AuthModule,
+    ProductModule,
+    OrderModule,
+    AiModule,
+    SearchModule,
+    StatisticsModule,
+    UploadModule,
+    CategoryModule,
+    CartModule,
+    ReviewModule,
+    FavoriteModule,
+    AddressModule,
+    CouponModule,
+    NotificationModule,
+    WalletModule,
+  ],
+  controllers: [HealthController],
 })
-export class AppModule { }
+export class AppModule {}

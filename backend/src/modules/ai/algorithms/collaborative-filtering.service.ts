@@ -60,7 +60,7 @@ export class CollaborativeFilteringService {
 
       const weight = this.BEHAVIOR_WEIGHTS[behavior.behaviorType] || 1.0;
       const currentValue = matrix[behavior.userId][behavior.productId] || 0;
-      
+
       // 累加同一用户对同一商品的不同行为权重
       matrix[behavior.userId][behavior.productId] = currentValue + weight;
     }
@@ -123,8 +123,10 @@ export class CollaborativeFilteringService {
     if (commonKeys.length === 0) return 0;
 
     // 计算平均值
-    const avg1 = commonKeys.reduce((sum, k) => sum + vec1[k], 0) / commonKeys.length;
-    const avg2 = commonKeys.reduce((sum, k) => sum + vec2[k], 0) / commonKeys.length;
+    const avg1 =
+      commonKeys.reduce((sum, k) => sum + vec1[k], 0) / commonKeys.length;
+    const avg2 =
+      commonKeys.reduce((sum, k) => sum + vec2[k], 0) / commonKeys.length;
 
     // 计算协方差和方差
     let covariance = 0;
@@ -168,10 +170,14 @@ export class CollaborativeFilteringService {
       if (otherUserId === userId) continue;
 
       const otherUserVector = matrix[otherUserId];
-      if (!otherUserVector || Object.keys(otherUserVector).length === 0) continue;
+      if (!otherUserVector || Object.keys(otherUserVector).length === 0)
+        continue;
 
       // 使用余弦相似度（也可使用皮尔逊相关系数）
-      const similarity = this.cosineSimilarity(targetUserVector, otherUserVector);
+      const similarity = this.cosineSimilarity(
+        targetUserVector,
+        otherUserVector,
+      );
 
       if (similarity >= minSimilarity) {
         userSimilarities.push({
@@ -189,7 +195,9 @@ export class CollaborativeFilteringService {
 
     // 计算推荐分数
     const recommendationScores: { [productId: number]: number } = {};
-    const targetUserProducts = new Set(Object.keys(targetUserVector).map(Number));
+    const targetUserProducts = new Set(
+      Object.keys(targetUserVector).map(Number),
+    );
 
     for (const similarUser of topSimilarUsers) {
       const similarUserVector = matrix[similarUser.id];
@@ -205,12 +213,15 @@ export class CollaborativeFilteringService {
           recommendationScores[productId] = 0;
         }
 
-        recommendationScores[productId] += similarity * similarUserVector[productId];
+        recommendationScores[productId] +=
+          similarity * similarUserVector[productId];
       }
     }
 
     // 转换为推荐结果数组并排序
-    const recommendations: RecommendationResult[] = Object.keys(recommendationScores)
+    const recommendations: RecommendationResult[] = Object.keys(
+      recommendationScores,
+    )
       .map(Number)
       .map((productId) => ({
         productId,
@@ -240,7 +251,9 @@ export class CollaborativeFilteringService {
     }
 
     // 构建物品-用户矩阵（转置矩阵）
-    const itemUserMatrix: { [productId: number]: { [userId: number]: number } } = {};
+    const itemUserMatrix: {
+      [productId: number]: { [userId: number]: number };
+    } = {};
     const allUserIds = Object.keys(matrix).map(Number);
 
     for (const uid of allUserIds) {
@@ -277,7 +290,10 @@ export class CollaborativeFilteringService {
         if (!otherProductVector) continue;
 
         // 计算商品相似度
-        const similarity = this.cosineSimilarity(likedProductVector, otherProductVector);
+        const similarity = this.cosineSimilarity(
+          likedProductVector,
+          otherProductVector,
+        );
 
         if (similarity >= minSimilarity) {
           // 累加推荐分数：用户评分 × 商品相似度
@@ -291,7 +307,9 @@ export class CollaborativeFilteringService {
     }
 
     // 转换为推荐结果数组并排序
-    const recommendations: RecommendationResult[] = Object.keys(recommendationScores)
+    const recommendations: RecommendationResult[] = Object.keys(
+      recommendationScores,
+    )
       .map(Number)
       .map((productId) => ({
         productId,

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, LessThan } from 'typeorm';
 import { Coupon } from '../../database/entities/coupon.entity';
@@ -99,11 +103,12 @@ export class CouponService {
 
     // 发送优惠券领取通知
     try {
-      const couponTypeText = {
-        discount: '折扣券',
-        reduce: '满减券',
-        free: '免运费券',
-      }[coupon.type] || '优惠券';
+      const couponTypeText =
+        {
+          discount: '折扣券',
+          reduce: '满减券',
+          free: '免运费券',
+        }[coupon.type] || '优惠券';
 
       await this.notificationService.create({
         userId,
@@ -139,7 +144,11 @@ export class CouponService {
   /**
    * 使用优惠券
    */
-  async useCoupon(userId: number, userCouponId: number, orderId: number): Promise<void> {
+  async useCoupon(
+    userId: number,
+    userCouponId: number,
+    orderId: number,
+  ): Promise<void> {
     const userCoupon = await this.userCouponRepository.findOne({
       where: { id: userCouponId, userId, status: 'unused' },
       relations: ['coupon'],
@@ -199,7 +208,10 @@ export class CouponService {
   /**
    * 更新优惠券（管理员）
    */
-  async update(id: number, updateData: Partial<CreateCouponDto>): Promise<Coupon> {
+  async update(
+    id: number,
+    updateData: Partial<CreateCouponDto>,
+  ): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne({ where: { id } });
     if (!coupon) {
       throw new NotFoundException('优惠券不存在');

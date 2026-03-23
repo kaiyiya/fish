@@ -65,10 +65,7 @@ export class NotificationController {
    */
   @Post(':id/read')
   @UseGuards(JwtAuthGuard)
-  async markAsRead(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async markAsRead(@CurrentUser() user: any, @Param('id') id: string) {
     return this.notificationService.markAsRead(user.id, +id);
   }
 
@@ -87,10 +84,7 @@ export class NotificationController {
    */
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: any, @Param('id') id: string) {
     await this.notificationService.remove(user.id, +id);
     return { message: '删除成功' };
   }

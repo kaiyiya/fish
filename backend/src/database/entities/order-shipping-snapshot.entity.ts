@@ -43,4 +43,3 @@ export class OrderShippingSnapshot {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

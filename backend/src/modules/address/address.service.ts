@@ -14,7 +14,10 @@ export class AddressService {
   /**
    * 创建地址
    */
-  async create(userId: number, createAddressDto: CreateAddressDto): Promise<Address> {
+  async create(
+    userId: number,
+    createAddressDto: CreateAddressDto,
+  ): Promise<Address> {
     // 如果设置为默认地址，先取消其他默认地址
     if (createAddressDto.isDefault) {
       await this.addressRepository.update(
@@ -121,7 +124,10 @@ export class AddressService {
    * 注意：这里使用腾讯地图API，需要配置API密钥
    * 实际项目中应该将API密钥放在环境变量中
    */
-  async reverseGeocode(latitude: number, longitude: number): Promise<{
+  async reverseGeocode(
+    latitude: number,
+    longitude: number,
+  ): Promise<{
     province: string;
     city: string;
     district: string;
@@ -131,7 +137,7 @@ export class AddressService {
       // 使用腾讯地图逆地理编码API
       // 注意：需要申请腾讯地图API密钥，并配置在环境变量中
       const TENCENT_MAP_KEY = process.env.TENCENT_MAP_KEY || '';
-      
+
       if (!TENCENT_MAP_KEY) {
         // 如果没有配置API密钥，返回null，让前端提示用户手动填写
         console.warn('腾讯地图API密钥未配置，无法进行逆地理编码');
@@ -139,7 +145,7 @@ export class AddressService {
       }
 
       const url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${latitude},${longitude}&key=${TENCENT_MAP_KEY}&get_poi=0`;
-      
+
       const response = await fetch(url);
       const data = await response.json();
 
@@ -149,7 +155,8 @@ export class AddressService {
           province: address_component?.province || '',
           city: address_component?.city || '',
           district: address_component?.district || '',
-          address: formatted_addresses?.recommend || formatted_addresses?.rough || '',
+          address:
+            formatted_addresses?.recommend || formatted_addresses?.rough || '',
         };
       }
 

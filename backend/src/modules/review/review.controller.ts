@@ -67,10 +67,7 @@ export class ReviewController {
    */
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async remove(@CurrentUser() user: any, @Param('id') id: string) {
     await this.reviewService.remove(user.id, +id);
     return { message: '删除成功' };
   }

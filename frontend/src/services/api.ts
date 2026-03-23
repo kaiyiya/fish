@@ -18,6 +18,14 @@ export const userApi = {
   updateProfile: (data) => {
     return request.patch('/user/profile', data)
   },
+  // 后台：管理员修改普通用户密码
+  adminUpdatePassword: (userId, data) => {
+    return request.patch(`/user/admin/${userId}/password`, data)
+  },
+  // 管理员：查看所有用户信息（不包含密码）
+  adminFindAll: () => {
+    return request.get('/user/admin/all')
+  },
 }
 
 // 商品相关API
@@ -101,6 +109,14 @@ export const walletApi = {
   },
   createRechargeCode: (amount) => {
     return request.post('/wallet/recharge/create', { amount })
+  },
+  // 后台：管理员手动给普通用户充值
+  adminRecharge: (data) => {
+    return request.post('/wallet/admin/recharge', data)
+  },
+  // 后台：管理员通过手机号给用户充值
+  adminRechargeByPhone: (data) => {
+    return request.post('/wallet/admin/recharge/by-phone', data)
   },
 }
 

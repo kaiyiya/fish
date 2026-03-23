@@ -21,7 +21,9 @@ export class UploadService {
   /**
    * 保存上传的文件
    */
-  async saveFile(file: Express.Multer.File): Promise<{ filename: string; url: string }> {
+  async saveFile(
+    file: Express.Multer.File,
+  ): Promise<{ filename: string; url: string }> {
     // 生成唯一文件名
     const ext = path.extname(file.originalname);
     const filename = `${Date.now()}-${randomBytes(8).toString('hex')}${ext}`;

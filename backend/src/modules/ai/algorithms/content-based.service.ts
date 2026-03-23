@@ -80,9 +80,7 @@ export class ContentBasedService {
     }
 
     // 6. 按相似度排序并返回topN
-    return recommendations
-      .sort((a, b) => b.score - a.score)
-      .slice(0, topN);
+    return recommendations.sort((a, b) => b.score - a.score).slice(0, topN);
   }
 
   /**
@@ -106,7 +104,8 @@ export class ContentBasedService {
 
       // 分类统计
       if (product.categoryId) {
-        categories[product.categoryId] = (categories[product.categoryId] || 0) + 1;
+        categories[product.categoryId] =
+          (categories[product.categoryId] || 0) + 1;
       }
     }
 
@@ -115,7 +114,7 @@ export class ContentBasedService {
     const maxCount = Math.max(...Object.values(categories), 1);
 
     preference['avg_price'] = avgPrice;
-    
+
     for (const [categoryId, count] of Object.entries(categories)) {
       preference[`category_${categoryId}`] = count / maxCount;
     }
@@ -134,7 +133,7 @@ export class ContentBasedService {
     const features: { [key: string]: number } = {};
 
     features['avg_price'] = Number(product.price);
-    
+
     if (product.categoryId) {
       features[`category_${product.categoryId}`] = 1.0;
     }

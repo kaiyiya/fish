@@ -1,4 +1,10 @@
-import { IsNumber, IsNotEmpty, IsArray, ValidateNested, Min } from 'class-validator';
+import {
+  IsNumber,
+  IsNotEmpty,
+  IsArray,
+  ValidateNested,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class OrderItemDto {

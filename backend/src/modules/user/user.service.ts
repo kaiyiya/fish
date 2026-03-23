@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
@@ -53,6 +53,48 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.userRepository.update(id, updateUserDto);
     return this.findOne(id);
+  }
+
+  async adminUpdatePassword(id: number, newPassword: string): Promise<User> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const res = await this.userRepository.update(id, { password: hashedPassword });
+
+    if (!res.affected || res.affected <= 0) {
+      throw new NotFoundException('用户不存在');
+    }
+
+    return this.findOne(id);
+  }
+
+  async adminFindAll(): Promise<
+    Array<{
+      id: number;
+      username: string;
+      phone: string;
+      avatar: string | null;
+      gender: string | null;
+      age: number | null;
+      role: string;
+      created_at: Date;
+      updated_at: Date;
+    }>
+  > {
+    const users = await this.userRepository.find({
+      order: { created_at: 'DESC' },
+    });
+
+    // 不返回 password，避免泄露
+    return users.map((u) => ({
+      id: u.id,
+      username: u.username,
+      phone: u.phone,
+      avatar: u.avatar ?? null,
+      gender: u.gender ?? null,
+      age: (u.age as any) ?? null,
+      role: u.role,
+      created_at: u.created_at,
+      updated_at: u.updated_at,
+    }));
   }
 
   async remove(id: number): Promise<void> {

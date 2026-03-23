@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from '../../database/entities/review.entity';
@@ -22,10 +26,13 @@ export class ReviewService {
   /**
    * 创建评价
    */
-  async create(userId: number, createReviewDto: CreateReviewDto): Promise<Review> {
+  async create(
+    userId: number,
+    createReviewDto: CreateReviewDto,
+  ): Promise<Review> {
     // 验证商品是否存在
-    const product = await this.productRepository.findOne({ 
-      where: { id: createReviewDto.productId } 
+    const product = await this.productRepository.findOne({
+      where: { id: createReviewDto.productId },
     });
     if (!product) {
       throw new NotFoundException('商品不存在');
@@ -59,7 +66,7 @@ export class ReviewService {
       });
 
       if (adminUsers.length > 0) {
-        const userIds = adminUsers.map(u => u.id);
+        const userIds = adminUsers.map((u) => u.id);
         await this.notificationService.createBatch(userIds, {
           type: 'review',
           title: '收到新评价',
@@ -78,7 +85,11 @@ export class ReviewService {
   /**
    * 获取商品评价列表
    */
-  async getProductReviews(productId: number, page: number = 1, limit: number = 10): Promise<{ reviews: Review[]; total: number }> {
+  async getProductReviews(
+    productId: number,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ reviews: Review[]; total: number }> {
     const [reviews, total] = await this.reviewRepository.findAndCount({
       where: { productId },
       relations: ['user'],
@@ -104,7 +115,9 @@ export class ReviewService {
   /**
    * 获取商品平均评分
    */
-  async getProductRating(productId: number): Promise<{ average: number; count: number }> {
+  async getProductRating(
+    productId: number,
+  ): Promise<{ average: number; count: number }> {
     const result = await this.reviewRepository
       .createQueryBuilder('review')
       .select('AVG(review.rating)', 'average')

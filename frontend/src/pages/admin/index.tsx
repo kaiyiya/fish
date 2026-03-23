@@ -109,6 +109,13 @@ export default class AdminDashboard extends Component {
                 <View className="menu-icon data">📊</View>
                 <Text className="menu-text">数据中心</Text>
               </View>
+              <View
+                className="menu-item"
+                onClick={() => this.navigateTo('/pages/admin/user-center/index')}
+              >
+                <View className="menu-icon user">👤</View>
+                <Text className="menu-text">用户充值/改密</Text>
+              </View>
             </View>
           </View>
         </ScrollView>

@@ -60,17 +60,18 @@ export class CartController {
     @Param('id') id: string,
     @Body() updateCartDto: UpdateCartDto,
   ) {
-    return this.cartService.updateCartItem(user.id, +id, updateCartDto.quantity);
+    return this.cartService.updateCartItem(
+      user.id,
+      +id,
+      updateCartDto.quantity,
+    );
   }
 
   /**
    * 删除购物车商品
    */
   @Delete(':id')
-  async removeCartItem(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async removeCartItem(@CurrentUser() user: any, @Param('id') id: string) {
     await this.cartService.removeCartItem(user.id, +id);
     return { message: '删除成功' };
   }

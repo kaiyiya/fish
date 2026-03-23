@@ -11,11 +11,15 @@ import { User } from '../../database/entities/user.entity';
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([VirtualAccount, WalletRechargeSession, WalletTransaction, User]),
+    TypeOrmModule.forFeature([
+      VirtualAccount,
+      WalletRechargeSession,
+      WalletTransaction,
+      User,
+    ]),
   ],
   controllers: [WalletController],
   providers: [WalletService],
   exports: [WalletService],
 })
 export class WalletModule {}
-

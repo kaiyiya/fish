@@ -38,9 +38,12 @@ export class StatisticsService {
     const totalRecognitions = await this.recognitionRepository.count();
 
     // 日期范围查询
-    const queryBuilder = this.recognitionRepository.createQueryBuilder('recognition');
+    const queryBuilder =
+      this.recognitionRepository.createQueryBuilder('recognition');
     if (startDate) {
-      queryBuilder.andWhere('recognition.created_at >= :startDate', { startDate });
+      queryBuilder.andWhere('recognition.created_at >= :startDate', {
+        startDate,
+      });
     }
     if (endDate) {
       queryBuilder.andWhere('recognition.created_at <= :endDate', { endDate });
@@ -78,7 +81,8 @@ export class StatisticsService {
   async getRecommendationStats(query: any) {
     const { startDate, endDate } = query;
 
-    const queryBuilder = this.recommendationLogRepository.createQueryBuilder('log');
+    const queryBuilder =
+      this.recommendationLogRepository.createQueryBuilder('log');
     if (startDate) {
       queryBuilder.andWhere('log.created_at >= :startDate', { startDate });
     }
@@ -93,13 +97,15 @@ export class StatisticsService {
     const clickedCount = await queryBuilder
       .andWhere('log.clicked = :clicked', { clicked: true })
       .getCount();
-    const clickRate = totalRecommendations > 0 ? clickedCount / totalRecommendations : 0;
+    const clickRate =
+      totalRecommendations > 0 ? clickedCount / totalRecommendations : 0;
 
     // 转化率 = 购买次数 / 推荐次数
     const purchasedCount = await queryBuilder
       .andWhere('log.purchased = :purchased', { purchased: true })
       .getCount();
-    const conversionRate = totalRecommendations > 0 ? purchasedCount / totalRecommendations : 0;
+    const conversionRate =
+      totalRecommendations > 0 ? purchasedCount / totalRecommendations : 0;
 
     // 各算法性能统计
     const algorithmPerformance = await this.recommendationLogRepository
@@ -107,7 +113,10 @@ export class StatisticsService {
       .select('log.algorithmType', 'algorithm')
       .addSelect('COUNT(*)', 'total')
       .addSelect('SUM(CASE WHEN log.clicked = 1 THEN 1 ELSE 0 END)', 'clicks')
-      .addSelect('SUM(CASE WHEN log.purchased = 1 THEN 1 ELSE 0 END)', 'purchases')
+      .addSelect(
+        'SUM(CASE WHEN log.purchased = 1 THEN 1 ELSE 0 END)',
+        'purchases',
+      )
       .groupBy('log.algorithmType')
       .getRawMany();
 
@@ -120,8 +129,12 @@ export class StatisticsService {
         total: Number(item.total),
         clicks: Number(item.clicks),
         purchases: Number(item.purchases),
-        clickRate: Number(item.total) > 0 ? Number(item.clicks) / Number(item.total) : 0,
-        conversionRate: Number(item.total) > 0 ? Number(item.purchases) / Number(item.total) : 0,
+        clickRate:
+          Number(item.total) > 0 ? Number(item.clicks) / Number(item.total) : 0,
+        conversionRate:
+          Number(item.total) > 0
+            ? Number(item.purchases) / Number(item.total)
+            : 0,
       })),
     };
   }
@@ -200,23 +213,25 @@ export class StatisticsService {
    * 后台数据中心：月销量/金额汇总、用户消费偏好（按品类）、总用户数等
    */
   async getDataCenterStats(query: any) {
-    const startDate = query?.startDate ? String(query.startDate) : undefined
-    const endDate = query?.endDate ? String(query.endDate) : undefined
-    const cancelledStatus = 'cancelled'
+    const startDate = query?.startDate ? String(query.startDate) : undefined;
+    const endDate = query?.endDate ? String(query.endDate) : undefined;
+    const cancelledStatus = 'cancelled';
 
     const baseOrdersQb = this.orderRepository
       .createQueryBuilder('order')
-      .where('order.status != :cancelledStatus', { cancelledStatus })
+      .where('order.status != :cancelledStatus', { cancelledStatus });
 
-    if (startDate) baseOrdersQb.andWhere('order.created_at >= :startDate', { startDate })
-    if (endDate) baseOrdersQb.andWhere('order.created_at <= :endDate', { endDate })
+    if (startDate)
+      baseOrdersQb.andWhere('order.created_at >= :startDate', { startDate });
+    if (endDate)
+      baseOrdersQb.andWhere('order.created_at <= :endDate', { endDate });
 
-    const totalOrders = await baseOrdersQb.clone().getCount()
+    const totalOrders = await baseOrdersQb.clone().getCount();
     const totalRevenueRaw = await baseOrdersQb
       .clone()
       .select('COALESCE(SUM(order.totalAmount), 0)', 'total')
-      .getRawOne()
-    const totalRevenue = Number(totalRevenueRaw?.total || 0)
+      .getRawOne();
+    const totalRevenue = Number(totalRevenueRaw?.total || 0);
 
     const monthlySalesRaw = await baseOrdersQb
       .clone()
@@ -226,9 +241,9 @@ export class StatisticsService {
       .groupBy("DATE_FORMAT(order.created_at, '%Y-%m')")
       .orderBy('month', 'DESC')
       .limit(12)
-      .getRawMany()
+      .getRawMany();
 
-    const totalUsers = await this.userRepository.count()
+    const totalUsers = await this.userRepository.count();
 
     const topUsersRaw = await baseOrdersQb
       .clone()
@@ -238,17 +253,22 @@ export class StatisticsService {
       .groupBy('order.userId')
       .orderBy('totalAmount', 'DESC')
       .limit(10)
-      .getRawMany()
+      .getRawMany();
 
     const topUserIds = topUsersRaw
       .map((r) => Number(r.userId))
-      .filter((id) => Number.isFinite(id))
+      .filter((id) => Number.isFinite(id));
 
-    const users = topUserIds.length ? await this.userRepository.find({ where: { id: In(topUserIds as any) } }) : []
-    const userMap = new Map(users.map((u) => [u.id, u]))
+    const users = topUserIds.length
+      ? await this.userRepository.find({ where: { id: In(topUserIds as any) } })
+      : [];
+    const userMap = new Map(users.map((u) => [u.id, u]));
 
     // 每个Top用户：消费最多的品类（按品类金额最大）
-    const userTopCategoryById: Record<number, { categoryId: number; totalAmount: number }> = {}
+    const userTopCategoryById: Record<
+      number,
+      { categoryId: number; totalAmount: number }
+    > = {};
     if (topUserIds.length) {
       const categoryTotalsQb = this.orderItemRepository
         .createQueryBuilder('item')
@@ -259,26 +279,30 @@ export class StatisticsService {
         .addSelect('SUM(item.subtotal)', 'totalAmount')
         .where('order.status != :cancelledStatus', { cancelledStatus })
         .andWhere('product.categoryId IS NOT NULL')
-        .andWhere('order.userId IN (:...topUserIds)', { topUserIds })
+        .andWhere('order.userId IN (:...topUserIds)', { topUserIds });
 
-      if (startDate) categoryTotalsQb.andWhere('order.created_at >= :startDate', { startDate })
-      if (endDate) categoryTotalsQb.andWhere('order.created_at <= :endDate', { endDate })
+      if (startDate)
+        categoryTotalsQb.andWhere('order.created_at >= :startDate', {
+          startDate,
+        });
+      if (endDate)
+        categoryTotalsQb.andWhere('order.created_at <= :endDate', { endDate });
 
       const rawRows = await categoryTotalsQb
         .groupBy('order.userId')
         .addGroupBy('product.categoryId')
         .orderBy('totalAmount', 'DESC')
-        .getRawMany()
+        .getRawMany();
 
       for (const row of rawRows) {
-        const uid = Number(row.userId)
-        const cid = Number(row.categoryId)
-        const ta = Number(row.totalAmount)
-        if (!Number.isFinite(uid) || !Number.isFinite(cid)) continue
+        const uid = Number(row.userId);
+        const cid = Number(row.categoryId);
+        const ta = Number(row.totalAmount);
+        if (!Number.isFinite(uid) || !Number.isFinite(cid)) continue;
 
-        const existing = userTopCategoryById[uid]
+        const existing = userTopCategoryById[uid];
         if (!existing || ta > existing.totalAmount) {
-          userTopCategoryById[uid] = { categoryId: cid, totalAmount: ta }
+          userTopCategoryById[uid] = { categoryId: cid, totalAmount: ta };
         }
       }
     }
@@ -289,15 +313,21 @@ export class StatisticsService {
           .map((x) => x.categoryId)
           .filter((id) => id > 0),
       ),
-    )
-    const categories = categoryIds.length ? await this.categoryRepository.find({ where: { id: In(categoryIds as any) } }) : []
-    const categoryMap = new Map(categories.map((c) => [c.id, c]))
+    );
+    const categories = categoryIds.length
+      ? await this.categoryRepository.find({
+          where: { id: In(categoryIds as any) },
+        })
+      : [];
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
     const topUsers = topUsersRaw.map((r) => {
-      const uid = Number(r.userId)
-      const user = userMap.get(uid)
-      const topCategory = userTopCategoryById[uid]
-      const category = topCategory ? categoryMap.get(topCategory.categoryId) : undefined
+      const uid = Number(r.userId);
+      const user = userMap.get(uid);
+      const topCategory = userTopCategoryById[uid];
+      const category = topCategory
+        ? categoryMap.get(topCategory.categoryId)
+        : undefined;
 
       return {
         userId: uid,
@@ -306,8 +336,8 @@ export class StatisticsService {
         orderCount: Number(r.orderCount || 0),
         topCategoryId: topCategory?.categoryId || null,
         topCategoryName: category?.name || null,
-      }
-    })
+      };
+    });
 
     const topCategoriesQb = this.orderItemRepository
       .createQueryBuilder('item')
@@ -317,27 +347,33 @@ export class StatisticsService {
       .addSelect('SUM(item.quantity)', 'totalQuantity')
       .addSelect('SUM(item.subtotal)', 'totalAmount')
       .where('order.status != :cancelledStatus', { cancelledStatus })
-      .andWhere('product.categoryId IS NOT NULL')
+      .andWhere('product.categoryId IS NOT NULL');
 
-    if (startDate) topCategoriesQb.andWhere('order.created_at >= :startDate', { startDate })
-    if (endDate) topCategoriesQb.andWhere('order.created_at <= :endDate', { endDate })
+    if (startDate)
+      topCategoriesQb.andWhere('order.created_at >= :startDate', { startDate });
+    if (endDate)
+      topCategoriesQb.andWhere('order.created_at <= :endDate', { endDate });
 
     const topCategoriesRaw = await topCategoriesQb
       .groupBy('product.categoryId')
       .orderBy('totalAmount', 'DESC')
       .limit(5)
-      .getRawMany()
+      .getRawMany();
 
-    const tcIds = topCategoriesRaw.map((r) => Number(r.categoryId)).filter((id) => id > 0)
-    const tcList = tcIds.length ? await this.categoryRepository.find({ where: { id: In(tcIds as any) } }) : []
-    const tcMap = new Map(tcList.map((c) => [c.id, c]))
+    const tcIds = topCategoriesRaw
+      .map((r) => Number(r.categoryId))
+      .filter((id) => id > 0);
+    const tcList = tcIds.length
+      ? await this.categoryRepository.find({ where: { id: In(tcIds as any) } })
+      : [];
+    const tcMap = new Map(tcList.map((c) => [c.id, c]));
 
     const topCategories = topCategoriesRaw.map((r) => ({
       categoryId: Number(r.categoryId),
       categoryName: tcMap.get(Number(r.categoryId))?.name || null,
       totalQuantity: Number(r.totalQuantity || 0),
       totalAmount: Number(r.totalAmount || 0),
-    }))
+    }));
 
     return {
       totalUsers,
@@ -350,6 +386,6 @@ export class StatisticsService {
       })),
       topUsers,
       topCategories,
-    }
+    };
   }
 }

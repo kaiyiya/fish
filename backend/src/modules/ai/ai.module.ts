@@ -41,4 +41,4 @@ import { Category } from '../../database/entities/category.entity';
     CollaborativeFilteringService,
   ],
 })
-export class AiModule { }
+export class AiModule {}
