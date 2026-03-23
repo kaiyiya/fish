@@ -1,0 +1,51 @@
+.region-selector {
+  width: 100%;
+}
+
+.region-row {
+  display: flex;
+  gap: 12px;
+}
+
+.region-item {
+  flex: 1;
+}
+
+.region-label {
+  display: block;
+  font-size: 24px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 10px;
+}
+
+.picker-view {
+  height: 84px;
+  border: 1px solid rgba(102, 126, 234, 0.12);
+  border-radius: 16px;
+  background: rgba(102, 126, 234, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+
+.picker-view--disabled {
+  opacity: 0.6;
+}
+
+.picker-placeholder {
+  font-size: 26px;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.picker-text {
+  font-size: 26px;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.picker-arrow {
+  font-size: 22px;
+  color: rgba(0, 0, 0, 0.4);
+}
+

@@ -41,7 +41,7 @@ export default class OrderList extends Component {
     })
     if (res.confirm) {
       try {
-        await orderApi.updateStatus(orderId, 'cancelled')
+        await orderApi.cancel(orderId)
         Taro.showToast({ title: '订单已取消', icon: 'success' })
         this.loadOrders()
       } catch (error) {
@@ -54,7 +54,7 @@ export default class OrderList extends Component {
   handlePayOrder = async (e, orderId) => {
     e.stopPropagation()
     try {
-      await orderApi.updateStatus(orderId, 'paid')
+      await orderApi.simulatePay(orderId)
       Taro.showToast({ title: '支付成功', icon: 'success' })
       this.loadOrders()
     } catch (error) {

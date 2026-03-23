@@ -16,11 +16,34 @@ export class OrderController {
     return this.orderService.create(user.id, createOrderDto);
   }
 
+  /**
+   * 用户模拟支付：不接入第三方支付，只把订单状态更新为 paid，并写入支付日志。
+   */
+  @Post(':id/pay/simulate')
+  async simulatePayment(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.orderService.simulatePayment(user.id, +id);
+  }
+
+  /**
+   * 用户取消订单（仅待支付可取消）
+   */
+  @Post(':id/cancel')
+  async cancelForUser(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.orderService.cancelForUser(user.id, +id);
+  }
+
   @Get('admin/all')
   @UseGuards(RolesGuard)
   @Roles('admin')
   findAllAdmin() {
     return this.orderService.findAll();
+  }
+
+  @Get('admin/user/:userId')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  findByUserAdmin(@Param('userId') userId: string) {
+    return this.orderService.findByUserAdmin(+userId);
   }
 
   @Get()
@@ -31,8 +54,12 @@ export class OrderController {
   @Patch(':id/status')
   @UseGuards(RolesGuard)
   @Roles('admin')
-  updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
-    return this.orderService.updateStatus(+id, body.status);
+  updateStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+    @CurrentUser() user: any,
+  ) {
+    return this.orderService.updateStatus(+id, body.status, user?.id ?? null);
   }
 
   @Get(':id')

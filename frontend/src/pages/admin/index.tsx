@@ -102,6 +102,13 @@ export default class AdminDashboard extends Component {
                 <View className="menu-icon category">🏷️</View>
                 <Text className="menu-text">分类管理</Text>
               </View>
+              <View
+                className="menu-item"
+                onClick={() => this.navigateTo('/pages/admin/data-center/index')}
+              >
+                <View className="menu-icon data">📊</View>
+                <Text className="menu-text">数据中心</Text>
+              </View>
             </View>
           </View>
         </ScrollView>

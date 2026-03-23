@@ -83,18 +83,15 @@ export default class OrderDetail extends Component {
 
     this.setState({ paying: true })
     try {
-      // TODO: 接入微信支付
-      // 目前先模拟支付流程
-      Taro.showToast({ 
-        title: '支付功能开发中，敬请期待', 
+      Taro.showToast({
+        title: '正在模拟支付...',
         icon: 'none',
-        duration: 2000
+        duration: 1500,
       })
-      
-      // 模拟支付成功后的操作
-      // await orderApi.pay(order.id)
-      // Taro.showToast({ title: '支付成功', icon: 'success' })
-      // this.loadDetail(order.id)
+
+      await orderApi.simulatePay(order.id)
+      Taro.showToast({ title: '支付成功', icon: 'success' })
+      this.loadDetail(order.id)
     } catch (error) {
       logger.error('支付失败', error)
       Taro.showToast({ 

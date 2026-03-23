@@ -1,0 +1,112 @@
+.wallet-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.loading-container {
+  margin-top: 200px;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 28px;
+  color: #999;
+}
+
+.balance-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 22px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.balance-label {
+  display: block;
+  font-size: 28px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.balance-value {
+  display: block;
+  margin-top: 16px;
+  font-size: 46px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.recharge-card {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px 18px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.row {
+  margin-bottom: 18px;
+}
+
+.amount-input {
+  width: 100%;
+}
+
+.recharge-btn {
+  margin-top: 8px;
+  border-radius: 18px;
+  height: 88px;
+  font-size: 32px !important;
+}
+
+.qr-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed rgba(102, 126, 234, 0.25);
+}
+
+.qr-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 14px;
+}
+
+.qr-wrap {
+  width: 360px;
+  height: 360px;
+  margin: 0 auto;
+  border-radius: 20px;
+  background: #fafbfc;
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qr-img {
+  width: 330px;
+  height: 330px;
+}
+
+.qr-hint {
+  margin-top: 16px;
+  font-size: 24px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.refresh-btn {
+  margin-top: 16px;
+}
+

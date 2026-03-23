@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { addressApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
+import RegionSelector from '../../../components/common/RegionSelector'
 import { useUserStore } from '../../../store/user'
 import { logger } from '../../../utils/logger'
 import './index.scss'
@@ -63,6 +64,17 @@ export default class AddressEdit extends Component {
       form: {
         ...prevState.form,
         [key]: value,
+      },
+    }))
+  }
+
+  handleRegionChange = (region: { province: string; city: string; district: string }) => {
+    this.setState((prevState) => ({
+      form: {
+        ...prevState.form,
+        province: region.province,
+        city: region.city,
+        district: region.district,
       },
     }))
   }
@@ -172,29 +184,14 @@ export default class AddressEdit extends Component {
 
             <View className="form-item">
               <Text className="form-label">所在地区</Text>
-              <View className="address-row">
-                <Input
-                  type="text"
-                  value={form.province}
-                  onInput={(e) => this.handleInputChange('province', e.detail.value)}
-                  placeholder="省"
-                  className="form-input address-input"
-                />
-                <Input
-                  type="text"
-                  value={form.city}
-                  onInput={(e) => this.handleInputChange('city', e.detail.value)}
-                  placeholder="市"
-                  className="form-input address-input"
-                />
-                <Input
-                  type="text"
-                  value={form.district}
-                  onInput={(e) => this.handleInputChange('district', e.detail.value)}
-                  placeholder="区/县"
-                  className="form-input address-input"
-                />
-              </View>
+              <RegionSelector
+                value={{
+                  province: form.province,
+                  city: form.city,
+                  district: form.district,
+                }}
+                onChange={this.handleRegionChange}
+              />
             </View>
 
             <View className="form-item">

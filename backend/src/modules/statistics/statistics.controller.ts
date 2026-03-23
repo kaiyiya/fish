@@ -19,4 +19,9 @@ export class StatisticsController {
   getSalesStats(@Query() query: any) {
     return this.statisticsService.getSalesStats(query);
   }
+
+  @Get('data-center')
+  getDataCenterStats(@Query() query: any) {
+    return this.statisticsService.getDataCenterStats(query);
+  }
 }

@@ -18,6 +18,7 @@ import { CouponModule } from './modules/coupon/coupon.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './modules/health/health.controller';
+import { WalletModule } from './modules/wallet/wallet.module';
 
 @Module({
     imports: [
@@ -44,6 +45,7 @@ import { HealthController } from './modules/health/health.controller';
         AddressModule,
         CouponModule,
         NotificationModule,
+        WalletModule,
     ],
     controllers: [HealthController],
 })

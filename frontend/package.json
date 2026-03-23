@@ -1,4 +1,4 @@
-  {
+{
   "name": "fish-app-frontend",
   "version": "1.0.0",
   "description": "卖鱼小程序前端 - 基于Taro",
@@ -41,6 +41,7 @@
   },
   "author": "",
   "dependencies": {
+    "@province-city-china/data": "^8.5.8",
     "@tarojs/components": "^3.6.8",
     "@tarojs/helper": "^3.6.8",
     "@tarojs/plugin-framework-react": "^3.6.8",

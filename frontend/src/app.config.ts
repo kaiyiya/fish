@@ -8,6 +8,7 @@ export default defineAppConfig({
     'pages/admin/product/index',
     'pages/admin/order/index',
     'pages/admin/category/index',
+    'pages/admin/data-center/index',
     'pages/search/index',
     'pages/cart/index',
     'pages/address/list/index',
@@ -17,6 +18,7 @@ export default defineAppConfig({
     'pages/order/detail/index',
     'pages/profile/index',
     'pages/login/index',
+    'pages/wallet/index',
   ],
   window: {
     backgroundTextStyle: 'light',

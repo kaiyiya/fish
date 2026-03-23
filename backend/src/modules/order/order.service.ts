@@ -9,6 +9,11 @@ import { Product } from '../../database/entities/product.entity';
 import { Address } from '../../database/entities/address.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { NotificationService } from '../notification/notification.service';
+import { PaymentLog } from '../../database/entities/payment-log.entity';
+import { OrderStatusHistory } from '../../database/entities/order-status-history.entity';
+import { OrderShippingSnapshot } from '../../database/entities/order-shipping-snapshot.entity';
+import { OrderCreationLog } from '../../database/entities/order-creation-log.entity';
+import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
 export class OrderService {
@@ -23,7 +28,16 @@ export class OrderService {
     private productRepository: Repository<Product>,
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
+    @InjectRepository(PaymentLog)
+    private paymentLogRepository: Repository<PaymentLog>,
+    @InjectRepository(OrderStatusHistory)
+    private orderStatusHistoryRepository: Repository<OrderStatusHistory>,
+    @InjectRepository(OrderShippingSnapshot)
+    private orderShippingSnapshotRepository: Repository<OrderShippingSnapshot>,
+    @InjectRepository(OrderCreationLog)
+    private orderCreationLogRepository: Repository<OrderCreationLog>,
     private notificationService: NotificationService,
+    private walletService: WalletService,
   ) { }
 
   async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
@@ -89,6 +103,25 @@ export class OrderService {
 
     await this.orderItemRepository.save(orderItems);
 
+    // 订单收货信息快照（避免用户后续修改地址导致订单展示错乱）
+    await this.orderShippingSnapshotRepository.save({
+      orderId: savedOrder.id,
+      name: address.name,
+      phone: address.phone,
+      province: address.province,
+      city: address.city,
+      district: address.district,
+      detail: address.detail,
+      postalCode: address.postalCode ?? null,
+    });
+
+    // 订单创建日志（用于统计/审计）
+    await this.orderCreationLogRepository.save({
+      orderId: savedOrder.id,
+      userId,
+      totalAmount: createOrderDto.totalAmount,
+    });
+
     // 记录用户购买行为（用于推荐算法）
     const behaviors = createOrderDto.items.map((item) =>
       this.behaviorRepository.create({
@@ -117,11 +150,94 @@ export class OrderService {
     return this.findOne(savedOrder.id);
   }
 
+  /**
+   * 模拟支付：不接入任何支付网关，从用户虚拟账户里扣款，并把订单状态更新为 paid。
+   */
+  async simulatePayment(userId: number, orderId: number): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, userId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('订单不存在');
+    }
+    if (order.status !== 'pending') {
+      throw new BadRequestException('订单状态不正确，无法支付');
+    }
+
+    // 先扣钱包余额（余额不足会直接抛错）
+    await this.walletService.payWithWallet(userId, orderId, Number(order.totalAmount), 'wallet_mock');
+
+    // 写支付方式，确保展示正确
+    order.paymentMethod = 'wallet_mock';
+    await this.orderRepository.save(order);
+
+    const paidOrder = await this.updateStatus(orderId, 'paid', userId);
+
+    await this.paymentLogRepository.save({
+      orderId: paidOrder.id,
+      userId,
+      amount: paidOrder.totalAmount,
+      method: 'wallet_mock',
+      status: 'success',
+      transactionNo: `SIM${Date.now()}${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+    });
+
+    return this.findOne(paidOrder.id);
+  }
+
+  /**
+   * 用户取消订单（仅 pending 状态允许取消）。
+   */
+  async cancelForUser(userId: number, orderId: number): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, userId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('订单不存在');
+    }
+    if (order.status !== 'pending') {
+      throw new BadRequestException('仅待支付订单可取消');
+    }
+
+    return this.updateStatus(orderId, 'cancelled', userId);
+  }
+
   async findByUser(userId: number): Promise<Order[]> {
     return this.orderRepository.find({
       where: { userId },
       relations: ['items', 'items.product'],
       order: { created_at: 'DESC' },
+    });
+  }
+
+  /**
+   * 管理后台：按用户查询订单，并附带收货信息快照，便于后台查看/管理。
+   */
+  async findByUserAdmin(userId: number): Promise<Array<Order & { receiverName?: string; receiverPhone?: string; fullAddress?: string }>> {
+    const orders = await this.orderRepository.find({
+      where: { userId },
+      relations: ['items', 'items.product'],
+      order: { created_at: 'DESC' },
+    });
+
+    const ids = orders.map((o) => o.id);
+    if (ids.length === 0) return orders as any;
+
+    const snapshots = await this.orderShippingSnapshotRepository.find({
+      where: { orderId: In(ids) },
+    });
+    const snapshotMap = new Map<number, OrderShippingSnapshot>(snapshots.map((s) => [s.orderId, s]));
+
+    return orders.map((order) => {
+      const snapshot = snapshotMap.get(order.id);
+      (order as any).receiverName = snapshot?.name;
+      (order as any).receiverPhone = snapshot?.phone;
+      (order as any).fullAddress = snapshot
+        ? [snapshot.province, snapshot.city, snapshot.district, snapshot.detail].filter(Boolean).join(' ')
+        : undefined;
+      return order as any;
     });
   }
 
@@ -139,7 +255,7 @@ export class OrderService {
     });
   }
 
-  async updateStatus(id: number, status: string): Promise<Order> {
+  async updateStatus(id: number, status: string, changedBy: number | null = null): Promise<Order> {
     const order = await this.orderRepository.findOne({ where: { id } });
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -147,6 +263,15 @@ export class OrderService {
     const oldStatus = order.status;
     order.status = status;
     const savedOrder = await this.orderRepository.save(order);
+
+    if (oldStatus !== status) {
+      await this.orderStatusHistoryRepository.save({
+        orderId: savedOrder.id,
+        fromStatus: oldStatus,
+        toStatus: status,
+        changedBy,
+      });
+    }
 
     // 发送订单状态变更通知
     if (oldStatus !== status) {

@@ -16,6 +16,7 @@ export default class ProductDetail extends Component {
     editing: false,
     saving: false,
     product: null,
+    buyQuantity: 1,
     editForm: {
       price: '',
       stock: '',
@@ -303,11 +304,22 @@ export default class ProductDetail extends Component {
   }
 
   handleBuyNow = async () => {
-    const { product, submitting } = this.state
+    const { product, submitting, buyQuantity } = this.state
     if (!product || submitting) return
 
     if (product.stock !== undefined && product.stock === 0) {
       Taro.showToast({ title: '商品已售罄', icon: 'none' })
+      return
+    }
+
+    const quantity = Number(buyQuantity) || 1
+    if (quantity < 1) {
+      Taro.showToast({ title: '请选择正确的数量', icon: 'none' })
+      return
+    }
+
+    if (product.stock !== undefined && product.stock < quantity) {
+      Taro.showToast({ title: `库存不足，最多可买 ${product.stock} 件`, icon: 'none' })
       return
     }
 
@@ -319,7 +331,6 @@ export default class ProductDetail extends Component {
 
     this.setState({ submitting: true })
     try {
-      const quantity = 1
       const price = Number(product.price) || 0
       const totalAmount = quantity * price
 
@@ -351,6 +362,25 @@ export default class ProductDetail extends Component {
     } finally {
       this.setState({ submitting: false })
     }
+  }
+
+  handleBuyQuantityMinus = () => {
+    this.setState((prevState) => ({
+      buyQuantity: Math.max(1, Number(prevState.buyQuantity) - 1),
+    }))
+  }
+
+  handleBuyQuantityPlus = () => {
+    const { product, buyQuantity } = this.state
+    const next = Number(buyQuantity) + 1
+
+    if (!product) return
+    if (product.stock !== undefined && product.stock > 0 && next > product.stock) {
+      Taro.showToast({ title: `库存不足，最多可买 ${product.stock} 件`, icon: 'none' })
+      return
+    }
+
+    this.setState({ buyQuantity: next })
   }
 
   render() {
@@ -631,11 +661,24 @@ export default class ProductDetail extends Component {
             >
               {addingToCart ? '添加中...' : '加入购物车'}
             </Button>
+            <View className="buy-quantity-control">
+              <View className="quantity-btn" onClick={this.handleBuyQuantityMinus}>
+                <Text className="quantity-btn-text">-</Text>
+              </View>
+              <Text className="quantity-value">{this.state.buyQuantity}</Text>
+              <View className="quantity-btn" onClick={this.handleBuyQuantityPlus}>
+                <Text className="quantity-btn-text">+</Text>
+              </View>
+            </View>
             <Button
               type="primary"
               size="large"
               onClick={this.handleBuyNow}
-              disabled={submitting || (product.stock !== undefined && product.stock === 0)}
+              disabled={
+                submitting ||
+                (product.stock !== undefined && product.stock === 0) ||
+                (product.stock !== undefined && product.stock > 0 && this.state.buyQuantity > product.stock)
+              }
               loading={submitting}
               className="buy-btn"
             >

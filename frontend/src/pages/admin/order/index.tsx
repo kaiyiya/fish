@@ -2,7 +2,7 @@ import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { orderApi } from '../../../services/api'
-import { Button } from '../../../components/ui'
+import { Button, Input } from '../../../components/ui'
 import { logger } from '../../../utils/logger'
 import './index.scss'
 
@@ -10,21 +10,40 @@ export default class AdminOrder extends Component {
   state = {
     loading: true,
     orders: [],
+    userIdFilter: '',
   }
 
   componentDidMount() {
     this.loadOrders()
   }
 
-  loadOrders = async () => {
+  loadOrders = async (userId?: string) => {
     try {
-      const orders = await orderApi.getAll()
+      const orders = userId ? await orderApi.getByUserAdmin(userId) : await orderApi.getAll()
       this.setState({ orders, loading: false })
     } catch (error) {
       logger.error('加载订单列表失败', error)
       Taro.showToast({ title: '加载失败', icon: 'none' })
       this.setState({ loading: false })
     }
+  }
+
+  handleSearch = async () => {
+    const { userIdFilter } = this.state
+    const trimmed = String(userIdFilter || '').trim()
+
+    if (!trimmed) {
+      this.setState({ loading: true }, () => this.loadOrders())
+      return
+    }
+
+    const id = Number(trimmed)
+    if (!Number.isFinite(id) || id <= 0) {
+      Taro.showToast({ title: '请输入有效的用户ID', icon: 'none' })
+      return
+    }
+
+    this.setState({ loading: true }, () => this.loadOrders(String(id)))
   }
 
   getStatusText = (status) => {
@@ -60,6 +79,17 @@ export default class AdminOrder extends Component {
     }
   }
 
+  handlePay = async (orderId) => {
+    try {
+      await orderApi.simulatePay(orderId)
+      Taro.showToast({ title: '支付成功', icon: 'success' })
+      this.loadOrders()
+    } catch (error) {
+      logger.error('支付失败', error)
+      Taro.showToast({ title: error.message || '支付失败', icon: 'none' })
+    }
+  }
+
   formatDate = (dateStr) => {
     if (!dateStr) return ''
     const date = new Date(dateStr)
@@ -67,12 +97,41 @@ export default class AdminOrder extends Component {
   }
 
   render() {
-    const { loading, orders } = this.state
+    const { loading, orders, userIdFilter } = this.state
 
     return (
       <View className="admin-order-page">
         <View className="header">
           <Text className="title">订单管理</Text>
+        </View>
+
+        <View className="search-area">
+          <View className="search-row">
+            <Input
+              type="digit"
+              value={userIdFilter}
+              placeholder="输入用户ID（可选）"
+              onInput={(e) => this.setState({ userIdFilter: e.detail.value })}
+              className="search-input"
+            />
+            <Button
+              type="primary"
+              size="small"
+              onClick={this.handleSearch}
+              loading={loading}
+              className="search-btn"
+            >
+              查询
+            </Button>
+          </View>
+          <View className="reset-row">
+            <View
+              className="reset-btn"
+              onClick={() => this.setState({ userIdFilter: '' }, () => this.loadOrders())}
+            >
+              <Text>查看全部</Text>
+            </View>
+          </View>
         </View>
 
         <ScrollView scrollY className="list-scroll">
@@ -87,6 +146,10 @@ export default class AdminOrder extends Component {
           ) : (
             orders.map((order) => (
               <View key={order.id} className="order-card">
+                {(() => {
+                  const status = String(order.status || '').trim().toLowerCase()
+                  return (
+                    <>
                 <View className="card-header">
                   <View className="header-left">
                     <Text className="order-no">订单号：{order.orderNo}</Text>
@@ -96,10 +159,10 @@ export default class AdminOrder extends Component {
                   </View>
                   <View
                     className="status-badge"
-                    style={{ backgroundColor: this.getStatusColor(order.status) }}
+                    style={{ backgroundColor: this.getStatusColor(status) }}
                   >
                     <Text className="status-text">
-                      {this.getStatusText(order.status)}
+                      {this.getStatusText(status)}
                     </Text>
                   </View>
                 </View>
@@ -109,6 +172,18 @@ export default class AdminOrder extends Component {
                     <Text className="label">用户ID：</Text>
                     <Text className="value">{order.userId}</Text>
                   </View>
+                  {order.receiverName ? (
+                    <View className="info-row">
+                      <Text className="label">收货人：</Text>
+                      <Text className="value">{order.receiverName}</Text>
+                    </View>
+                  ) : null}
+                  {order.fullAddress ? (
+                    <View className="info-row">
+                      <Text className="label">收货地址：</Text>
+                      <Text className="value">{order.fullAddress}</Text>
+                    </View>
+                  ) : null}
                   <View className="info-row">
                     <Text className="label">商品数量：</Text>
                     <Text className="value">
@@ -122,11 +197,11 @@ export default class AdminOrder extends Component {
                 </View>
 
                 <View className="card-footer">
-                  {order.status === 'pending' && (
+                  {status === 'pending' && (
                     <View className="admin-action-buttons">
                       <View
                         className="admin-action-btn admin-btn-secondary"
-                        onClick={() => this.handleStatusChange(order.id, 'paid')}
+                        onClick={() => this.handlePay(order.id)}
                       >
                         <Text className="btn-text">标记已支付</Text>
                       </View>
@@ -138,7 +213,7 @@ export default class AdminOrder extends Component {
                       </View>
                     </View>
                   )}
-                  {order.status === 'paid' && (
+                  {status === 'paid' && (
                     <View
                       className="admin-action-btn admin-btn-secondary single"
                       onClick={() => this.handleStatusChange(order.id, 'shipped')}
@@ -146,7 +221,7 @@ export default class AdminOrder extends Component {
                       <Text className="btn-text">标记已发货</Text>
                     </View>
                   )}
-                  {order.status === 'shipped' && (
+                  {status === 'shipped' && (
                     <View
                       className="admin-action-btn admin-btn-secondary single"
                       onClick={() => this.handleStatusChange(order.id, 'completed')}
@@ -155,6 +230,9 @@ export default class AdminOrder extends Component {
                     </View>
                   )}
                 </View>
+                    </>
+                  )
+                })()}
               </View>
             ))
           )}

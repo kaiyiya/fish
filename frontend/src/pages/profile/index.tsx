@@ -61,6 +61,12 @@ export default class Profile extends Component {
     })
   }
 
+  handleGotoWallet = () => {
+    Taro.navigateTo({
+      url: '/pages/wallet/index',
+    })
+  }
+
   handleGotoCart = () => {
     Taro.navigateTo({
       url: '/pages/cart/index',
@@ -158,6 +164,15 @@ export default class Profile extends Component {
                   <View className="menu-content">
                     <Text className="menu-title">收货地址</Text>
                     <Text className="menu-desc">管理收货地址</Text>
+                  </View>
+                  <Text className="menu-arrow">›</Text>
+                </View>
+
+                <View className="menu-item" onClick={this.handleGotoWallet}>
+                  <View className="menu-icon wallet-icon">💳</View>
+                  <View className="menu-content">
+                    <Text className="menu-title">我的钱包</Text>
+                    <Text className="menu-desc">虚拟账户余额与充值</Text>
                   </View>
                   <Text className="menu-arrow">›</Text>
                 </View>

@@ -7,6 +7,8 @@ import { RecommendationLog } from '../../database/entities/recommendation-log.en
 import { Order } from '../../database/entities/order.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
 import { Product } from '../../database/entities/product.entity';
+import { User } from '../../database/entities/user.entity';
+import { Category } from '../../database/entities/category.entity';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { Product } from '../../database/entities/product.entity';
       Order,
       OrderItem,
       Product,
+      User,
+      Category,
     ]),
   ],
   controllers: [StatisticsController],

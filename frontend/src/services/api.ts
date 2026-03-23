@@ -73,8 +73,17 @@ export const orderApi = {
   getAll: () => {
     return request.get('/order/admin/all')
   },
+  getByUserAdmin: (userId) => {
+    return request.get(`/order/admin/user/${userId}`)
+  },
   getDetail: (id) => {
     return request.get(`/order/${id}`)
+  },
+  simulatePay: (id) => {
+    return request.post(`/order/${id}/pay/simulate`)
+  },
+  cancel: (id) => {
+    return request.post(`/order/${id}/cancel`)
   },
   updateStatus: (id, status) => {
     return request.patch(`/order/${id}/status`, { status })
@@ -82,6 +91,16 @@ export const orderApi = {
   exportOrders: () => {
     // 注意：导出接口需要特殊处理，直接返回完整 URL
     return 'http://localhost:3000/order/admin/export'
+  },
+}
+
+// 钱包/虚拟账户相关API
+export const walletApi = {
+  getBalance: () => {
+    return request.get('/wallet/balance')
+  },
+  createRechargeCode: (amount) => {
+    return request.post('/wallet/recharge/create', { amount })
   },
 }
 
@@ -114,6 +133,9 @@ export const statisticsApi = {
   },
   getSales: (params) => {
     return request.get('/statistics/sales', { params })
+  },
+  getDataCenter: (params) => {
+    return request.get('/statistics/data-center', { params })
   },
 }
 

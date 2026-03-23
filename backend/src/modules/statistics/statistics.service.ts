@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ImageRecognition } from '../../database/entities/image-recognition.entity';
 import { RecommendationLog } from '../../database/entities/recommendation-log.entity';
 import { Order } from '../../database/entities/order.entity';
 import { OrderItem } from '../../database/entities/order-item.entity';
 import { Product } from '../../database/entities/product.entity';
+import { User } from '../../database/entities/user.entity';
+import { Category } from '../../database/entities/category.entity';
 
 @Injectable()
 export class StatisticsService {
@@ -20,6 +22,10 @@ export class StatisticsService {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   /**
@@ -188,5 +194,162 @@ export class StatisticsService {
       })),
       topProducts: topProductsWithInfo,
     };
+  }
+
+  /**
+   * 后台数据中心：月销量/金额汇总、用户消费偏好（按品类）、总用户数等
+   */
+  async getDataCenterStats(query: any) {
+    const startDate = query?.startDate ? String(query.startDate) : undefined
+    const endDate = query?.endDate ? String(query.endDate) : undefined
+    const cancelledStatus = 'cancelled'
+
+    const baseOrdersQb = this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.status != :cancelledStatus', { cancelledStatus })
+
+    if (startDate) baseOrdersQb.andWhere('order.created_at >= :startDate', { startDate })
+    if (endDate) baseOrdersQb.andWhere('order.created_at <= :endDate', { endDate })
+
+    const totalOrders = await baseOrdersQb.clone().getCount()
+    const totalRevenueRaw = await baseOrdersQb
+      .clone()
+      .select('COALESCE(SUM(order.totalAmount), 0)', 'total')
+      .getRawOne()
+    const totalRevenue = Number(totalRevenueRaw?.total || 0)
+
+    const monthlySalesRaw = await baseOrdersQb
+      .clone()
+      .select("DATE_FORMAT(order.created_at, '%Y-%m')", 'month')
+      .addSelect('COALESCE(SUM(order.totalAmount), 0)', 'amount')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy("DATE_FORMAT(order.created_at, '%Y-%m')")
+      .orderBy('month', 'DESC')
+      .limit(12)
+      .getRawMany()
+
+    const totalUsers = await this.userRepository.count()
+
+    const topUsersRaw = await baseOrdersQb
+      .clone()
+      .select('order.userId', 'userId')
+      .addSelect('SUM(order.totalAmount)', 'totalAmount')
+      .addSelect('COUNT(*)', 'orderCount')
+      .groupBy('order.userId')
+      .orderBy('totalAmount', 'DESC')
+      .limit(10)
+      .getRawMany()
+
+    const topUserIds = topUsersRaw
+      .map((r) => Number(r.userId))
+      .filter((id) => Number.isFinite(id))
+
+    const users = topUserIds.length ? await this.userRepository.find({ where: { id: In(topUserIds as any) } }) : []
+    const userMap = new Map(users.map((u) => [u.id, u]))
+
+    // 每个Top用户：消费最多的品类（按品类金额最大）
+    const userTopCategoryById: Record<number, { categoryId: number; totalAmount: number }> = {}
+    if (topUserIds.length) {
+      const categoryTotalsQb = this.orderItemRepository
+        .createQueryBuilder('item')
+        .leftJoin('item.order', 'order')
+        .leftJoin('item.product', 'product')
+        .select('order.userId', 'userId')
+        .addSelect('product.categoryId', 'categoryId')
+        .addSelect('SUM(item.subtotal)', 'totalAmount')
+        .where('order.status != :cancelledStatus', { cancelledStatus })
+        .andWhere('product.categoryId IS NOT NULL')
+        .andWhere('order.userId IN (:...topUserIds)', { topUserIds })
+
+      if (startDate) categoryTotalsQb.andWhere('order.created_at >= :startDate', { startDate })
+      if (endDate) categoryTotalsQb.andWhere('order.created_at <= :endDate', { endDate })
+
+      const rawRows = await categoryTotalsQb
+        .groupBy('order.userId')
+        .addGroupBy('product.categoryId')
+        .orderBy('totalAmount', 'DESC')
+        .getRawMany()
+
+      for (const row of rawRows) {
+        const uid = Number(row.userId)
+        const cid = Number(row.categoryId)
+        const ta = Number(row.totalAmount)
+        if (!Number.isFinite(uid) || !Number.isFinite(cid)) continue
+
+        const existing = userTopCategoryById[uid]
+        if (!existing || ta > existing.totalAmount) {
+          userTopCategoryById[uid] = { categoryId: cid, totalAmount: ta }
+        }
+      }
+    }
+
+    const categoryIds = Array.from(
+      new Set(
+        Object.values(userTopCategoryById)
+          .map((x) => x.categoryId)
+          .filter((id) => id > 0),
+      ),
+    )
+    const categories = categoryIds.length ? await this.categoryRepository.find({ where: { id: In(categoryIds as any) } }) : []
+    const categoryMap = new Map(categories.map((c) => [c.id, c]))
+
+    const topUsers = topUsersRaw.map((r) => {
+      const uid = Number(r.userId)
+      const user = userMap.get(uid)
+      const topCategory = userTopCategoryById[uid]
+      const category = topCategory ? categoryMap.get(topCategory.categoryId) : undefined
+
+      return {
+        userId: uid,
+        username: user?.username || `用户${uid}`,
+        totalAmount: Number(r.totalAmount || 0),
+        orderCount: Number(r.orderCount || 0),
+        topCategoryId: topCategory?.categoryId || null,
+        topCategoryName: category?.name || null,
+      }
+    })
+
+    const topCategoriesQb = this.orderItemRepository
+      .createQueryBuilder('item')
+      .leftJoin('item.order', 'order')
+      .leftJoin('item.product', 'product')
+      .select('product.categoryId', 'categoryId')
+      .addSelect('SUM(item.quantity)', 'totalQuantity')
+      .addSelect('SUM(item.subtotal)', 'totalAmount')
+      .where('order.status != :cancelledStatus', { cancelledStatus })
+      .andWhere('product.categoryId IS NOT NULL')
+
+    if (startDate) topCategoriesQb.andWhere('order.created_at >= :startDate', { startDate })
+    if (endDate) topCategoriesQb.andWhere('order.created_at <= :endDate', { endDate })
+
+    const topCategoriesRaw = await topCategoriesQb
+      .groupBy('product.categoryId')
+      .orderBy('totalAmount', 'DESC')
+      .limit(5)
+      .getRawMany()
+
+    const tcIds = topCategoriesRaw.map((r) => Number(r.categoryId)).filter((id) => id > 0)
+    const tcList = tcIds.length ? await this.categoryRepository.find({ where: { id: In(tcIds as any) } }) : []
+    const tcMap = new Map(tcList.map((c) => [c.id, c]))
+
+    const topCategories = topCategoriesRaw.map((r) => ({
+      categoryId: Number(r.categoryId),
+      categoryName: tcMap.get(Number(r.categoryId))?.name || null,
+      totalQuantity: Number(r.totalQuantity || 0),
+      totalAmount: Number(r.totalAmount || 0),
+    }))
+
+    return {
+      totalUsers,
+      totalOrders,
+      totalRevenue,
+      monthlySales: monthlySalesRaw.map((m) => ({
+        month: m.month,
+        amount: Number(m.amount || 0),
+        count: Number(m.count || 0),
+      })),
+      topUsers,
+      topCategories,
+    }
   }
 }
