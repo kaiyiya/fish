@@ -24,7 +24,7 @@ export default defineAppConfig({
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'AI卖鱼商城',
+    navigationBarTitleText: '鱼类智能识别与管理系统',
     navigationBarTextStyle: 'black',
   },
   tabBar: {
