@@ -87,6 +87,9 @@ ENV/
 coverage/
 .nyc_output/
 
+# 论文 docx 批量修订工具依赖
+docs/_docx_tool/node_modules/
+
 # 其他
 *.pid
 *.seed
