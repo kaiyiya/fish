@@ -1,9 +1,11 @@
 import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import AdminShell from '../../../components/admin-shell'
 import { orderApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
 import { logger } from '../../../utils/logger'
+import { isH5 } from '../../../utils/is-h5'
 import './index.scss'
 
 export default class AdminOrder extends Component {
@@ -96,148 +98,313 @@ export default class AdminOrder extends Component {
     return `${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`
   }
 
+  renderOrderRowActions = (order) => {
+    const status = String(order.status || '').trim().toLowerCase()
+    const id = order.id
+    return (
+      <View className="order-table__actions">
+        {status === 'pending' && (
+          <>
+            <Button
+              type="primary"
+              size="mini"
+              className="order-table__btn"
+              onClick={() => this.handlePay(id)}
+            >
+              已支付
+            </Button>
+            <Button
+              type="danger"
+              size="mini"
+              className="order-table__btn"
+              onClick={() => this.handleStatusChange(id, 'cancelled')}
+            >
+              取消
+            </Button>
+          </>
+        )}
+        {status === 'paid' && (
+          <Button
+            type="primary"
+            size="mini"
+            className="order-table__btn"
+            onClick={() => this.handleStatusChange(id, 'shipped')}
+          >
+            发货
+          </Button>
+        )}
+        {status === 'shipped' && (
+          <Button
+            type="primary"
+            size="mini"
+            className="order-table__btn"
+            onClick={() => this.handleStatusChange(id, 'completed')}
+          >
+            完成
+          </Button>
+        )}
+      </View>
+    )
+  }
+
   render() {
     const { loading, orders, userIdFilter } = this.state
 
-    return (
-      <View className="admin-order-page">
+    const page = (
+      <View className={`admin-order-page ${isH5 ? 'admin-order-page--h5' : ''}`}>
         <View className="header">
           <Text className="title">订单管理</Text>
         </View>
 
-        <View className="search-area">
-          <View className="search-row">
-            <Input
-              type="digit"
-              value={userIdFilter}
-              placeholder="输入用户ID（可选）"
-              onInput={(e) => this.setState({ userIdFilter: e.detail.value })}
-              className="search-input"
-            />
-            <Button
-              type="primary"
-              size="small"
-              onClick={this.handleSearch}
-              loading={loading}
-              className="search-btn"
-            >
-              查询
-            </Button>
-          </View>
-          <View className="reset-row">
-            <View
-              className="reset-btn"
-              onClick={() => this.setState({ userIdFilter: '' }, () => this.loadOrders())}
-            >
-              <Text>查看全部</Text>
-            </View>
-          </View>
-        </View>
-
-        <ScrollView scrollY className="list-scroll">
-          {loading ? (
-            <View className="empty">
-              <Text>加载中...</Text>
-            </View>
-          ) : orders.length === 0 ? (
-            <View className="empty">
-              <Text>暂无订单</Text>
+        <View className={`search-area ${isH5 ? 'search-area--h5' : ''}`}>
+          {isH5 ? (
+            <View className="order-filter-h5">
+              <View className="order-filter-h5__row">
+                <Text className="order-filter-h5__label">用户 ID</Text>
+                <Input
+                  type="digit"
+                  value={userIdFilter}
+                  placeholder="留空为全部"
+                  onInput={(e) => this.setState({ userIdFilter: e.detail.value })}
+                  className="order-filter-h5__input search-input"
+                />
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={this.handleSearch}
+                  loading={loading}
+                  className="order-filter-h5__query search-btn"
+                >
+                  查询
+                </Button>
+                <Text
+                  className="order-filter-h5__reset"
+                  onClick={() => this.setState({ userIdFilter: '' }, () => this.loadOrders())}
+                >
+                  查看全部
+                </Text>
+              </View>
             </View>
           ) : (
-            orders.map((order) => (
-              <View key={order.id} className="order-card">
-                {(() => {
-                  const status = String(order.status || '').trim().toLowerCase()
-                  return (
-                    <>
-                <View className="card-header">
-                  <View className="header-left">
-                    <Text className="order-no">订单号：{order.orderNo}</Text>
-                    <Text className="order-time">
-                      {this.formatDate(order.created_at)}
-                    </Text>
-                  </View>
-                  <View
-                    className="status-badge"
-                    style={{ backgroundColor: this.getStatusColor(status) }}
-                  >
-                    <Text className="status-text">
-                      {this.getStatusText(status)}
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="card-body">
-                  <View className="info-row">
-                    <Text className="label">用户ID：</Text>
-                    <Text className="value">{order.userId}</Text>
-                  </View>
-                  {order.receiverName ? (
-                    <View className="info-row">
-                      <Text className="label">收货人：</Text>
-                      <Text className="value">{order.receiverName}</Text>
-                    </View>
-                  ) : null}
-                  {order.fullAddress ? (
-                    <View className="info-row">
-                      <Text className="label">收货地址：</Text>
-                      <Text className="value">{order.fullAddress}</Text>
-                    </View>
-                  ) : null}
-                  <View className="info-row">
-                    <Text className="label">商品数量：</Text>
-                    <Text className="value">
-                      {order.items?.length || 0} 件
-                    </Text>
-                  </View>
-                  <View className="info-row">
-                    <Text className="label">总金额：</Text>
-                    <Text className="price">¥{order.totalAmount}</Text>
-                  </View>
-                </View>
-
-                <View className="card-footer">
-                  {status === 'pending' && (
-                    <View className="admin-action-buttons">
-                      <View
-                        className="admin-action-btn admin-btn-secondary"
-                        onClick={() => this.handlePay(order.id)}
-                      >
-                        <Text className="btn-text">标记已支付</Text>
-                      </View>
-                      <View
-                        className="admin-action-btn admin-btn-danger"
-                        onClick={() => this.handleStatusChange(order.id, 'cancelled')}
-                      >
-                        <Text className="btn-text">取消订单</Text>
-                      </View>
-                    </View>
-                  )}
-                  {status === 'paid' && (
-                    <View
-                      className="admin-action-btn admin-btn-secondary single"
-                      onClick={() => this.handleStatusChange(order.id, 'shipped')}
-                    >
-                      <Text className="btn-text">标记已发货</Text>
-                    </View>
-                  )}
-                  {status === 'shipped' && (
-                    <View
-                      className="admin-action-btn admin-btn-secondary single"
-                      onClick={() => this.handleStatusChange(order.id, 'completed')}
-                    >
-                      <Text className="btn-text">标记已完成</Text>
-                    </View>
-                  )}
-                </View>
-                    </>
-                  )
-                })()}
+            <>
+              <View className="search-row">
+                <Input
+                  type="digit"
+                  value={userIdFilter}
+                  placeholder="输入用户ID（可选）"
+                  onInput={(e) => this.setState({ userIdFilter: e.detail.value })}
+                  className="search-input"
+                />
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={this.handleSearch}
+                  loading={loading}
+                  className="search-btn"
+                >
+                  查询
+                </Button>
               </View>
-            ))
+              <View className="reset-row">
+                <View
+                  className="reset-btn"
+                  onClick={() => this.setState({ userIdFilter: '' }, () => this.loadOrders())}
+                >
+                  <Text>查看全部</Text>
+                </View>
+              </View>
+            </>
           )}
-        </ScrollView>
+        </View>
+
+        {isH5 ? (
+          <View className="list-scroll list-scroll--h5 list-section--enterprise">
+            <View className="enterprise-list-header">
+              <Text className="enterprise-list-header__title">订单列表</Text>
+              <Text className="enterprise-list-header__meta">
+                {loading ? '加载中…' : `共 ${orders.length} 单`}
+              </Text>
+            </View>
+            {loading ? (
+              <View className="empty">
+                <Text>加载中...</Text>
+              </View>
+            ) : orders.length === 0 ? (
+              <View className="empty">
+                <Text>暂无订单</Text>
+              </View>
+            ) : (
+              <View className="order-table-wrap">
+                <View className="order-table">
+                  <View className="order-table__thead">
+                    <View className="order-table__tr order-table__tr--head">
+                      <View className="order-table__th order-table__col-no">订单号</View>
+                      <View className="order-table__th order-table__col-time">下单时间</View>
+                      <View className="order-table__th order-table__col-status">状态</View>
+                      <View className="order-table__th order-table__col-user">用户ID</View>
+                      <View className="order-table__th order-table__col-qty">件数</View>
+                      <View className="order-table__th order-table__col-amount">金额</View>
+                      <View className="order-table__th order-table__col-actions">操作</View>
+                    </View>
+                  </View>
+                  <View className="order-table__tbody">
+                    {orders.map((order) => {
+                      const status = String(order.status || '').trim().toLowerCase()
+                      return (
+                        <View key={order.id} className="order-table__tr order-table__tr--data">
+                          <View className="order-table__td order-table__col-no">
+                            <Text className="order-table__mono order-table__order-no">{order.orderNo}</Text>
+                          </View>
+                          <View className="order-table__td order-table__col-time">
+                            <Text className="order-table__time">{this.formatDate(order.created_at)}</Text>
+                          </View>
+                          <View className="order-table__td order-table__col-status">
+                            <View
+                              className={`order-table__badge order-table__badge--${
+                                ['pending', 'paid', 'shipped', 'completed', 'cancelled'].includes(status)
+                                  ? status
+                                  : 'unknown'
+                              }`}
+                            >
+                              <Text className="order-table__badge-text">{this.getStatusText(status)}</Text>
+                            </View>
+                          </View>
+                          <View className="order-table__td order-table__col-user">
+                            <Text>{order.userId}</Text>
+                          </View>
+                          <View className="order-table__td order-table__col-qty">
+                            <Text>{order.items?.length || 0}</Text>
+                          </View>
+                          <View className="order-table__td order-table__col-amount">
+                            <Text className="order-table__amount">¥{order.totalAmount}</Text>
+                          </View>
+                          <View className="order-table__td order-table__col-actions">
+                            {this.renderOrderRowActions(order)}
+                          </View>
+                        </View>
+                      )
+                    })}
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
+        ) : (
+          <ScrollView scrollY className="list-scroll">
+            {loading ? (
+              <View className="empty">
+                <Text>加载中...</Text>
+              </View>
+            ) : orders.length === 0 ? (
+              <View className="empty">
+                <Text>暂无订单</Text>
+              </View>
+            ) : (
+              orders.map((order) => (
+                <View key={order.id} className="order-card">
+                  {(() => {
+                    const status = String(order.status || '').trim().toLowerCase()
+                    return (
+                      <>
+                        <View className="card-header">
+                          <View className="header-left">
+                            <Text className="order-no">订单号：{order.orderNo}</Text>
+                            <Text className="order-time">{this.formatDate(order.created_at)}</Text>
+                          </View>
+                          <View
+                            className="status-badge"
+                            style={{ backgroundColor: this.getStatusColor(status) }}
+                          >
+                            <Text className="status-text">{this.getStatusText(status)}</Text>
+                          </View>
+                        </View>
+
+                        <View className="card-body">
+                          <View className="info-row">
+                            <Text className="label">用户ID：</Text>
+                            <Text className="value">{order.userId}</Text>
+                          </View>
+                          {order.receiverName ? (
+                            <View className="info-row">
+                              <Text className="label">收货人：</Text>
+                              <Text className="value">{order.receiverName}</Text>
+                            </View>
+                          ) : null}
+                          {order.fullAddress ? (
+                            <View className="info-row">
+                              <Text className="label">收货地址：</Text>
+                              <Text className="value">{order.fullAddress}</Text>
+                            </View>
+                          ) : null}
+                          <View className="info-row">
+                            <Text className="label">商品数量：</Text>
+                            <Text className="value">{order.items?.length || 0} 件</Text>
+                          </View>
+                          <View className="info-row">
+                            <Text className="label">总金额：</Text>
+                            <Text className="price">¥{order.totalAmount}</Text>
+                          </View>
+                        </View>
+
+                        <View className="card-footer">
+                          {status === 'pending' && (
+                            <View className="admin-action-buttons">
+                              <View
+                                className="admin-action-btn admin-btn-secondary"
+                                onClick={() => this.handlePay(order.id)}
+                              >
+                                <Text className="btn-text">标记已支付</Text>
+                              </View>
+                              <View
+                                className="admin-action-btn admin-btn-danger"
+                                onClick={() => this.handleStatusChange(order.id, 'cancelled')}
+                              >
+                                <Text className="btn-text">取消订单</Text>
+                              </View>
+                            </View>
+                          )}
+                          {status === 'paid' && (
+                            <View
+                              className="admin-action-btn admin-btn-secondary single"
+                              onClick={() => this.handleStatusChange(order.id, 'shipped')}
+                            >
+                              <Text className="btn-text">标记已发货</Text>
+                            </View>
+                          )}
+                          {status === 'shipped' && (
+                            <View
+                              className="admin-action-btn admin-btn-secondary single"
+                              onClick={() => this.handleStatusChange(order.id, 'completed')}
+                            >
+                              <Text className="btn-text">标记已完成</Text>
+                            </View>
+                          )}
+                        </View>
+                      </>
+                    )
+                  })()}
+                </View>
+              ))
+            )}
+          </ScrollView>
+        )}
       </View>
     )
+
+    if (isH5) {
+      return (
+        <AdminShell
+          title="订单管理"
+          breadcrumb={[
+            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '订单管理' },
+          ]}
+        >
+          {page}
+        </AdminShell>
+      )
+    }
+
+    return page
   }
 }

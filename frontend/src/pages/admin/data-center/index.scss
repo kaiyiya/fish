@@ -138,3 +138,241 @@
   font-size: 24px;
 }
 
+.data-center-toolbar-h5 {
+  display: none;
+}
+
+.data-center-page--h5 {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #f1f5f9;
+
+  .data-center-toolbar-h5 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 24px;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .data-center-toolbar-h5__left {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .data-center-toolbar-h5__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+    writing-mode: horizontal-tb;
+  }
+
+  .data-center-toolbar-h5__subtitle {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .header {
+    display: none;
+  }
+
+  .list-section--enterprise {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-top: 0;
+  }
+
+  .list-scroll--h5 {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .empty--h5 {
+    margin-top: 48px;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .list-section-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 0;
+  }
+
+  .stat-card {
+    text-align: left;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    border-left: 4px solid #2563eb;
+    padding: 16px 18px;
+  }
+
+  .stat-card::before {
+    display: none;
+  }
+
+  .stat-card.green {
+    border-left-color: #16a34a;
+  }
+
+  .stat-card.orange {
+    border-left-color: #ea580c;
+  }
+
+  .stat-card.purple {
+    border-left-color: #7c3aed;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    color: #0f172a;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .dc-table-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .dc-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .empty-sub--inline {
+    padding: 28px 16px;
+    margin: 0;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .dc-table__tr {
+    display: grid;
+    align-items: center;
+    gap: 0 12px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
+
+  .dc-table__tr--head {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .dc-table__tr--data {
+    border-bottom: 1px solid #f1f5f9;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+
+  .dc-table__th {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .dc-table__td {
+    font-size: 13px;
+    color: #334155;
+    min-width: 0;
+  }
+
+  .dc-table__th--num,
+  .dc-table__td--num {
+    text-align: center;
+    justify-self: center;
+  }
+
+  .dc-table__th--right,
+  .dc-table__td--right {
+    text-align: right;
+    justify-self: end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dc-table__td--muted {
+    color: #64748b;
+  }
+
+  .dc-table__name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .dc-table__sub {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .dc-table--monthly .dc-table__tr {
+    grid-template-columns: minmax(100px, 1fr) 88px minmax(96px, 120px);
+  }
+
+  .dc-table--users .dc-table__tr {
+    grid-template-columns: minmax(140px, 1.2fr) minmax(100px, 1fr) minmax(100px, 120px);
+  }
+
+  .dc-table--categories .dc-table__tr {
+    grid-template-columns: minmax(120px, 1fr) 80px minmax(96px, 112px);
+  }
+
+  .dc-table {
+    min-width: 480px;
+  }
+
+  .dc-table--users {
+    min-width: 560px;
+  }
+}
+
+@media (max-width: 900px) {
+  .data-center-page--h5 .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

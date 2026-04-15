@@ -68,13 +68,19 @@ export default class AddressEdit extends Component {
     }))
   }
 
-  handleRegionChange = (region: { province: string; city: string; district: string }) => {
+  handleRegionChange = (region: {
+    province: string
+    city: string
+    district: string
+    postcode?: string
+  }) => {
     this.setState((prevState) => ({
       form: {
         ...prevState.form,
         province: region.province,
         city: region.city,
         district: region.district,
+        ...(region.postcode ? { postalCode: region.postcode } : {}),
       },
     }))
   }

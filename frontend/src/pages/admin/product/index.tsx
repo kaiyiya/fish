@@ -1,9 +1,11 @@
 import { Component } from 'react'
 import { View, Text, Textarea, ScrollView, Image, Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import AdminShell from '../../../components/admin-shell'
 import { productApi, categoryApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
 import { logger } from '../../../utils/logger'
+import { isH5 } from '../../../utils/is-h5'
 import './index.scss'
 
 export default class AdminProduct extends Component {
@@ -351,6 +353,13 @@ export default class AdminProduct extends Component {
     this.handleChange('imageUrlsText', urls.join('\n'))
   }
 
+  getCategoryLabel = (categoryId) => {
+    const { categories } = this.state
+    if (categoryId == null || categoryId === '') return '—'
+    const c = categories.find((x) => String(x.id) === String(categoryId))
+    return c ? c.name : String(categoryId)
+  }
+
   render() {
     const { loading, products, categories, editingId, form, saving } = this.state
     const imageUrls = (form.imageUrlsText || '').split('\n').filter(s => s.trim())
@@ -359,26 +368,39 @@ export default class AdminProduct extends Component {
       ? categories.findIndex(c => String(c.id) === String(form.categoryId))
       : -1
 
-    return (
-      <View className='admin-product-page'>
-        <View className='header'>
-          <View className='header-content'>
-            <Text className='title'>商品管理</Text>
-            <Text className='subtitle'>管理您的商品信息</Text>
+    const page = (
+      <View className={`admin-product-page ${isH5 ? 'admin-product-page--h5' : ''}`}>
+        {isH5 ? (
+          <View className='product-toolbar-h5'>
+            <View className='product-toolbar-h5__left'>
+              <Text className='product-toolbar-h5__title'>商品管理</Text>
+              <Text className='product-toolbar-h5__subtitle'>维护商品资料、价格与库存</Text>
+            </View>
+            <Button type='primary' size='small' onClick={this.startCreate} className='product-toolbar-h5__btn'>
+              <Text className='btn-icon'>+</Text>
+              <Text>新建商品</Text>
+            </Button>
           </View>
-          <Button
-            type='default'
-            size='large'
-            onClick={this.startCreate}
-            className='create-btn'
-          >
-            <Text className='btn-icon'>+</Text>
-            <Text>新建商品</Text>
-          </Button>
-        </View>
+        ) : (
+          <View className='header'>
+            <View className='header-content'>
+              <Text className='title'>商品管理</Text>
+              <Text className='subtitle'>管理您的商品信息</Text>
+            </View>
+            <Button
+              type='default'
+              size='large'
+              onClick={this.startCreate}
+              className='create-btn'
+            >
+              <Text className='btn-icon'>+</Text>
+              <Text>新建商品</Text>
+            </Button>
+          </View>
+        )}
 
         {editingId && (
-          <ScrollView scrollY className='edit-panel-scroll'>
+          <ScrollView scrollY className={`edit-panel-scroll ${isH5 ? 'edit-panel-scroll--h5' : ''}`}>
             <View className='edit-panel'>
               <View className="panel-header">
                 <Text className="panel-title">
@@ -577,9 +599,17 @@ export default class AdminProduct extends Component {
         )}
 
         {!editingId && (
-          <View className='list-section'>
-            <Text className='list-title'>商品列表</Text>
-            <ScrollView scrollY className='list-scroll'>
+          <View className={`list-section ${isH5 ? 'list-section--enterprise' : ''}`}>
+            {!isH5 && <Text className='list-title'>商品列表</Text>}
+            {isH5 && (
+              <View className='enterprise-list-header'>
+                <Text className='enterprise-list-header__title'>商品列表</Text>
+                <Text className='enterprise-list-header__meta'>
+                  {loading ? '加载中…' : `共 ${products.length} 条`}
+                </Text>
+              </View>
+            )}
+            <ScrollView scrollY className={`list-scroll ${isH5 ? 'list-scroll--h5' : ''}`}>
               {loading ? (
                 <View className='empty'>
                   <Text>加载中...</Text>
@@ -587,6 +617,88 @@ export default class AdminProduct extends Component {
               ) : products.length === 0 ? (
                 <View className='empty'>
                   <Text>暂无商品</Text>
+                </View>
+              ) : isH5 ? (
+                <View className='product-table-wrap'>
+                  <View className='product-table'>
+                    <View className='product-table__thead'>
+                      <View className='product-table__tr product-table__tr--head'>
+                        <View className='product-table__th product-table__col-thumb'>预览</View>
+                        <View className='product-table__th product-table__col-name'>商品名称</View>
+                        <View className='product-table__th product-table__col-id'>ID</View>
+                        <View className='product-table__th product-table__col-cat'>分类</View>
+                        <View className='product-table__th product-table__col-price'>价格</View>
+                        <View className='product-table__th product-table__col-stock'>库存</View>
+                        <View className='product-table__th product-table__col-actions'>操作</View>
+                      </View>
+                    </View>
+                    <View className='product-table__tbody'>
+                      {products.map((item) => {
+                        const desc = item.description
+                          ? String(item.description).replace(/\s+/g, ' ').trim()
+                          : ''
+                        const descShort =
+                          desc.length > 48 ? `${desc.slice(0, 48)}…` : desc
+                        return (
+                          <View key={item.id} className='product-table__tr product-table__tr--data'>
+                            <View className='product-table__td product-table__col-thumb'>
+                              {item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0] ? (
+                                <Image
+                                  src={item.imageUrls[0]}
+                                  className='product-table__thumb'
+                                  mode='aspectFill'
+                                />
+                              ) : (
+                                <View className='product-table__thumb-placeholder'>
+                                  <Text className='product-table__thumb-ph-text'>—</Text>
+                                </View>
+                              )}
+                            </View>
+                            <View className='product-table__td product-table__col-name'>
+                              <Text className='product-table__name'>{item.name}</Text>
+                              {descShort ? (
+                                <Text className='product-table__desc'>{descShort}</Text>
+                              ) : null}
+                            </View>
+                            <View className='product-table__td product-table__col-id'>
+                              <Text className='product-table__mono'>{item.id}</Text>
+                            </View>
+                            <View className='product-table__td product-table__col-cat'>
+                              <Text className='product-table__ellipsis'>
+                                {this.getCategoryLabel(item.categoryId)}
+                              </Text>
+                            </View>
+                            <View className='product-table__td product-table__col-price'>
+                              <Text className='product-table__price'>¥{item.price}</Text>
+                            </View>
+                            <View className='product-table__td product-table__col-stock'>
+                              <Text>{item.stock}</Text>
+                            </View>
+                            <View className='product-table__td product-table__col-actions'>
+                              <View className='product-table__action-btns'>
+                                <Button
+                                  type='default'
+                                  size='mini'
+                                  className='product-table__btn'
+                                  onClick={() => this.startEdit(item)}
+                                >
+                                  编辑
+                                </Button>
+                                <Button
+                                  type='danger'
+                                  size='mini'
+                                  className='product-table__btn'
+                                  onClick={() => this.handleRemove(item.id)}
+                                >
+                                  删除
+                                </Button>
+                              </View>
+                            </View>
+                          </View>
+                        )
+                      })}
+                    </View>
+                  </View>
                 </View>
               ) : (
                 products.map((item) => (
@@ -639,6 +751,22 @@ export default class AdminProduct extends Component {
         )}
       </View>
     )
+
+    if (isH5) {
+      return (
+        <AdminShell
+          title="商品管理"
+          breadcrumb={[
+            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '商品管理' },
+          ]}
+        >
+          {page}
+        </AdminShell>
+      )
+    }
+
+    return page
   }
 }
 

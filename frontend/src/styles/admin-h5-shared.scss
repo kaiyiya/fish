@@ -1,0 +1,177 @@
+/* H5 管理后台：覆盖 app 里针对小程序的巨型 button/input，统一为企业端紧凑尺寸 */
+
+.admin-order-page--h5,
+.admin-category-page--h5,
+.admin-product-page--h5,
+.data-center-page--h5,
+.admin-user-center--h5,
+.admin-dashboard--h5 {
+  /* 全局 app.scss 对裸 button 施加了很大 min-height，需用 UI 类名压过 */
+  button.ui-button {
+    min-width: 64px !important;
+    max-width: none !important;
+    font-weight: 500 !important;
+  }
+
+  button.ui-button--mini {
+    height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    min-width: 56px !important;
+  }
+
+  button.ui-button--small {
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    min-width: 64px !important;
+  }
+
+  button.ui-button--medium {
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    min-width: 80px !important;
+  }
+
+  button.ui-button--large {
+    height: 40px !important;
+    line-height: 40px !important;
+    padding: 0 18px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    min-width: 100px !important;
+  }
+
+  button.ui-button--primary {
+    background: #2563eb !important;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25) !important;
+    border: none !important;
+  }
+
+  button.ui-button--primary:hover {
+    background: #1d4ed8 !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35) !important;
+  }
+
+  button.ui-button--default {
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    color: #334155 !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  button.ui-button--danger {
+    background: #dc2626 !important;
+    color: #fff !important;
+    box-shadow: 0 1px 2px rgba(220, 38, 38, 0.25) !important;
+  }
+
+  .ui-input,
+  input.ui-input {
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+    border-radius: 6px !important;
+    border-width: 1px !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+
+  .ui-input:focus,
+  .ui-input:hover {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  }
+
+  textarea.ui-textarea,
+  .ui-textarea,
+  textarea.textarea,
+  .textarea {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    border-radius: 6px !important;
+    border-width: 1px !important;
+    padding: 10px 12px !important;
+    min-height: 88px !important;
+  }
+}
+
+/* 多页共用的列表页头与全宽容器（订单、分类、数据中心、用户等与商品页视觉一致） */
+.admin-order-page--h5 .list-section--enterprise,
+.admin-category-page--h5 .list-section--enterprise,
+.data-center-page--h5 .list-section--enterprise,
+.admin-user-center--h5 .list-section--enterprise {
+  width: 100%;
+  max-width: none;
+  padding: 16px 24px 40px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.admin-order-page--h5 .enterprise-list-header,
+.admin-category-page--h5 .enterprise-list-header,
+.data-center-page--h5 .enterprise-list-header,
+.admin-user-center--h5 .enterprise-list-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-order-page--h5 .enterprise-list-header__title,
+.admin-category-page--h5 .enterprise-list-header__title,
+.data-center-page--h5 .enterprise-list-header__title,
+.admin-user-center--h5 .enterprise-list-header__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.admin-order-page--h5 .enterprise-list-header__meta,
+.admin-category-page--h5 .enterprise-list-header__meta,
+.data-center-page--h5 .enterprise-list-header__meta,
+.admin-user-center--h5 .enterprise-list-header__meta {
+  font-size: 12px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-user-center--h5 .enterprise-list-header--with-action {
+  align-items: center;
+}
+
+/* 商品 / 分类表操作列：编辑/删除同宽对齐 */
+.admin-product-page--h5 .product-table__action-btns button.ui-button--mini,
+.admin-category-page--h5 .category-table__action-btns button.ui-button--mini {
+  flex: 0 0 auto;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* 订单表操作列：固定小号按钮，横排不换行，避免撑满整列 */
+.admin-order-page--h5 .order-table__actions button.ui-button--mini {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 52px !important;
+  max-width: none !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  border-radius: 6px !important;
+}
+
+.admin-order-page--h5 .order-table__actions button.ui-button--mini + button.ui-button--mini {
+  margin-left: 0;
+}

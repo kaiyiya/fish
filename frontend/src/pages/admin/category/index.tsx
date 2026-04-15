@@ -1,9 +1,11 @@
 import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import AdminShell from '../../../components/admin-shell'
 import { categoryApi } from '../../../services/api'
 import { Button, Input } from '../../../components/ui'
 import { logger } from '../../../utils/logger'
+import { isH5 } from '../../../utils/is-h5'
 import './index.scss'
 
 export default class AdminCategory extends Component {
@@ -125,8 +127,8 @@ export default class AdminCategory extends Component {
   render() {
     const { loading, categories, editingId, form, saving } = this.state
 
-    return (
-      <View className="admin-category-page">
+    const page = (
+      <View className={`admin-category-page ${isH5 ? 'admin-category-page--h5' : ''}`}>
         <View className="header">
           <Text className="title">分类管理</Text>
           <Button
@@ -138,6 +140,18 @@ export default class AdminCategory extends Component {
             新建分类
           </Button>
         </View>
+
+        {isH5 && (
+          <View className="category-toolbar-h5">
+            <View className="category-toolbar-h5__left">
+              <Text className="category-toolbar-h5__title">分类管理</Text>
+              <Text className="category-toolbar-h5__subtitle">维护分类名称与前台排序</Text>
+            </View>
+            <Button type="primary" size="small" onClick={this.startCreate} className="category-toolbar-h5__btn">
+              新建分类
+            </Button>
+          </View>
+        )}
 
         {editingId && (
           <View className="edit-panel">
@@ -197,51 +211,129 @@ export default class AdminCategory extends Component {
         )}
 
         {!editingId && (
-          <View className="list-section">
-            <Text className="list-title">分类列表</Text>
-            <ScrollView scrollY className="list-scroll">
-              {loading ? (
-                <View className="empty">
-                  <Text>加载中...</Text>
-                </View>
-              ) : categories.length === 0 ? (
-                <View className="empty">
-                  <Text>暂无分类</Text>
-                </View>
-              ) : (
-            categories.map((item) => (
-              <View key={item.id} className="category-card">
-                <View className="card-content">
-                  <View className="card-left">
-                    <Text className="card-name">{item.name}</Text>
-                    <Text className="card-meta">
-                      ID: {item.id} | 排序: {item.sortOrder || 0}
-                    </Text>
-                  </View>
-                </View>
-                <View className="card-actions">
-                  <Button
-                    type="default"
-                    size="small"
-                    onClick={() => this.startEdit(item)}
-                  >
-                    编辑
-                  </Button>
-                  <Button
-                    type="danger"
-                    size="small"
-                    onClick={() => this.handleRemove(item.id)}
-                  >
-                    删除
-                  </Button>
-                </View>
+          <View className={`list-section ${isH5 ? 'list-section--enterprise' : ''}`}>
+            {!isH5 && <Text className="list-title">分类列表</Text>}
+            {isH5 && (
+              <View className="enterprise-list-header">
+                <Text className="enterprise-list-header__title">分类列表</Text>
+                <Text className="enterprise-list-header__meta">
+                  {loading ? '加载中…' : `共 ${categories.length} 条`}
+                </Text>
               </View>
-            ))
-              )}
-            </ScrollView>
+            )}
+            {isH5 ? (
+              <View className="list-scroll list-scroll--h5">
+                {loading ? (
+                  <View className="empty">
+                    <Text>加载中...</Text>
+                  </View>
+                ) : categories.length === 0 ? (
+                  <View className="empty">
+                    <Text>暂无分类</Text>
+                  </View>
+                ) : (
+                  <View className="category-table-wrap">
+                    <View className="category-table">
+                      <View className="category-table__thead">
+                        <View className="category-table__tr category-table__tr--head">
+                          <View className="category-table__th category-table__col-id">ID</View>
+                          <View className="category-table__th category-table__col-name">分类名称</View>
+                          <View className="category-table__th category-table__col-sort">排序</View>
+                          <View className="category-table__th category-table__col-actions">操作</View>
+                        </View>
+                      </View>
+                      <View className="category-table__tbody">
+                        {categories.map((item) => (
+                          <View key={item.id} className="category-table__tr category-table__tr--data">
+                            <View className="category-table__td category-table__col-id">
+                              <Text className="category-table__mono">{item.id}</Text>
+                            </View>
+                            <View className="category-table__td category-table__col-name">
+                              <Text className="category-table__name">{item.name}</Text>
+                            </View>
+                            <View className="category-table__td category-table__col-sort">
+                              <Text>{item.sortOrder || 0}</Text>
+                            </View>
+                            <View className="category-table__td category-table__col-actions">
+                              <View className="category-table__action-btns">
+                                <Button
+                                  type="default"
+                                  size="mini"
+                                  className="category-table__btn"
+                                  onClick={() => this.startEdit(item)}
+                                >
+                                  编辑
+                                </Button>
+                                <Button
+                                  type="danger"
+                                  size="mini"
+                                  className="category-table__btn"
+                                  onClick={() => this.handleRemove(item.id)}
+                                >
+                                  删除
+                                </Button>
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <ScrollView scrollY className="list-scroll">
+                {loading ? (
+                  <View className="empty">
+                    <Text>加载中...</Text>
+                  </View>
+                ) : categories.length === 0 ? (
+                  <View className="empty">
+                    <Text>暂无分类</Text>
+                  </View>
+                ) : (
+                  categories.map((item) => (
+                    <View key={item.id} className="category-card">
+                      <View className="card-content">
+                        <View className="card-left">
+                          <Text className="card-name">{item.name}</Text>
+                          <Text className="card-meta">
+                            ID: {item.id} | 排序: {item.sortOrder || 0}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="card-actions">
+                        <Button type="default" size="small" onClick={() => this.startEdit(item)}>
+                          编辑
+                        </Button>
+                        <Button type="danger" size="small" onClick={() => this.handleRemove(item.id)}>
+                          删除
+                        </Button>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+            )}
           </View>
         )}
       </View>
     )
+
+    if (isH5) {
+      return (
+        <AdminShell
+          title="分类管理"
+          breadcrumb={[
+            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '分类管理' },
+          ]}
+        >
+          {page}
+        </AdminShell>
+      )
+    }
+
+    return page
   }
 }

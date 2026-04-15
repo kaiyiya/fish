@@ -429,6 +429,9 @@ export default class ProductDetail extends Component {
       )
     }
 
+    const cartDisabled =
+      addingToCart || (product.stock !== undefined && product.stock === 0)
+
     const firstImage = product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : ''
 
     return (
@@ -651,16 +654,17 @@ export default class ProductDetail extends Component {
 
         {!editing && (
           <View className="detail-footer">
-            <Button
-              type="default"
-              size="large"
-              onClick={this.handleAddToCart}
-              disabled={addingToCart || (product.stock !== undefined && product.stock === 0)}
-              loading={addingToCart}
-              className="add-cart-btn"
+            {/* 使用 View 模拟按钮：小程序原生 button 会套 WeUI 灰底，自定义样式常被覆盖 */}
+            <View
+              className={`add-cart-touch ${cartDisabled ? 'add-cart-touch--disabled' : ''}`}
+              hoverClass={cartDisabled ? '' : 'add-cart-touch--pressed'}
+              hoverStayTime={80}
+              onClick={cartDisabled ? undefined : this.handleAddToCart}
             >
-              {addingToCart ? '添加中...' : '加入购物车'}
-            </Button>
+              <Text className="add-cart-touch__text">
+                {addingToCart ? '添加中...' : '加入购物车'}
+              </Text>
+            </View>
             <View className="buy-quantity-control">
               <View className="quantity-btn" onClick={this.handleBuyQuantityMinus}>
                 <Text className="quantity-btn-text">-</Text>

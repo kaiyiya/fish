@@ -41,7 +41,6 @@
   },
   "author": "",
   "dependencies": {
-    "@province-city-china/data": "^8.5.8",
     "@tarojs/components": "^3.6.8",
     "@tarojs/helper": "^3.6.8",
     "@tarojs/plugin-framework-react": "^3.6.8",

@@ -626,15 +626,16 @@
 
 .section-content {
   font-size: 28px;
-  line-height: 2;
+  line-height: 1.65;
   color: #4a5568;
   word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
   letter-spacing: 0.3px;
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
-  border-radius: 12px;
-  border: 1px solid rgba(102, 126, 234, 0.08);
+  padding: 20px 18px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 .detail-scroll {
@@ -661,75 +662,58 @@
   box-sizing: border-box;
   border-top: 2px solid rgba(102, 126, 234, 0.1);
   
-  // 确保所有按钮在同一水平线上
-  .add-cart-btn,
-  .add-cart-btn.ui-button,
-  .add-cart-btn.ui-button--default,
+  // 底栏垂直对齐
+  .add-cart-touch,
   .buy-btn,
   .buy-btn.ui-button,
   .buy-btn.ui-button--primary {
     align-self: center !important;
     vertical-align: middle !important;
   }
-  
-  .add-cart-btn,
-  .add-cart-btn.ui-button,
-  .add-cart-btn.ui-button--default {
-    flex: 1 !important;
-    min-width: 0 !important;
-    height: 88px !important;
-    line-height: calc(88px - 6px) !important;
-    font-size: 32px !important;
-    font-weight: 900 !important;
-    border-radius: 24px !important;
-    border: 3px solid #667eea !important;
-    color: #000;
-    background: #000;
-    background-color: #333 ;
-    background-image: none !important;
-    display: flex !important;
-    visibility: visible !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2) !important;
-    letter-spacing: 1px !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    opacity: 1 !important;
-    z-index: 101 !important;
-    position: relative !important;
-    width: auto !important;
-    max-width: none !important;
 
-    &:active {
-      transform: scale(0.96) translateY(1px) !important;
-      box-shadow: 0 6px 18px rgba(102, 126, 234, 0.16), 0 2px 8px rgba(118, 75, 162, 0.12) !important;
-    }
-    
-    &:hover {
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3), 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
-      transform: translateY(-2px) !important;
-    }
+  /* 加入购物车：用 View 实现，避免小程序原生 button 的灰色 WeUI 主题盖掉样式 */
+  .add-cart-touch {
+    flex: 1;
+    min-width: 0;
+    height: 88px;
+    border-radius: 24px;
+    border: 3px solid #818cf8;
+    background: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    z-index: 101;
+    position: relative;
+    overflow: hidden;
+  }
 
-    &[disabled] {
-      border-color: #d9d9d9 !important;
-      color: #d9d9d9 !important;
-      opacity: 0.6 !important;
-      box-shadow: none !important;
-      transform: none !important;
-      cursor: not-allowed !important;
+  .add-cart-touch--pressed {
+    opacity: 0.92;
+    transform: scale(0.98);
+  }
+
+  .add-cart-touch__text {
+    font-size: 30px;
+    font-weight: 700;
+    color: #3730a3;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .add-cart-touch--disabled {
+    border-color: #e5e7eb;
+    background: #f3f4f6;
+    box-shadow: none;
+    opacity: 0.85;
+
+    .add-cart-touch__text {
+      color: #9ca3af;
     }
   }
 
-  // 确保按钮内部文字也吃到“加粗/更清晰”的效果
-  .add-cart-btn text,
-  .add-cart-btn span {
-    font-weight: 900 !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
-  }
-  
   .buy-btn,
   .buy-btn.ui-button,
   .buy-btn.ui-button--primary {
