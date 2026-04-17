@@ -4,12 +4,6 @@ export default defineAppConfig({
     'pages/recognize/index',
     'pages/product/list/index',
     'pages/product/detail/index',
-    'pages/admin/index',
-    'pages/admin/product/index',
-    'pages/admin/order/index',
-    'pages/admin/category/index',
-    'pages/admin/data-center/index',
-    'pages/admin/user-center/index',
     'pages/search/index',
     'pages/cart/index',
     'pages/address/list/index',
@@ -20,6 +14,22 @@ export default defineAppConfig({
     'pages/profile/index',
     'pages/login/index',
     'pages/wallet/index',
+  ],
+  /** 按需注入，减轻主包启动解析压力 */
+  lazyCodeLoading: 'requiredComponents',
+  subPackages: [
+    {
+      root: 'subpackages/pkg-admin',
+      name: 'pkg-admin',
+      pages: [
+        'pages/admin/index',
+        'pages/admin/product/index',
+        'pages/admin/order/index',
+        'pages/admin/category/index',
+        'pages/admin/data-center/index',
+        'pages/admin/user-center/index',
+      ],
+    },
   ],
   window: {
     backgroundTextStyle: 'light',

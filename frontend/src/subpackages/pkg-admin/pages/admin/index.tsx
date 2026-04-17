@@ -1,10 +1,10 @@
 import { Component, type ReactNode } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import AdminShell from '../../components/admin-shell'
-import { statisticsApi, productApi, orderApi } from '../../services/api'
-import { logger } from '../../utils/logger'
-import { isH5 } from '../../utils/is-h5'
+import AdminShell from '../../../../components/admin-shell'
+import { statisticsApi, productApi, orderApi } from '../../../../services/api'
+import { logger } from '../../../../utils/logger'
+import { isH5 } from '../../../../utils/is-h5'
 import './index.scss'
 
 const MenuIcon: Record<string, ReactNode> = {
@@ -130,7 +130,7 @@ export default class AdminDashboard extends Component {
                   <View className="menu-grid">
                     <View
                       className="menu-item"
-                      onClick={() => this.navigateTo('/pages/admin/product/index')}
+                      onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/product/index')}
                     >
                       <View className="menu-icon-wrap menu-icon-wrap--a">{MenuIcon.product}</View>
                       <Text className="menu-text">商品管理</Text>
@@ -138,7 +138,7 @@ export default class AdminDashboard extends Component {
                     </View>
                     <View
                       className="menu-item"
-                      onClick={() => this.navigateTo('/pages/admin/order/index')}
+                      onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/order/index')}
                     >
                       <View className="menu-icon-wrap menu-icon-wrap--b">{MenuIcon.order}</View>
                       <Text className="menu-text">订单管理</Text>
@@ -146,7 +146,7 @@ export default class AdminDashboard extends Component {
                     </View>
                     <View
                       className="menu-item"
-                      onClick={() => this.navigateTo('/pages/admin/category/index')}
+                      onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/category/index')}
                     >
                       <View className="menu-icon-wrap menu-icon-wrap--c">{MenuIcon.category}</View>
                       <Text className="menu-text">分类管理</Text>
@@ -154,7 +154,7 @@ export default class AdminDashboard extends Component {
                     </View>
                     <View
                       className="menu-item"
-                      onClick={() => this.navigateTo('/pages/admin/data-center/index')}
+                      onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/data-center/index')}
                     >
                       <View className="menu-icon-wrap menu-icon-wrap--d">{MenuIcon.data}</View>
                       <Text className="menu-text">数据中心</Text>
@@ -162,7 +162,7 @@ export default class AdminDashboard extends Component {
                     </View>
                     <View
                       className="menu-item menu-item--wide"
-                      onClick={() => this.navigateTo('/pages/admin/user-center/index')}
+                      onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/user-center/index')}
                     >
                       <View className="menu-icon-wrap menu-icon-wrap--e">{MenuIcon.user}</View>
                       <Text className="menu-text">用户充值 / 改密</Text>
@@ -199,35 +199,35 @@ export default class AdminDashboard extends Component {
               <View className="menu-grid">
                 <View
                   className="menu-item"
-                  onClick={() => this.navigateTo('/pages/admin/product/index')}
+                  onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/product/index')}
                 >
                   <View className="menu-icon product">📦</View>
                   <Text className="menu-text">商品管理</Text>
                 </View>
                 <View
                   className="menu-item"
-                  onClick={() => this.navigateTo('/pages/admin/order/index')}
+                  onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/order/index')}
                 >
                   <View className="menu-icon order">📋</View>
                   <Text className="menu-text">订单管理</Text>
                 </View>
                 <View
                   className="menu-item"
-                  onClick={() => this.navigateTo('/pages/admin/category/index')}
+                  onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/category/index')}
                 >
                   <View className="menu-icon category">🏷️</View>
                   <Text className="menu-text">分类管理</Text>
                 </View>
                 <View
                   className="menu-item"
-                  onClick={() => this.navigateTo('/pages/admin/data-center/index')}
+                  onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/data-center/index')}
                 >
                   <View className="menu-icon data">📊</View>
                   <Text className="menu-text">数据中心</Text>
                 </View>
                 <View
                   className="menu-item"
-                  onClick={() => this.navigateTo('/pages/admin/user-center/index')}
+                  onClick={() => this.navigateTo('/subpackages/pkg-admin/pages/admin/user-center/index')}
                 >
                   <View className="menu-icon user">👤</View>
                   <Text className="menu-text">用户充值/改密</Text>

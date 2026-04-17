@@ -15,12 +15,12 @@ type Props = {
 }
 
 const ADMIN_NAV: Array<{ path: string; label: string }> = [
-  { path: '/pages/admin/index', label: '工作台' },
-  { path: '/pages/admin/product/index', label: '商品管理' },
-  { path: '/pages/admin/order/index', label: '订单管理' },
-  { path: '/pages/admin/category/index', label: '分类管理' },
-  { path: '/pages/admin/data-center/index', label: '数据中心' },
-  { path: '/pages/admin/user-center/index', label: '用户与充值' },
+  { path: '/subpackages/pkg-admin/pages/admin/index', label: '工作台' },
+  { path: '/subpackages/pkg-admin/pages/admin/product/index', label: '商品管理' },
+  { path: '/subpackages/pkg-admin/pages/admin/order/index', label: '订单管理' },
+  { path: '/subpackages/pkg-admin/pages/admin/category/index', label: '分类管理' },
+  { path: '/subpackages/pkg-admin/pages/admin/data-center/index', label: '数据中心' },
+  { path: '/subpackages/pkg-admin/pages/admin/user-center/index', label: '用户与充值' },
 ]
 
 function currentPath(): string {
@@ -82,12 +82,12 @@ const NavIcon: FC<{ name: string }> = ({ name }) => (
 )
 
 const iconByPath: Record<string, string> = {
-  '/pages/admin/index': 'dashboard',
-  '/pages/admin/product/index': 'product',
-  '/pages/admin/order/index': 'order',
-  '/pages/admin/category/index': 'category',
-  '/pages/admin/data-center/index': 'data',
-  '/pages/admin/user-center/index': 'user',
+  '/subpackages/pkg-admin/pages/admin/index': 'dashboard',
+  '/subpackages/pkg-admin/pages/admin/product/index': 'product',
+  '/subpackages/pkg-admin/pages/admin/order/index': 'order',
+  '/subpackages/pkg-admin/pages/admin/category/index': 'category',
+  '/subpackages/pkg-admin/pages/admin/data-center/index': 'data',
+  '/subpackages/pkg-admin/pages/admin/user-center/index': 'user',
 }
 
 export const AdminShell: FC<Props> = ({ title, breadcrumb, children }) => {

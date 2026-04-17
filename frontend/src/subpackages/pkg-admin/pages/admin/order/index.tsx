@@ -1,11 +1,11 @@
 import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import AdminShell from '../../../components/admin-shell'
-import { orderApi } from '../../../services/api'
-import { Button, Input } from '../../../components/ui'
-import { logger } from '../../../utils/logger'
-import { isH5 } from '../../../utils/is-h5'
+import AdminShell from '../../../../../components/admin-shell'
+import { orderApi } from '../../../../../services/api'
+import { Button, Input } from '../../../../../components/ui'
+import { logger } from '../../../../../utils/logger'
+import { isH5 } from '../../../../../utils/is-h5'
 import './index.scss'
 
 export default class AdminOrder extends Component {
@@ -396,7 +396,7 @@ export default class AdminOrder extends Component {
         <AdminShell
           title="订单管理"
           breadcrumb={[
-            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '管理后台', path: '/subpackages/pkg-admin/pages/admin/index' },
             { label: '订单管理' },
           ]}
         >

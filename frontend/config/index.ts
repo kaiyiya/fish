@@ -1,7 +1,14 @@
+import path from 'path'
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
-import tsconfigPaths from 'tsconfig-paths-webpack-plugin'
 import devConfig from './dev'
 import prodConfig from './prod'
+
+// 必须用 __dirname：从 monorepo 根目录执行 taro 时 process.cwd() 不是 frontend
+const srcDir = path.resolve(__dirname, '..', 'src')
+
+function applyWebpackAliases(chain: { resolve: { alias: { set: (k: string, v: string) => void } } }) {
+  chain.resolve.alias.set('@', srcDir)
+}
 
 // https://taro-docs.jd.com/docs/next/config
 const config: UserConfigExport = {
@@ -56,7 +63,7 @@ const config: UserConfigExport = {
             }
         },
         webpackChain(chain) {
-            chain.plugin('tsconfigPaths').use(tsconfigPaths)
+            applyWebpackAliases(chain)
         }
     },
     h5: {
@@ -77,7 +84,7 @@ const config: UserConfigExport = {
             }
         },
         webpackChain(chain) {
-            chain.plugin('tsconfigPaths').use(tsconfigPaths)
+            applyWebpackAliases(chain)
         }
     },
     rn: {

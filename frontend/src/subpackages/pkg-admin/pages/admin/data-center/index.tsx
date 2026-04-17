@@ -1,10 +1,10 @@
 import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import AdminShell from '../../../components/admin-shell'
-import { statisticsApi } from '../../../services/api'
-import { logger } from '../../../utils/logger'
-import { isH5 } from '../../../utils/is-h5'
+import AdminShell from '../../../../../components/admin-shell'
+import { statisticsApi } from '../../../../../services/api'
+import { logger } from '../../../../../utils/logger'
+import { isH5 } from '../../../../../utils/is-h5'
 import './index.scss'
 
 export default class DataCenter extends Component {
@@ -287,7 +287,7 @@ export default class DataCenter extends Component {
         <AdminShell
           title="数据中心"
           breadcrumb={[
-            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '管理后台', path: '/subpackages/pkg-admin/pages/admin/index' },
             { label: '数据中心' },
           ]}
         >

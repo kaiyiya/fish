@@ -993,7 +993,7 @@
   }
 
   .product-toolbar-h5__title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #0f172a;
     letter-spacing: 0.02em;
@@ -1002,7 +1002,7 @@
   }
 
   .product-toolbar-h5__subtitle {
-    font-size: 12px;
+    font-size: 13px;
     color: #64748b;
     font-weight: 400;
     writing-mode: horizontal-tb;
@@ -1063,7 +1063,7 @@
     line-height: 44px !important;
     min-width: 0 !important;
     max-width: none !important;
-    font-size: 13px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
     border-radius: 8px !important;
   }
@@ -1088,7 +1088,7 @@
   }
 
   .edit-panel .product-edit-back {
-    font-size: 13px;
+    font-size: 14px;
     color: #2563eb;
     font-weight: 500;
     margin-bottom: 2px;
@@ -1130,10 +1130,10 @@
   }
 
   .edit-panel .section-head__hint {
-    font-size: 13px;
-    color: #64748b;
+    font-size: 12px;
+    color: #94a3b8;
     font-weight: 400;
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
   .edit-panel .section-head .section-title {
@@ -1207,9 +1207,8 @@
     }
   }
 
-  /* 编辑页字号：页标题 16px；表单正文 13px；计数与提示 11px */
   .edit-panel .panel-title {
-    font-size: 16px !important;
+    font-size: 18px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
     margin-bottom: 4px !important;
@@ -1239,7 +1238,7 @@
       height: 40px !important;
       min-height: 40px !important;
       padding: 0 12px !important;
-      font-size: 13px !important;
+      font-size: 14px !important;
       line-height: 1.45 !important;
       border-radius: 6px !important;
       border-width: 1px !important;
@@ -1255,7 +1254,7 @@
   }
 
   .edit-panel .section-title {
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
     margin-bottom: 12px !important;
@@ -1322,7 +1321,7 @@
 
   .edit-panel .picker-text,
   .edit-panel .picker-placeholder {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
 
   .edit-panel .picker-arrow {
@@ -1334,7 +1333,7 @@
   .edit-panel textarea.textarea {
     min-height: 88px !important;
     padding: 10px 12px !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
     line-height: 1.55 !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
@@ -1349,7 +1348,7 @@
   }
 
   .edit-panel .char-count {
-    font-size: 11px !important;
+    font-size: 12px !important;
     color: #94a3b8 !important;
     margin-top: 6px !important;
   }
@@ -1370,12 +1369,7 @@
 
   .edit-panel .upload-tip,
   .edit-panel .hint-text {
-    font-size: 11px !important;
-    color: #94a3b8 !important;
-  }
-
-  .edit-panel .image-count-hint {
-    font-size: 11px !important;
+    font-size: 12px !important;
     color: #94a3b8 !important;
   }
 
@@ -1399,7 +1393,7 @@
   .edit-panel .remove-btn {
     width: 28px !important;
     height: 28px !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
     line-height: 28px !important;
   }
 
@@ -1459,13 +1453,13 @@
   }
 
   .enterprise-list-header__title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #0f172a;
   }
 
   .enterprise-list-header__meta {
-    font-size: 11px;
+    font-size: 12px;
     color: #94a3b8;
     font-variant-numeric: tabular-nums;
   }
@@ -1521,14 +1515,14 @@
   }
 
   .product-table__th {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: #64748b;
     line-height: 1.3;
   }
 
   .product-table__td {
-    font-size: 12px;
+    font-size: 13px;
     color: #334155;
     min-width: 0;
     overflow: hidden;
@@ -1573,12 +1567,12 @@
   }
 
   .product-table__thumb-ph-text {
-    font-size: 11px;
+    font-size: 12px;
     color: #94a3b8;
   }
 
   .product-table__name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #0f172a;
     overflow: hidden;
@@ -1588,7 +1582,7 @@
   }
 
   .product-table__desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #94a3b8;
     margin-top: 3px;
     line-height: 1.4;
@@ -1605,7 +1599,7 @@
   }
 
   .product-table__mono {
-    font-size: 11px;
+    font-size: 12px;
     color: #64748b;
     font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Menlo, Consolas, monospace;
   }
@@ -1640,35 +1634,35 @@
   }
 
   .list-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #64748b;
     margin-bottom: 12px;
   }
 
   .card-title {
-    font-size: 14px !important;
+    font-size: 15px !important;
   }
 
   .card-sub,
   .card-line {
-    font-size: 12px !important;
+    font-size: 13px !important;
   }
 
   .card-desc {
-    font-size: 11px !important;
-  }
-
-  .panel-title {
-    font-size: 16px !important;
-  }
-
-  .panel-subtitle {
     font-size: 12px !important;
   }
 
-  .section-title {
+  .panel-title {
+    font-size: 17px !important;
+  }
+
+  .panel-subtitle {
     font-size: 13px !important;
+  }
+
+  .section-title {
+    font-size: 14px !important;
   }
 
   .card-footer .ui-button,
@@ -1704,12 +1698,12 @@
     }
 
     .edit-panel .product-edit-back {
-      font-size: 13px;
+      font-size: 14px;
       margin-bottom: 2px;
     }
 
     .edit-panel .panel-title {
-      font-size: 16px !important;
+      font-size: 20px !important;
       font-weight: 600 !important;
       letter-spacing: -0.02em;
     }
@@ -1806,11 +1800,7 @@
     }
 
     .edit-panel .section-head .section-title {
-      font-size: 13px !important;
-    }
-
-    .edit-panel .section-head__hint {
-      font-size: 13px;
+      font-size: 15px !important;
     }
 
     .edit-panel .form-row {

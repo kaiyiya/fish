@@ -1,4 +1,5 @@
 import request from '../utils/request'
+import config from '../config'
 
 // 认证相关API
 export const authApi = {
@@ -98,7 +99,7 @@ export const orderApi = {
   },
   exportOrders: () => {
     // 注意：导出接口需要特殊处理，直接返回完整 URL
-    return 'http://localhost:3000/order/admin/export'
+    return `${config.baseURL}/order/admin/export`
   },
 }
 

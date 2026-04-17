@@ -1,11 +1,11 @@
 import { Component } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import AdminShell from '../../../components/admin-shell'
-import { Button, Input } from '../../../components/ui'
-import { logger } from '../../../utils/logger'
-import { walletApi, userApi } from '../../../services/api'
-import { isH5 } from '../../../utils/is-h5'
+import AdminShell from '../../../../../components/admin-shell'
+import { Button, Input } from '../../../../../components/ui'
+import { logger } from '../../../../../utils/logger'
+import { walletApi, userApi } from '../../../../../services/api'
+import { isH5 } from '../../../../../utils/is-h5'
 import './index.scss'
 
 export default class AdminUserCenter extends Component {
@@ -453,7 +453,7 @@ export default class AdminUserCenter extends Component {
         <AdminShell
           title="用户与充值"
           breadcrumb={[
-            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '管理后台', path: '/subpackages/pkg-admin/pages/admin/index' },
             { label: '用户与充值' },
           ]}
         >

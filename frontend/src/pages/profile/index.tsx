@@ -104,7 +104,7 @@ export default class Profile extends Component {
 
   handleGotoAdmin = () => {
     Taro.navigateTo({
-      url: '/pages/admin/index',
+      url: '/subpackages/pkg-admin/pages/admin/index',
     })
   }
 

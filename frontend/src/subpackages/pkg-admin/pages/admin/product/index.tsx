@@ -1,11 +1,12 @@
 import { Component } from 'react'
 import { View, Text, Textarea, ScrollView, Image, Picker } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import AdminShell from '../../../components/admin-shell'
-import { productApi, categoryApi } from '../../../services/api'
-import { Button, Input } from '../../../components/ui'
-import { logger } from '../../../utils/logger'
-import { isH5 } from '../../../utils/is-h5'
+import AdminShell from '../../../../../components/admin-shell'
+import { productApi, categoryApi } from '../../../../../services/api'
+import { Button, Input } from '../../../../../components/ui'
+import { logger } from '../../../../../utils/logger'
+import { isH5 } from '../../../../../utils/is-h5'
+import appConfig from '../../../../../config'
 import './index.scss'
 
 export default class AdminProduct extends Component {
@@ -136,9 +137,7 @@ export default class AdminProduct extends Component {
       success: async (res) => {
         const tempFilePath = res.tempFilePaths[0]
         try {
-          // 使用配置中的 baseURL
-          const config = require('../../../config')
-          const baseUrl = config.baseURL || 'http://localhost:3000'
+          const baseUrl = appConfig.baseURL || 'http://localhost:3000'
           const uploadRes = await Taro.uploadFile({
             url: `${baseUrl}/upload`,
             filePath: tempFilePath,
@@ -360,17 +359,234 @@ export default class AdminProduct extends Component {
     return c ? c.name : String(categoryId)
   }
 
+  renderEditSectionHead = (index, title, hint) => {
+    if (!isH5) {
+      return <Text className='section-title'>{title}</Text>
+    }
+    return (
+      <View className='section-head'>
+        <Text className='section-head__index'>{index}</Text>
+        <View className='section-head__text'>
+          <Text className='section-title'>{title}</Text>
+          <Text className='section-head__hint'>{hint}</Text>
+        </View>
+      </View>
+    )
+  }
+
+  renderEditPanel = () => {
+    const { editingId, form, saving, categories } = this.state
+    const imageUrls = (form.imageUrlsText || '').split('\n').filter((s) => s.trim())
+    const selectedCategoryIndex =
+      form.categoryId && form.categoryId !== null && form.categoryId !== ''
+        ? categories.findIndex((c) => String(c.id) === String(form.categoryId))
+        : -1
+
+    return (
+      <View className={`edit-panel ${isH5 ? 'product-edit-page' : ''}`}>
+        <View className={`panel-header ${isH5 ? 'panel-header--h5' : ''}`}>
+          {isH5 && (
+            <Text className='product-edit-back' onClick={this.cancelEdit}>
+              ← 返回列表
+            </Text>
+          )}
+          <Text className='panel-title'>
+            {editingId === 'new' ? '创建新商品' : `编辑商品 #${editingId}`}
+          </Text>
+          <Text className='panel-subtitle'>
+            {editingId === 'new' ? '填写商品信息以创建新商品' : '修改商品信息'}
+          </Text>
+        </View>
+
+        <View className='product-edit-body'>
+        <View className={`form-section ${isH5 ? 'form-section--h5' : ''} form-section--basic`}>
+          {this.renderEditSectionHead(1, '基本信息', '名称、分类与价格库存')}
+          <View className='form-grid-compact'>
+            <View className='form-item'>
+              <Text className='label'>
+                商品名称 <Text className='required'>*</Text>
+              </Text>
+              <Input
+                value={form.name}
+                onInput={(e) => this.handleChange('name', e.detail.value)}
+                placeholder='请输入商品名称'
+              />
+            </View>
+
+            <View className='form-item'>
+              <Text className='label'>商品分类</Text>
+              {categories.length > 0 ? (
+                <Picker
+                  mode='selector'
+                  range={categories}
+                  rangeKey='name'
+                  value={selectedCategoryIndex >= 0 ? selectedCategoryIndex : 0}
+                  onChange={(e) => {
+                    const index = e.detail.value
+                    const category = this.state.categories[index]
+                    if (category) {
+                      this.handleChange('categoryId', String(category.id))
+                    }
+                  }}
+                >
+                  <View className='picker-view'>
+                    <Text className={selectedCategoryIndex >= 0 ? 'picker-text' : 'picker-placeholder'}>
+                      {selectedCategoryIndex >= 0 && categories[selectedCategoryIndex]
+                        ? categories[selectedCategoryIndex].name
+                        : categories.length > 0
+                          ? '请选择分类'
+                          : '暂无分类'}
+                    </Text>
+                    <Text className='picker-arrow'>▼</Text>
+                  </View>
+                </Picker>
+              ) : (
+                <View className='picker-view'>
+                  <Text className='picker-placeholder'>暂无分类，请先在分类管理中创建</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View className='form-row'>
+            <View className='form-item half price-item'>
+              <Text className='label'>
+                价格 <Text className='required'>*</Text>
+              </Text>
+              <Input
+                type='digit'
+                value={form.price}
+                onInput={(e) => this.handleChange('price', e.detail.value)}
+                placeholder='0.00'
+                prefix='¥'
+              />
+            </View>
+            <View className='form-item half stock-item'>
+              <Text className='label'>
+                库存 <Text className='required'>*</Text>
+              </Text>
+              <Input
+                type='number'
+                value={form.stock}
+                onInput={(e) => this.handleChange('stock', e.detail.value)}
+                placeholder='0'
+              />
+            </View>
+          </View>
+        </View>
+
+        <View className={`form-section ${isH5 ? 'form-section--h5' : ''} form-section--images`}>
+          {this.renderEditSectionHead(2, '商品图片', '主图与多图 URL')}
+          <View className='image-upload-area'>
+            {imageUrls.length > 0 ? (
+              <View className='image-list'>
+                {imageUrls.map((url, index) => (
+                  <View key={index} className='image-item'>
+                    <Image src={url} className='preview-image' mode='aspectFill' />
+                    <View className='image-overlay'>
+                      <Text className='remove-btn' onClick={() => this.removeImage(index)}>
+                        ×
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className='no-images-hint'>
+                <Text className='hint-text'>暂无图片，请上传或输入图片URL</Text>
+              </View>
+            )}
+            <Button type='primary' size='large' onClick={this.handleUploadImage} className='upload-btn'>
+              <Text className='upload-icon'>📷</Text>
+              <Text>上传图片</Text>
+            </Button>
+            <Text className='upload-tip'>支持 JPG、PNG 格式，建议尺寸 800x800</Text>
+          </View>
+          <View className='form-item form-item--image-urls'>
+            <Text className='label'>图片URL（一行一个，可选）</Text>
+            <Textarea
+              className='textarea textarea--compact'
+              value={form.imageUrlsText}
+              onInput={(e) => this.handleChange('imageUrlsText', e.detail.value)}
+              placeholder='也可以直接粘贴图片URL，每行一个&#10;例如：&#10;http://localhost:3000/uploads/image1.jpg&#10;http://localhost:3000/uploads/image2.jpg'
+            />
+            {imageUrls.length > 0 && (
+              <Text className='image-count-hint'>当前有 {imageUrls.length} 张图片</Text>
+            )}
+          </View>
+        </View>
+
+        <View className={`form-section ${isH5 ? 'form-section--h5' : ''} form-section--desc`}>
+          {this.renderEditSectionHead(3, '商品描述', '列表与详情页展示文案')}
+          <View className='form-item'>
+            <Text className='label'>商品描述</Text>
+            <Textarea
+              className='textarea'
+              value={form.description}
+              onInput={(e) => this.handleChange('description', e.detail.value)}
+              placeholder='请输入商品详细描述...'
+              maxlength={500}
+            />
+            <Text className='char-count'>{form.description.length}/500</Text>
+          </View>
+        </View>
+
+        <View className={`form-section ${isH5 ? 'form-section--h5' : ''} form-section--detail`}>
+          {this.renderEditSectionHead(4, '详细信息', '营养与烹饪说明')}
+          <View className='detail-two-col'>
+            <View className='form-item'>
+              <Text className='label'>营养信息</Text>
+              <Textarea
+                className='textarea textarea--compact'
+                value={form.nutritionInfo}
+                onInput={(e) => this.handleChange('nutritionInfo', e.detail.value)}
+                placeholder='请输入营养信息...'
+                maxlength={300}
+              />
+              <Text className='char-count'>{form.nutritionInfo.length}/300</Text>
+            </View>
+
+            <View className='form-item'>
+              <Text className='label'>烹饪建议</Text>
+              <Textarea
+                className='textarea textarea--compact'
+                value={form.cookingTips}
+                onInput={(e) => this.handleChange('cookingTips', e.detail.value)}
+                placeholder='请输入烹饪方法建议...'
+                maxlength={300}
+              />
+              <Text className='char-count'>{form.cookingTips.length}/300</Text>
+            </View>
+          </View>
+        </View>
+        </View>
+
+        {!isH5 && (
+          <View className='btn-row'>
+            <Button type='default' size='large' onClick={this.cancelEdit} className='cancel-btn'>
+              取消
+            </Button>
+            <Button
+              type='primary'
+              size='large'
+              onClick={this.handleSave}
+              loading={saving}
+              className='save-btn'
+            >
+              {saving ? '保存中...' : '保存商品'}
+            </Button>
+          </View>
+        )}
+      </View>
+    )
+  }
+
   render() {
-    const { loading, products, categories, editingId, form, saving } = this.state
-    const imageUrls = (form.imageUrlsText || '').split('\n').filter(s => s.trim())
-    // 计算当前选中的分类索引（如果分类ID为空或找不到，返回 -1）
-    const selectedCategoryIndex = form.categoryId && form.categoryId !== null && form.categoryId !== ''
-      ? categories.findIndex(c => String(c.id) === String(form.categoryId))
-      : -1
+    const { loading, products, categories, editingId, saving } = this.state
 
     const page = (
       <View className={`admin-product-page ${isH5 ? 'admin-product-page--h5' : ''}`}>
-        {isH5 ? (
+        {isH5 && !editingId ? (
           <View className='product-toolbar-h5'>
             <View className='product-toolbar-h5__left'>
               <Text className='product-toolbar-h5__title'>商品管理</Text>
@@ -381,7 +597,7 @@ export default class AdminProduct extends Component {
               <Text>新建商品</Text>
             </Button>
           </View>
-        ) : (
+        ) : !isH5 ? (
           <View className='header'>
             <View className='header-content'>
               <Text className='title'>商品管理</Text>
@@ -397,204 +613,32 @@ export default class AdminProduct extends Component {
               <Text>新建商品</Text>
             </Button>
           </View>
-        )}
+        ) : null}
 
-        {editingId && (
-          <ScrollView scrollY className={`edit-panel-scroll ${isH5 ? 'edit-panel-scroll--h5' : ''}`}>
-            <View className='edit-panel'>
-              <View className="panel-header">
-                <Text className="panel-title">
-                  {editingId === 'new' ? '创建新商品' : `编辑商品 #${editingId}`}
-                </Text>
-                <Text className="panel-subtitle">
-                  {editingId === 'new' ? '填写商品信息以创建新商品' : '修改商品信息'}
-                </Text>
-              </View>
-
-              {/* 基本信息卡片 */}
-              <View className='form-section'>
-                <Text className='section-title'>基本信息</Text>
-                <View className='form-item'>
-                  <Text className='label'>
-                    商品名称 <Text className='required'>*</Text>
-                  </Text>
-                  <Input
-                    value={form.name}
-                    onInput={(e) => this.handleChange('name', e.detail.value)}
-                    placeholder='请输入商品名称'
-                  />
-                </View>
-
-                <View className='form-item'>
-                  <Text className='label'>商品分类</Text>
-                  {categories.length > 0 ? (
-                    <Picker
-                      mode='selector'
-                      range={categories}
-                      rangeKey='name'
-                      value={selectedCategoryIndex >= 0 ? selectedCategoryIndex : 0}
-                      onChange={(e) => {
-                        const index = e.detail.value
-                        const category = this.state.categories[index]
-                        if (category) {
-                          this.handleChange('categoryId', String(category.id))
-                        }
-                      }}
-                    >
-                      <View className='picker-view'>
-                        <Text className={selectedCategoryIndex >= 0 ? 'picker-text' : 'picker-placeholder'}>
-                          {selectedCategoryIndex >= 0 && categories[selectedCategoryIndex] 
-                            ? categories[selectedCategoryIndex].name 
-                            : categories.length > 0 ? '请选择分类' : '暂无分类'}
-                        </Text>
-                        <Text className='picker-arrow'>▼</Text>
-                      </View>
-                    </Picker>
-                  ) : (
-                    <View className='picker-view'>
-                      <Text className='picker-placeholder'>暂无分类，请先在分类管理中创建</Text>
-                    </View>
-                  )}
-                </View>
-
-                <View className='form-row'>
-                  <View className='form-item half price-item'>
-                    <Text className='label'>
-                      价格 <Text className='required'>*</Text>
-                    </Text>
-                    <Input
-                      type='digit'
-                      value={form.price}
-                      onInput={(e) => this.handleChange('price', e.detail.value)}
-                      placeholder='0.00'
-                      prefix='¥'
-                    />
-                  </View>
-                  <View className='form-item half stock-item'>
-                    <Text className='label'>
-                      库存 <Text className='required'>*</Text>
-                    </Text>
-                    <Input
-                      type='number'
-                      value={form.stock}
-                      onInput={(e) => this.handleChange('stock', e.detail.value)}
-                      placeholder='0'
-                    />
-                  </View>
-                </View>
-              </View>
-
-              {/* 商品描述卡片 */}
-              <View className='form-section'>
-                <Text className='section-title'>商品描述</Text>
-                <View className='form-item'>
-                  <Text className='label'>商品描述</Text>
-                  <Textarea
-                    className='textarea'
-                    value={form.description}
-                    onInput={(e) => this.handleChange('description', e.detail.value)}
-                    placeholder='请输入商品详细描述...'
-                    maxlength={500}
-                  />
-                  <Text className='char-count'>{form.description.length}/500</Text>
-                </View>
-              </View>
-
-              {/* 详细信息卡片 */}
-              <View className='form-section'>
-                <Text className='section-title'>详细信息</Text>
-                <View className='form-item'>
-                  <Text className='label'>营养信息</Text>
-                  <Textarea
-                    className='textarea'
-                    value={form.nutritionInfo}
-                    onInput={(e) => this.handleChange('nutritionInfo', e.detail.value)}
-                    placeholder='请输入营养信息...'
-                    maxlength={300}
-                  />
-                  <Text className='char-count'>{form.nutritionInfo.length}/300</Text>
-                </View>
-
-                <View className='form-item'>
-                  <Text className='label'>烹饪建议</Text>
-                  <Textarea
-                    className='textarea'
-                    value={form.cookingTips}
-                    onInput={(e) => this.handleChange('cookingTips', e.detail.value)}
-                    placeholder='请输入烹饪方法建议...'
-                    maxlength={300}
-                  />
-                  <Text className='char-count'>{form.cookingTips.length}/300</Text>
-                </View>
-              </View>
-
-              {/* 商品图片卡片 */}
-              <View className='form-section'>
-                <Text className='section-title'>商品图片</Text>
-                <View className='image-upload-area'>
-                  {imageUrls.length > 0 ? (
-                    <View className='image-list'>
-                      {imageUrls.map((url, index) => (
-                        <View key={index} className='image-item'>
-                          <Image src={url} className='preview-image' mode='aspectFill' />
-                          <View className='image-overlay'>
-                            <Text className='remove-btn' onClick={() => this.removeImage(index)}>×</Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <View className='no-images-hint'>
-                      <Text className='hint-text'>暂无图片，请上传或输入图片URL</Text>
-                    </View>
-                  )}
-                  <Button
-                    type='primary'
-                    size='large'
-                    onClick={this.handleUploadImage}
-                    className='upload-btn'
-                  >
-                    <Text className='upload-icon'>📷</Text>
-                    <Text>上传图片</Text>
-                  </Button>
-                  <Text className='upload-tip'>支持 JPG、PNG 格式，建议尺寸 800x800</Text>
-                </View>
-                <View className='form-item' style={{ marginTop: '20px' }}>
-                  <Text className='label'>图片URL（一行一个，可选）</Text>
-                  <Textarea
-                    className='textarea'
-                    value={form.imageUrlsText}
-                    onInput={(e) => this.handleChange('imageUrlsText', e.detail.value)}
-                    placeholder='也可以直接粘贴图片URL，每行一个&#10;例如：&#10;http://localhost:3000/uploads/image1.jpg&#10;http://localhost:3000/uploads/image2.jpg'
-                  />
-                  {imageUrls.length > 0 && (
-                    <Text className='image-count-hint'>
-                      当前有 {imageUrls.length} 张图片
-                    </Text>
-                  )}
-                </View>
-              </View>
-
-              <View className='btn-row'>
-                <Button
-                  type='default'
-                  size='large'
-                  onClick={this.cancelEdit}
-                  className='cancel-btn'
-                >
-                  取消
-                </Button>
-                <Button
-                  type='primary'
-                  size='large'
-                  onClick={this.handleSave}
-                  loading={saving}
-                  className='save-btn'
-                >
-                  {saving ? '保存中...' : '保存商品'}
-                </Button>
-              </View>
+        {editingId && isH5 && (
+          <View className='product-edit-shell'>
+            <ScrollView scrollY className='edit-panel-scroll edit-panel-scroll--h5 product-edit-scroll'>
+              {this.renderEditPanel()}
+            </ScrollView>
+            <View className='product-edit-footer'>
+              <Button type='default' size='large' onClick={this.cancelEdit} className='cancel-btn'>
+                取消
+              </Button>
+              <Button
+                type='primary'
+                size='large'
+                onClick={this.handleSave}
+                loading={saving}
+                className='save-btn'
+              >
+                {saving ? '保存中...' : '保存商品'}
+              </Button>
             </View>
+          </View>
+        )}
+        {editingId && !isH5 && (
+          <ScrollView scrollY className='edit-panel-scroll'>
+            {this.renderEditPanel()}
           </ScrollView>
         )}
 
@@ -757,7 +801,7 @@ export default class AdminProduct extends Component {
         <AdminShell
           title="商品管理"
           breadcrumb={[
-            { label: '管理后台', path: '/pages/admin/index' },
+            { label: '管理后台', path: '/subpackages/pkg-admin/pages/admin/index' },
             { label: '商品管理' },
           ]}
         >
