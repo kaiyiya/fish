@@ -287,6 +287,49 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  .enterprise-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .enterprise-list-header__left {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .enterprise-list-header__export {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    background: #fff;
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #eff6ff;
+      border-color: #1d4ed8;
+    }
+
+    &:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+  }
+
+  .enterprise-list-header__export-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2563eb;
+    white-space: nowrap;
+  }
+
   .order-table-wrap {
     overflow-x: auto;
     border: 1px solid #e2e8f0;

@@ -92,6 +92,88 @@ export default class AdminOrder extends Component {
     }
   }
 
+  handleExportOrders = async () => {
+    try {
+      const res = await Taro.showModal({
+        title: '导出订单',
+        content: '确定要导出所有订单到 Excel 表格吗？',
+        confirmText: '导出',
+        cancelText: '取消',
+      })
+
+      if (!res.confirm) return
+
+      const exportUrl = orderApi.exportOrders()
+      const token = Taro.getStorageSync('token')
+
+      Taro.showLoading({ title: '生成 Excel...', mask: true })
+
+      if (isH5 && Taro.getEnv() === Taro.ENV_TYPE.WEB) {
+        // H5 环境：直接打开新窗口下载（携带 token）
+        const link = document.createElement('a')
+        link.href = exportUrl
+        link.setAttribute(
+          'header',
+          `Authorization: ${token ? `Bearer ${token}` : ''}`,
+        )
+        // 使用 fetch 下载并创建 blob
+        const response = await fetch(exportUrl, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+        })
+        if (!response.ok) throw new Error('下载失败')
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `订单列表_${new Date().toISOString().split('T')[0]}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        Taro.hideLoading()
+        Taro.showToast({ title: '导出成功', icon: 'success' })
+      } else {
+        // 小程序环境
+        const downloadTask = Taro.downloadFile({
+          url: exportUrl,
+          header: {
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+          success: (res) => {
+            Taro.hideLoading()
+            if (res.statusCode === 200) {
+              Taro.saveFile({
+                tempFilePath: res.tempFilePath,
+                success: (saveRes) => {
+                  Taro.showToast({ title: '文件已保存', icon: 'success' })
+                  Taro.openDocument({
+                    filePath: saveRes.savedFilePath,
+                  })
+                },
+                fail: () => {
+                  Tarao.showToast({ title: '保存失败', icon: 'none' })
+                },
+              })
+            } else {
+              Taro.showToast({ title: '导出失败', icon: 'none' })
+            }
+          },
+          fail: (err) => {
+            Taro.hideLoading()
+            console.error('下载失败', err)
+            Taro.showToast({ title: '网络错误', icon: 'none' })
+          },
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      logger.error('导出订单失败', error)
+      Taro.showToast({ title: '导出失败', icon: 'none' })
+    }
+  }
+
   formatDate = (dateStr) => {
     if (!dateStr) return ''
     const date = new Date(dateStr)
@@ -220,10 +302,18 @@ export default class AdminOrder extends Component {
         {isH5 ? (
           <View className="list-scroll list-scroll--h5 list-section--enterprise">
             <View className="enterprise-list-header">
-              <Text className="enterprise-list-header__title">订单列表</Text>
-              <Text className="enterprise-list-header__meta">
-                {loading ? '加载中…' : `共 ${orders.length} 单`}
-              </Text>
+              <View className="enterprise-list-header__left">
+                <Text className="enterprise-list-header__title">订单列表</Text>
+                <Text className="enterprise-list-header__meta">
+                  {loading ? '加载中…' : `共 ${orders.length} 单`}
+                </Text>
+              </View>
+              <View
+                className="enterprise-list-header__export"
+                onClick={this.handleExportOrders}
+              >
+                <Text className="enterprise-list-header__export-text">导出 Excel</Text>
+              </View>
             </View>
             {loading ? (
               <View className="empty">
