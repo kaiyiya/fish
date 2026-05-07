@@ -41,6 +41,8 @@
   },
   "author": "",
   "dependencies": {
+    "@antv/f2": "^5.14.0",
+    "@nutui/nutui-react-taro": "^3.0.19-cpp.29-beta.1",
     "@tarojs/components": "^3.6.8",
     "@tarojs/helper": "^3.6.8",
     "@tarojs/plugin-framework-react": "^3.6.8",

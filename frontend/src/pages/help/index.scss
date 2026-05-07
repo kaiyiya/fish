@@ -1,0 +1,72 @@
+.help-page {
+  min-height: 100vh;
+  background: #f6f8fb;
+}
+
+.help-scroll {
+  height: 100vh;
+}
+
+.help-header {
+  padding: 32px 24px 20px;
+}
+
+.help-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: block;
+}
+
+.help-desc {
+  margin-top: 8px;
+  font-size: 24px;
+  color: #8c8c8c;
+  display: block;
+}
+
+.help-card {
+  margin: 0 16px 16px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 24px;
+}
+
+.help-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.help-question,
+.help-section-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: block;
+}
+
+.help-answer {
+  margin-top: 8px;
+  font-size: 24px;
+  color: #666;
+  line-height: 1.6;
+  display: block;
+}
+
+.help-contact {
+  margin-top: 0;
+}
+
+.help-actions {
+  padding: 24px 16px 40px;
+}
+
+.help-btn {
+  height: 88px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -14,6 +14,8 @@ export default defineAppConfig({
     'pages/profile/index',
     'pages/login/index',
     'pages/wallet/index',
+    'pages/settings/index',
+    'pages/help/index',
   ],
   /** 按需注入，减轻主包启动解析压力 */
   lazyCodeLoading: 'requiredComponents',
